@@ -177,7 +177,7 @@ export default function RegisterPage() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Min. 8 characters and digit and symbols"
+                placeholder="Min. 8 characters and digit(s) and symbol(s)"
                 required
                 autoComplete="new-password"
                 minLength={8}
