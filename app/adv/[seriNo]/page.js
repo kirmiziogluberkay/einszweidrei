@@ -248,22 +248,38 @@ export default async function AdDetailPage({ params }) {
 
               <div className="card p-6">
                 <h3 className="text-base font-semibold text-ink mb-4">Seller Information</h3>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-600
-                                  flex items-center justify-center font-bold text-sm">
-                    {ad.owner?.username?.charAt(0).toUpperCase()}
+                {user ? (
+                  <>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-600
+                                      flex items-center justify-center font-bold text-sm">
+                        {ad.owner?.username?.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-medium text-ink text-sm">{ad.owner?.username}</p>
+                        <p className="text-xs text-ink-tertiary">Member</p>
+                      </div>
+                    </div>
+                    <ContactButton
+                      adId={ad.id}
+                      adTitle={ad.title}
+                      receiverId={ad.owner?.id}
+                      receiverName={ad.owner?.username}
+                    />
+                  </>
+                ) : (
+                  <div className="text-center py-4 px-2 bg-surface-secondary rounded-xl border border-surface-tertiary">
+                    <p className="text-sm text-ink-secondary mb-3 px-2">
+                      Please log in to see seller information and send a message.
+                    </p>
+                    <Link
+                      href="/login"
+                      className="btn-primary w-full max-w-[200px] mx-auto text-sm py-2"
+                    >
+                      Log In
+                    </Link>
                   </div>
-                  <div>
-                    <p className="font-medium text-ink text-sm">{ad.owner?.username}</p>
-                    <p className="text-xs text-ink-tertiary">Member</p>
-                  </div>
-                </div>
-                <ContactButton
-                  adId={ad.id}
-                  adTitle={ad.title}
-                  receiverId={ad.owner?.id}
-                  receiverName={ad.owner?.username}
-                />
+                )}
               </div>
             </aside>
           </div>
