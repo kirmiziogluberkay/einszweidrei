@@ -122,10 +122,14 @@ export default function AdCard({ ad }) {
 
         {/* Alt bilgiler */}
         <div className="flex items-center justify-between pt-1">
-          {/* Fiyat */}
-          <span className="font-bold text-ink text-lg">
-            {formatPrice(price, currency)}
-          </span>
+          {/* Fiyat - Free in green if no price given */}
+          {(!price || price === 0) ? (
+            <span className="font-bold text-green-500 text-lg">Free</span>
+          ) : (
+            <span className="font-bold text-ink text-lg">
+              {formatPrice(price, currency)}
+            </span>
+          )}
 
           {/* Zaman */}
           <div className="flex items-center gap-1 text-xs text-ink-tertiary">

@@ -151,10 +151,14 @@ export default async function AdDetailPage({ params }) {
                 {statusInfo.label}
               </span>
             )}
-            <h1 className="text-2xl font-bold text-ink leading-tight">{ad.title}</h1>
-            <p className="text-3xl font-bold text-brand-500">
-              {formatPrice(ad.price, ad.currency)}
-            </p>
+            {/* Fiyat - Free in green if no price given */}
+            {(!ad.price || ad.price === 0) ? (
+              <p className="text-3xl font-bold text-green-500">Free</p>
+            ) : (
+              <p className="text-3xl font-bold text-brand-500">
+                {formatPrice(ad.price, ad.currency)}
+              </p>
+            )}
 
             <div className="divider" />
             <dl className="space-y-3 text-sm">
