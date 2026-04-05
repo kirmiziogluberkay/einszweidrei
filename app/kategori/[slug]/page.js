@@ -1,0 +1,43 @@
+/**
+ * app/kategori/[slug]/page.js
+ * ─────────────────────────────────────────────────────
+ * Kategori sayfası — belirtilen slug'a göre ilanlar.
+ * URL: /kategori/[slug]
+ * ─────────────────────────────────────────────────────
+ */
+
+import { notFound } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import KategoriClient from './KategoriClient';
+
+/**
+ * Dinamik SEO metadata.
+ */
+export async function generateMetadata({ params }) {
+  const supabase = await createClient();
+  const { data: category } = await supabase
+    .from('categories')
+    .select('name')
+    .eq('slug', params.slug)
+    .single();
+
+  if (!category) return { title: 'Kategori Bulunamadı' };
+  return {
+    title:       `${category.name} İlanları`,
+    description: `${category.name} kategorisindeki ikinci el ve kiralık eşya ilanları.`,
+  };
+}
+
+export default async function KategoriPage({ params }) {
+  const supabase = await createClient();
+
+  const { data: category } = await supabase
+    .from('categories')
+    .select('id, name, slug, parent:categories!parent_id(id, name, slug)')
+    .eq('slug', params.slug)
+    .single();
+
+  if (!category) notFound();
+
+  return <KategoriClient category={category} />;
+}
