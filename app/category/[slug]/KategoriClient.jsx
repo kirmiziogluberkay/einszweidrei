@@ -153,7 +153,7 @@ export default function KategoriClient({ category, categoryTree = [] }) {
             {/* ── Price Filter ── */}
             <div className="mt-8 border-t border-surface-tertiary pt-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-semibold text-ink-tertiary uppercase tracking-wider">Max Price</h3>
+                <h3 className="text-sm font-semibold text-ink-secondary">Max Price</h3>
                 <div className="flex items-center gap-1">
                   <input
                     type="number"
