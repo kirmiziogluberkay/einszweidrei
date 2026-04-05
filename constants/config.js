@@ -14,10 +14,10 @@ export const SITE_NAME = 'Einszweidrei';
 
 /** Site açıklaması (meta description) */
 export const SITE_DESCRIPTION =
-  'İkinci el eşya al-sat ve kiralık eşya ilanları platformu. Güvenli, kolay ve hızlı.';
+  'Second-hand buy-sell and rental items platform. Safe, easy, and fast.';
 
 /** Anasayfada hero bölümünde gösterilen slogan */
-export const SITE_TAGLINE = 'İkinci El & Kiralık Eşya Platformu';
+export const SITE_TAGLINE = 'Second-Hand & Rental Items Platform';
 
 /** Geliştirici / şirket adı */
 export const SITE_AUTHOR = 'Einszweidrei';
@@ -29,7 +29,7 @@ export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
 /** İlan detay sayfası URL öneki */
-export const AD_URL_PREFIX = '/ilan';
+export const AD_URL_PREFIX = '/ad';
 
 // ─── Sayfalama ────────────────────────────────────────────────────────────────
 
@@ -56,21 +56,21 @@ export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 // ─── Para Birimi ──────────────────────────────────────────────────────────────
 
 /** Varsayılan para birimi kodu */
-export const DEFAULT_CURRENCY = 'TRY';
+export const DEFAULT_CURRENCY = 'EUR';
 
 /** Para birimi sembolü */
-export const CURRENCY_SYMBOL = '₺';
+export const CURRENCY_SYMBOL = '€';
 
 /** Fiyat formatı için locale */
-export const PRICE_LOCALE = 'tr-TR';
+export const PRICE_LOCALE = 'en-US';
 
 // ─── İlan Durumları ───────────────────────────────────────────────────────────
 
 /** Mevcut ilan durumları ve etiketleri */
 export const AD_STATUSES = {
-  active:  { label: 'Aktif',  color: 'green' },
-  passive: { label: 'Pasif',  color: 'gray'  },
-  sold:    { label: 'Satıldı', color: 'red'  },
+  active:  { label: 'Active',  color: 'green' },
+  passive: { label: 'Passive', color: 'gray'  },
+  sold:    { label: 'Sold',    color: 'red'   },
 };
 
 // ─── Kullanıcı Rolleri ────────────────────────────────────────────────────────
@@ -88,9 +88,9 @@ export const ADMIN_REQUIRED_ROLE = USER_ROLES.ADMIN;
 
 /** Giriş yapılmadan erişilemeyen rotalar (middleware içinde kullanılır) */
 export const PROTECTED_ROUTES = [
-  '/ilan-ver',
-  '/profilim',
-  '/mesajlar',
+  '/post-ad',
+  '/profile',
+  '/messages',
   '/admin',
 ];
 
@@ -104,27 +104,27 @@ export const ADMIN_ROUTE_PREFIX = '/admin';
  */
 export const DEFAULT_CATEGORIES = [
   {
-    name:      'İkinci El Eşya',
-    slug:      'ikinci-el-esya',
+    name:      'Second Hand Items',
+    slug:      'second-hand-items',
     parent_id: null,
     children:  [
-      { name: 'Elektronik',       slug: 'ikinci-el-elektronik' },
-      { name: 'Mobilya',          slug: 'ikinci-el-mobilya'    },
-      { name: 'Giyim & Aksesuar', slug: 'ikinci-el-giyim'      },
-      { name: 'Spor & Outdoor',   slug: 'ikinci-el-spor'       },
-      { name: 'Kitap & Hobi',     slug: 'ikinci-el-kitap'      },
-      { name: 'Diğer',            slug: 'ikinci-el-diger'      },
+      { name: 'Electronics',       slug: 'second-hand-electronics' },
+      { name: 'Furniture',         slug: 'second-hand-furniture'   },
+      { name: 'Clothing & Accs.',  slug: 'second-hand-clothing'    },
+      { name: 'Sports & Outdoor',  slug: 'second-hand-sports'      },
+      { name: 'Books & Hobbies',   slug: 'second-hand-books'       },
+      { name: 'Other',             slug: 'second-hand-other'       },
     ],
   },
   {
-    name:      'Kiralık Eşya',
-    slug:      'kiralik-esya',
+    name:      'Rental Items',
+    slug:      'rental-items',
     parent_id: null,
     children:  [
-      { name: 'Elektronik',    slug: 'kiralik-elektronik' },
-      { name: 'Kamp & Outdoor', slug: 'kiralik-kamp'      },
-      { name: 'Araç & Gereç',  slug: 'kiralik-arac'       },
-      { name: 'Diğer',         slug: 'kiralik-diger'      },
+      { name: 'Electronics',    slug: 'rental-electronics' },
+      { name: 'Camping & Outdoor', slug: 'rental-camping'  },
+      { name: 'Tools & Eq.',    slug: 'rental-tools'       },
+      { name: 'Other',          slug: 'rental-other'       },
     ],
   },
 ];
@@ -133,45 +133,45 @@ export const DEFAULT_CATEGORIES = [
 
 /** WhatsApp paylaşım mesaj şablonu. {title} ve {url} dinamik olarak doldurulur. */
 export const WHATSAPP_SHARE_TEMPLATE =
-  'Merhaba! Şu ilanı gördüm ve ilgini çekebilir: *{title}* — {url}';
+  'Hello! I saw this ad and thought you might be interested: *{title}* — {url}';
 
 /** Telegram paylaşım başlık şablonu */
-export const TELEGRAM_SHARE_TEMPLATE = 'İlana göz at: {title}';
+export const TELEGRAM_SHARE_TEMPLATE = 'Check out this ad: {title}';
 
 // ─── Navigasyon ───────────────────────────────────────────────────────────────
 
 /** Giriş gerektirmeyen statik nav linkleri */
 export const STATIC_NAV_LINKS = [
-  { label: 'Anasayfa', href: '/' },
+  { label: 'Home', href: '/' },
 ];
 
 /** Giriş yapılmış kullanıcı için ek nav linkleri */
 export const AUTH_NAV_LINKS = [
-  { label: 'İlan Ver',    href: '/ilan-ver'  },
-  { label: 'Mesajlarım', href: '/mesajlar'  },
-  { label: 'Profilim',   href: '/profilim'  },
+  { label: 'Post Ad',    href: '/ilan-ver'  },
+  { label: 'Messages',   href: '/mesajlar'  },
+  { label: 'My Profile', href: '/profilim'  },
 ];
 
 // ─── Hata Mesajları ───────────────────────────────────────────────────────────
 
 /** Kullanıcıya gösterilecek genel hata mesajları */
 export const ERROR_MESSAGES = {
-  generic:       'Bir hata oluştu. Lütfen tekrar deneyin.',
-  notFound:      'Aradığınız sayfa veya ilan bulunamadı.',
-  unauthorized:  'Bu işlem için giriş yapmanız gerekiyor.',
-  forbidden:     'Bu sayfaya erişim yetkiniz yok.',
-  uploadFailed:  'Fotoğraf yüklenirken bir hata oluştu.',
+  generic:       'An error occurred. Please try again.',
+  notFound:      'The page or ad you are looking for could not be found.',
+  unauthorized:  'You need to log in to perform this action.',
+  forbidden:     'You do not have permission to access this page.',
+  uploadFailed:  'An error occurred while uploading the photo.',
 };
 
 // ─── Başarı Mesajları ─────────────────────────────────────────────────────────
 
 /** Kullanıcıya gösterilecek başarı mesajları */
 export const SUCCESS_MESSAGES = {
-  adCreated:   'İlanınız başarıyla yayınlandı!',
-  adUpdated:   'İlan güncellendi.',
-  adDeleted:   'İlan silindi.',
-  messageSent: 'Mesajınız gönderildi.',
-  profileSaved:'Profil kaydedildi.',
+  adCreated:   'Your ad has been successfully published!',
+  adUpdated:   'Ad updated successfully.',
+  adDeleted:   'Ad deleted successfully.',
+  messageSent: 'Your message has been sent.',
+  profileSaved:'Profile saved successfully.',
 };
 
 // ─── PWA ──────────────────────────────────────────────────────────────────────

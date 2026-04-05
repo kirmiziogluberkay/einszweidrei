@@ -64,7 +64,7 @@ export default function HomePage() {
           {SITE_TAGLINE}
         </h1>
         <p className="text-ink-secondary text-lg max-w-xl mx-auto">
-          Güvenli, hızlı ve kolay alışveriş deneyimi için doğru adrestesiniz.
+          You are at the right place for a safe, fast, and easy shopping experience.
         </p>
       </section>
 
@@ -78,24 +78,24 @@ export default function HomePage() {
               type="search"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="İlan ara..."
+              placeholder="Search ads..."
               className="input pl-11 py-3.5 text-base"
             />
           </div>
-          <button type="submit" className="btn-primary px-6 py-3.5">Ara</button>
+          <button type="submit" className="btn-primary px-6 py-3.5">Search</button>
         </form>
 
         {/* Aktif arama etiketi */}
         {searchQuery && (
           <div className="flex items-center justify-center gap-2 mt-3">
             <span className="text-sm text-ink-secondary">
-              "<span className="font-medium text-ink">{searchQuery}</span>" için sonuçlar ({total} ilan)
+              Results for "<span className="font-medium text-ink">{searchQuery}</span>" ({total} ads)
             </span>
             <button
               onClick={() => { setSearchQuery(''); setSearchInput(''); setPage(1); }}
               className="text-xs text-brand-500 hover:underline"
             >
-              Temizle
+              Clear
             </button>
           </div>
         )}
@@ -116,7 +116,7 @@ export default function HomePage() {
                 : 'bg-white text-ink-secondary border border-surface-tertiary hover:border-ink-tertiary'
             )}
           >
-            Tümü
+            All
           </button>
 
           {/* Üst kategoriler */}
@@ -161,8 +161,8 @@ export default function HomePage() {
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-semibold text-ink">
             {searchQuery || selectedCategory
-              ? `${total} ilan bulundu`
-              : 'Tüm İlanlar'
+              ? `${total} ads found`
+              : 'All Ads'
             }
           </h2>
         </div>
@@ -175,8 +175,8 @@ export default function HomePage() {
         error={error}
         emptyMessage={
           searchQuery
-            ? `"${searchQuery}" için ilan bulunamadı.`
-            : 'Bu kategoride henüz ilan bulunmuyor.'
+            ? `No ads found for "${searchQuery}".`
+            : 'No ads found in this category yet.'
         }
       />
 
@@ -188,7 +188,7 @@ export default function HomePage() {
             disabled={page === 1}
             className="btn-secondary px-4 py-2 disabled:opacity-40"
           >
-            ← Önceki
+            ← Previous
           </button>
 
           <span className="text-sm text-ink-secondary px-4">
@@ -200,7 +200,7 @@ export default function HomePage() {
             disabled={page === totalPages}
             className="btn-secondary px-4 py-2 disabled:opacity-40"
           >
-            Sonraki →
+            Next →
           </button>
         </div>
       )}

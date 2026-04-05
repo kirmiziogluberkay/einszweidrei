@@ -47,21 +47,21 @@ export default function RegisterPage() {
 
     // Şifre eşleşme kontrolü
     if (formData.password !== formData.confirm) {
-      setError('Şifreler eşleşmiyor.');
+      setError('Passwords do not match.');
       setLoading(false);
       return;
     }
 
     // Minimum şifre uzunluğu
     if (formData.password.length < 8) {
-      setError('Şifre en az 8 karakter olmalı.');
+      setError('Password must be at least 8 characters.');
       setLoading(false);
       return;
     }
 
     // Kullanıcı adı kontrolü (sadece harf, rakam ve alt çizgi)
     if (!/^[a-zA-Z0-9_]{3,30}$/.test(formData.username)) {
-      setError('Kullanıcı adı 3-30 karakter, sadece harf/rakam/alt çizgi içerebilir.');
+      setError('Username must be 3-30 characters, containing only letters/numbers/underscores.');
       setLoading(false);
       return;
     }
@@ -77,7 +77,7 @@ export default function RegisterPage() {
 
     if (authError) {
       setError(authError.message === 'User already registered'
-        ? 'Bu e-posta adresi zaten kayıtlı.'
+        ? 'This email address is already registered.'
         : authError.message);
       setLoading(false);
       return;
@@ -104,9 +104,9 @@ export default function RegisterPage() {
       <div className="min-h-[80vh] flex items-center justify-center px-4">
         <div className="text-center space-y-4">
           <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
-          <h2 className="text-xl font-semibold text-ink">Kayıt Başarılı!</h2>
+          <h2 className="text-xl font-semibold text-ink">Registration Successful!</h2>
           <p className="text-ink-secondary text-sm">
-            Hesabınız oluşturuldu. Yönlendiriliyorsunuz...
+            Your account has been created. Redirecting...
           </p>
         </div>
       </div>
@@ -122,8 +122,8 @@ export default function RegisterPage() {
           <Link href="/" className="text-2xl font-bold text-ink hover:text-brand-500 transition-colors">
             {SITE_NAME}
           </Link>
-          <h1 className="text-xl font-semibold text-ink mt-3">Hesap Oluştur</h1>
-          <p className="text-sm text-ink-secondary mt-1">Hemen ücretsiz kayıt olun</p>
+          <h1 className="text-xl font-semibold text-ink mt-3">Create Account</h1>
+          <p className="text-sm text-ink-secondary mt-1">Sign up for free now</p>
         </div>
 
         <div className="card p-6 sm:p-8">
@@ -138,7 +138,7 @@ export default function RegisterPage() {
           <form onSubmit={handleRegister} className="space-y-5">
             {/* Kullanıcı adı */}
             <div>
-              <label htmlFor="reg-username" className="label">Kullanıcı Adı</label>
+              <label htmlFor="reg-username" className="label">Username</label>
               <input
                 id="reg-username"
                 type="text"
@@ -154,7 +154,7 @@ export default function RegisterPage() {
 
             {/* E-posta */}
             <div>
-              <label htmlFor="reg-email" className="label">E-posta</label>
+              <label htmlFor="reg-email" className="label">Email</label>
               <input
                 id="reg-email"
                 type="email"
@@ -170,14 +170,14 @@ export default function RegisterPage() {
 
             {/* Şifre */}
             <div>
-              <label htmlFor="reg-password" className="label">Şifre</label>
+              <label htmlFor="reg-password" className="label">Password</label>
               <input
                 id="reg-password"
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Min. 8 karakter"
+                placeholder="Min. 8 characters"
                 required
                 autoComplete="new-password"
                 minLength={8}
@@ -187,14 +187,14 @@ export default function RegisterPage() {
 
             {/* Şifre tekrar */}
             <div>
-              <label htmlFor="reg-confirm" className="label">Şifre Tekrar</label>
+              <label htmlFor="reg-confirm" className="label">Confirm Password</label>
               <input
                 id="reg-confirm"
                 type="password"
                 name="confirm"
                 value={formData.confirm}
                 onChange={handleChange}
-                placeholder="Şifreyi tekrar girin"
+                placeholder="Re-enter the password"
                 required
                 autoComplete="new-password"
                 className="input"
@@ -208,16 +208,16 @@ export default function RegisterPage() {
               className="btn-primary w-full py-3"
             >
               {loading ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Kayıt olunuyor...</>
-              ) : 'Kayıt Ol'}
+                <><Loader2 className="w-4 h-4 animate-spin" /> Signing up...</>
+              ) : 'Sign Up'}
             </button>
           </form>
         </div>
 
         <p className="text-center text-sm text-ink-secondary mt-5">
-          Zaten hesabınız var mı?{' '}
+          Already have an account?{' '}
           <Link href="/login" className="text-brand-500 font-medium hover:underline">
-            Giriş Yapın
+            Log In
           </Link>
         </p>
       </div>

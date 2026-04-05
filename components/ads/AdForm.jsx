@@ -82,7 +82,7 @@ export default function AdForm({ initialData = null }) {
 
     const remaining = MAX_IMAGES_PER_AD - uploadedImages.length;
     if (remaining <= 0) {
-      setError(`En fazla ${MAX_IMAGES_PER_AD} fotoğraf yükleyebilirsiniz.`);
+      setError(`You can upload a maximum of ${MAX_IMAGES_PER_AD} photos.`);
       return;
     }
 
@@ -95,13 +95,13 @@ export default function AdForm({ initialData = null }) {
     for (const file of filesToUpload) {
       // Boyut kontrolü
       if (file.size > MAX_IMAGE_SIZE_BYTES) {
-        setError(`"${file.name}" dosyası 5 MB'dan büyük olamaz.`);
+        setError(`The file "${file.name}" cannot be larger than 5 MB.`);
         continue;
       }
 
       // Format kontrolü
       if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-        setError('Sadece JPEG, PNG ve WebP formatları kabul edilir.');
+        setError('Only JPEG, PNG and WebP formats are accepted.');
         continue;
       }
 
@@ -156,7 +156,7 @@ export default function AdForm({ initialData = null }) {
 
     // Temel doğrulama
     if (!formData.title.trim()) {
-      setError('Başlık zorunludur.');
+      setError('Title is required.');
       setSubmitting(false);
       return;
     }
@@ -227,17 +227,17 @@ export default function AdForm({ initialData = null }) {
 
       {/* ── Fotoğraf yükleme ── */}
       <div>
-        <label className="label">Fotoğraflar <span className="text-ink-tertiary font-normal">({uploadedImages.length}/{MAX_IMAGES_PER_AD})</span></label>
+        <label className="label">Photos <span className="text-ink-tertiary font-normal">({uploadedImages.length}/{MAX_IMAGES_PER_AD})</span></label>
 
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-2">
           {/* Yüklenmiş fotoğraflar */}
           {uploadedImages.map((url, index) => (
             <div key={url} className="relative aspect-square rounded-2xl overflow-hidden group">
-              <Image src={url} alt={`Fotoğraf ${index + 1}`} fill className="object-cover" />
+              <Image src={url} alt={`Photo ${index + 1}`} fill className="object-cover" />
               <button
                 type="button"
                 onClick={() => removeImage(index)}
-                aria-label="Fotoğrafı kaldır"
+                aria-label="Remove photo"
                 className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/50 text-white
                            flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
@@ -262,7 +262,7 @@ export default function AdForm({ initialData = null }) {
               ) : (
                 <>
                   <Upload className="w-6 h-6" />
-                  <span>Ekle</span>
+                  <span>Add</span>
                 </>
               )}
             </button>
@@ -277,23 +277,23 @@ export default function AdForm({ initialData = null }) {
           multiple
           onChange={handleImageUpload}
           className="hidden"
-          aria-label="Fotoğraf seç"
+          aria-label="Select photo"
         />
         <p className="text-xs text-ink-tertiary mt-2">
-          PNG, JPG veya WebP — en fazla {MAX_IMAGE_SIZE_BYTES / 1024 / 1024} MB
+          PNG, JPG or WebP — max {MAX_IMAGE_SIZE_BYTES / 1024 / 1024} MB
         </p>
       </div>
 
       {/* ── Başlık ── */}
       <div>
-        <label htmlFor="ad-title" className="label">İlan Başlığı *</label>
+        <label htmlFor="ad-title" className="label">Ad Title *</label>
         <input
           id="ad-title"
           type="text"
           name="title"
           value={formData.title}
           onChange={handleChange}
-          placeholder="Ürününüzü açıklayan kısa bir başlık yazın"
+          placeholder="Write a short title describing your item"
           maxLength={100}
           required
           className="input"
@@ -302,14 +302,14 @@ export default function AdForm({ initialData = null }) {
 
       {/* ── Açıklama ── */}
       <div>
-        <label htmlFor="ad-description" className="label">Açıklama</label>
+        <label htmlFor="ad-description" className="label">Description</label>
         <textarea
           id="ad-description"
           name="description"
           value={formData.description}
           onChange={handleChange}
           rows={5}
-          placeholder="Ürün hakkında detaylı bilgi verin (durum, özellikler, vb.)"
+          placeholder="Provide detailed information about the item (condition, features, etc.)"
           className="input resize-none"
         />
       </div>
@@ -319,7 +319,7 @@ export default function AdForm({ initialData = null }) {
 
         {/* Fiyat */}
         <div>
-          <label htmlFor="ad-price" className="label">Fiyat ({CURRENCY_SYMBOL})</label>
+          <label htmlFor="ad-price" className="label">Price ({CURRENCY_SYMBOL})</label>
           <input
             id="ad-price"
             type="number"
@@ -331,12 +331,12 @@ export default function AdForm({ initialData = null }) {
             step="0.01"
             className="input"
           />
-          <p className="text-xs text-ink-tertiary mt-1">Boş bırakın veya 0 yazın → "Ücretsiz"</p>
+          <p className="text-xs text-ink-tertiary mt-1">Leave empty or write 0 → "Free"</p>
         </div>
 
         {/* Kategori */}
         <div>
-          <label htmlFor="ad-category" className="label">Kategori</label>
+          <label htmlFor="ad-category" className="label">Category</label>
           <select
             id="ad-category"
             name="category_id"
@@ -344,7 +344,7 @@ export default function AdForm({ initialData = null }) {
             onChange={handleChange}
             className="input"
           >
-            <option value="">Kategori seçin</option>
+            <option value="">Select Category</option>
             {categories
               // Önce üst kategoriler
               .filter((c) => !c.parent_id)
@@ -373,10 +373,10 @@ export default function AdForm({ initialData = null }) {
           {submitting ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Kaydediliyor...
+              Saving...
             </>
           ) : (
-            initialData ? 'Güncelle' : 'İlanı Yayınla'
+            initialData ? 'Update' : 'Publish Ad'
           )}
         </button>
 
@@ -385,7 +385,7 @@ export default function AdForm({ initialData = null }) {
           onClick={() => router.back()}
           className="btn-secondary"
         >
-          İptal
+          Cancel
         </button>
       </div>
     </form>

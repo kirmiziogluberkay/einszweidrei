@@ -10,8 +10,8 @@ import AdForm from '@/components/ads/AdForm';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
-  title: 'İlan Ver',
-  description: 'Yeni ilan oluştur ve eşyalarını sat ya da kiraya ver.',
+  title: 'Post Ad',
+  description: 'Create a new ad and sell or rent out your items.',
 };
 
 export default function IlanVerPage() {
@@ -20,9 +20,9 @@ export default function IlanVerPage() {
 
       {/* Sayfa başlığı */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-ink">İlan Ver</h1>
+        <h1 className="text-3xl font-bold text-ink">Post Ad</h1>
         <p className="text-ink-secondary mt-2">
-          Birkaç dakikada ilanınızı oluşturup yayınlayın.
+          Create and publish your ad in just a few minutes.
         </p>
       </div>
 

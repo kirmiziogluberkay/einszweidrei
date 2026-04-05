@@ -51,7 +51,7 @@ function LoginContent() {
       // Türkçe hata mesajı
       setError(
         authError.message === 'Invalid login credentials'
-          ? 'E-posta veya şifre hatalı.'
+          ? 'Invalid email or password.'
           : authError.message
       );
       setLoading(false);
@@ -71,8 +71,8 @@ function LoginContent() {
           <Link href="/" className="text-2xl font-bold text-ink hover:text-brand-500 transition-colors">
             {SITE_NAME}
           </Link>
-          <h1 className="text-xl font-semibold text-ink mt-3">Hoş Geldiniz</h1>
-          <p className="text-sm text-ink-secondary mt-1">Hesabınıza giriş yapın</p>
+          <h1 className="text-xl font-semibold text-ink mt-3">Welcome</h1>
+          <p className="text-sm text-ink-secondary mt-1">Log in to your account</p>
         </div>
 
         {/* Kart */}
@@ -89,7 +89,7 @@ function LoginContent() {
           <form onSubmit={handleLogin} className="space-y-5">
             {/* E-posta */}
             <div>
-              <label htmlFor="login-email" className="label">E-posta</label>
+              <label htmlFor="login-email" className="label">Email</label>
               <input
                 id="login-email"
                 type="email"
@@ -104,7 +104,7 @@ function LoginContent() {
 
             {/* Şifre */}
             <div>
-              <label htmlFor="login-password" className="label">Şifre</label>
+              <label htmlFor="login-password" className="label">Password</label>
               <input
                 id="login-password"
                 type="password"
@@ -127,18 +127,18 @@ function LoginContent() {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Giriş yapılıyor...
+                  Logging in...
                 </>
-              ) : 'Giriş Yap'}
+              ) : 'Log In'}
             </button>
           </form>
         </div>
 
         {/* Kayıt linki */}
         <p className="text-center text-sm text-ink-secondary mt-5">
-          Hesabınız yok mu?{' '}
+          Don't have an account?{' '}
           <Link href="/register" className="text-brand-500 font-medium hover:underline">
-            Kayıt Olun
+            Sign Up
           </Link>
         </p>
       </div>

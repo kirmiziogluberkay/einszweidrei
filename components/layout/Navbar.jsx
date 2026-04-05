@@ -62,7 +62,7 @@ export default function Navbar() {
           <Link
             href="/"
             className="font-bold text-xl text-ink tracking-tight hover:text-brand-500 transition-colors"
-            aria-label="Anasayfaya git"
+            aria-label="Go to homepage"
           >
             {SITE_NAME}
           </Link>
@@ -108,7 +108,7 @@ export default function Navbar() {
                       className="block px-4 py-2 text-sm text-ink-secondary hover:text-ink
                                  hover:bg-surface-secondary transition-colors font-medium"
                     >
-                      Tümü — {cat.name}
+                      All — {cat.name}
                     </Link>
                     <div className="border-t border-surface-tertiary my-1" />
                     {cat.children.map((sub) => (
@@ -135,7 +135,7 @@ export default function Navbar() {
             <Link
               href="/ara"
               className="p-2 rounded-xl text-ink-secondary hover:text-ink hover:bg-surface-secondary transition-colors"
-              aria-label="Ara"
+              aria-label="Search"
             >
               <Search className="w-5 h-5" />
             </Link>
@@ -145,7 +145,7 @@ export default function Navbar() {
                 {/* İlan Ver */}
                 <Link href="/ilan-ver" className="btn-primary hidden sm:inline-flex">
                   <Plus className="w-4 h-4" />
-                  İlan Ver
+                  Post Ad
                 </Link>
 
                 {/* Admin butonu */}
@@ -153,8 +153,8 @@ export default function Navbar() {
                   <Link
                     href="/admin"
                     className="p-2 rounded-xl text-brand-500 hover:bg-brand-50 transition-colors"
-                    aria-label="Admin paneli"
-                    title="Admin Paneli"
+                    aria-label="Admin panel"
+                    title="Admin Panel"
                   >
                     <ShieldCheck className="w-5 h-5" />
                   </Link>
@@ -179,7 +179,7 @@ export default function Navbar() {
                                   transition-all duration-200">
                     <div className="px-4 py-2 border-b border-surface-tertiary">
                       <p className="text-sm font-medium text-ink truncate">
-                        {profile?.username ?? 'Kullanıcı'}
+                        {profile?.username ?? 'User'}
                       </p>
                     </div>
                     {AUTH_NAV_LINKS.map((link) => (
@@ -198,7 +198,7 @@ export default function Navbar() {
                         className="w-full text-left px-4 py-2 text-sm text-red-500
                                    hover:bg-red-50 transition-colors"
                       >
-                        Çıkış Yap
+                        Log Out
                       </button>
                     </div>
                   </div>
@@ -207,10 +207,10 @@ export default function Navbar() {
             ) : (
               <>
                 <Link href="/login" className="btn-secondary hidden sm:inline-flex">
-                  Giriş Yap
+                  Log In
                 </Link>
                 <Link href="/register" className="btn-primary hidden sm:inline-flex">
-                  Kayıt Ol
+                  Sign Up
                 </Link>
               </>
             )}
@@ -219,7 +219,7 @@ export default function Navbar() {
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className="md:hidden p-2 rounded-xl text-ink-secondary hover:bg-surface-secondary transition-colors"
-              aria-label={mobileOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -266,7 +266,7 @@ export default function Navbar() {
               {user ? (
                 <>
                   <Link href="/ilan-ver" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brand-500">
-                    <Plus className="w-4 h-4" /> İlan Ver
+                    <Plus className="w-4 h-4" /> Post Ad
                   </Link>
                   {AUTH_NAV_LINKS.map((link) => (
                     <Link
@@ -281,13 +281,13 @@ export default function Navbar() {
                     onClick={signOut}
                     className="w-full text-left px-4 py-2.5 text-sm text-red-500"
                   >
-                    Çıkış Yap
+                    Log Out
                   </button>
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="block px-4 py-2.5 text-sm font-medium text-ink">Giriş Yap</Link>
-                  <Link href="/register" className="block px-4 py-2.5 text-sm font-medium text-brand-500">Kayıt Ol</Link>
+                  <Link href="/login" className="block px-4 py-2.5 text-sm font-medium text-ink">Log In</Link>
+                  <Link href="/register" className="block px-4 py-2.5 text-sm font-medium text-brand-500">Sign Up</Link>
                 </>
               )}
             </div>
