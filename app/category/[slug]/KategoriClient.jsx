@@ -214,6 +214,7 @@ export default function KategoriClient({ category, categoryTree = [] }) {
             ads={ads}
             loading={loading}
             error={error}
+            layout="list"
             emptyMessage={`No ads found in ${category.name} category.`}
           />
 

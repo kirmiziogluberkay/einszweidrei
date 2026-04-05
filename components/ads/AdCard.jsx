@@ -29,9 +29,12 @@ import { AD_STATUSES } from '@/constants/config';
  *     owner: { username: string },
  *     category: { name: string, slug: string }
  *   }
+ * @param {{
+ *   ad: Object,
+ *   layout?: 'grid' | 'list'
  * }} props
  */
-export default function AdCard({ ad }) {
+export default function AdCard({ ad, layout = 'grid' }) {
   const {
     serial_number,
     title,
@@ -53,6 +56,78 @@ export default function AdCard({ ad }) {
 
   /** İlan durum bilgisi */
   const statusInfo = AD_STATUSES[status] ?? AD_STATUSES.active;
+
+  if (layout === 'list') {
+    return (
+      <Link
+        href={adUrl}
+        className="card group flex flex-col md:flex-row gap-6 p-4 hover:shadow-md transition-shadow"
+        aria-label={`${title} ilanına git`}
+      >
+        {/* ── Left: Image ── */}
+        <div className="relative w-full md:w-64 h-48 md:h-auto bg-surface-secondary rounded-xl overflow-hidden flex-shrink-0">
+          {coverImage ? (
+            <Image
+              src={coverImage}
+              alt={title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-surface-tertiary text-ink-tertiary">
+              <svg className="w-10 h-10 mb-2 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14 m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="text-xs font-medium uppercase opacity-60">No Image</span>
+            </div>
+          )}
+          {status !== 'active' && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <span className="bg-white text-ink text-xs font-semibold px-3 py-1 rounded-full">{statusInfo.label}</span>
+            </div>
+          )}
+        </div>
+
+        {/* ── Right: Content ── */}
+        <div className="flex-1 flex flex-col h-full min-w-0">
+          <div className="flex justify-between items-start gap-4">
+            <div className="min-w-0 flex-1">
+              {category && (
+                <div className="flex items-center gap-1 text-xs text-brand-600 font-medium mb-1">
+                  <Tag className="w-3 h-3" />
+                  <span>{category.name}</span>
+                </div>
+              )}
+              <h3 className="font-bold text-ink text-xl leading-tight group-hover:text-brand-500 transition-colors truncate">
+                {title}
+              </h3>
+            </div>
+            <div className="flex-shrink-0 text-right">
+              {(!price || price === 0) ? (
+                <span className="font-bold text-green-500 text-2xl leading-none">Free</span>
+              ) : (
+                <span className="font-bold text-ink text-2xl leading-none">{formatPrice(price, currency)}</span>
+              )}
+            </div>
+          </div>
+
+          <p className="text-sm text-ink-secondary mt-3 line-clamp-3 flex-1">
+            {description}
+          </p>
+
+          <div className="flex items-center justify-between pt-4 mt-auto border-t border-surface-tertiary/50">
+            <div className="flex items-center gap-1 text-xs text-ink-tertiary">
+              <Clock className="w-3.5 h-3.5" />
+              <span>{timeAgo(created_at)}</span>
+            </div>
+            {owner && (
+              <span className="text-xs text-ink-tertiary font-medium">@{owner.username}</span>
+            )}
+          </div>
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <Link

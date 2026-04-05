@@ -299,6 +299,7 @@ export default function HomePage() {
             ads={ads}
             loading={loading}
             error={error}
+            layout={selectedCategory ? 'list' : 'grid'}
             emptyMessage={
               searchQuery
                 ? `No ads found for "${searchQuery}".`

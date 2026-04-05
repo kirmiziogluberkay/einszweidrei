@@ -23,16 +23,20 @@ export default function AdGrid({
   loading = false,
   error = null,
   emptyMessage = 'Henüz ilan bulunmuyor.',
+  layout = 'grid',
 }) {
 
   // ── Yükleme durumu ── skeleton kartlar
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <div className={layout === 'grid' 
+        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+        : "flex flex-col gap-5"
+      }>
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="card animate-pulse">
-            <div className="skeleton aspect-[4/3]" />
-            <div className="p-4 space-y-3">
+          <div key={i} className={layout === 'grid' ? "card animate-pulse" : "card animate-pulse flex flex-col md:flex-row gap-6 p-4"}>
+            <div className={layout === 'grid' ? "skeleton aspect-[4/3]" : "skeleton w-full md:w-64 h-48 md:h-40 rounded-xl"} />
+            <div className="flex-1 p-4 space-y-3">
               <div className="skeleton h-4 w-1/3" />
               <div className="skeleton h-5 w-full" />
               <div className="skeleton h-4 w-4/5" />
@@ -75,9 +79,12 @@ export default function AdGrid({
 
   // ── Normal durum ──
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    <div className={layout === 'grid' 
+      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+      : "flex flex-col gap-6"
+    }>
       {ads.map((ad) => (
-        <AdCard key={ad.id} ad={ad} />
+        <AdCard key={ad.id} ad={ad} layout={layout} />
       ))}
     </div>
   );
