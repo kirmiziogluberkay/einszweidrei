@@ -12,13 +12,13 @@
  */
 
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import ShareButtons from '@/components/ads/ShareButtons';
 import AdDetailClient from './AdDetailClient';
+import ContactButton from './ContactButton';
 import { formatPrice, formatDate } from '@/lib/helpers';
-import { SITE_NAME, AD_STATUSES } from '@/constants/config';
+import { AD_STATUSES } from '@/constants/config';
 
 /** SEO için dinamik metadata üret */
 export async function generateMetadata({ params }) {
@@ -165,7 +165,7 @@ export default async function AdDetailPage({ params }) {
             </dl>
           </div>
 
-          {/* İlan sahibi + mesaj (Client bölümü ayrı dosyada) */}
+          {/* İlan sahibi + mesaj */}
           <div className="card p-6">
             <h3 className="text-base font-semibold text-ink mb-4">İlan Sahibi</h3>
             <div className="flex items-center gap-3 mb-4">
@@ -179,7 +179,7 @@ export default async function AdDetailPage({ params }) {
               </div>
             </div>
 
-            {/* Mesaj gönderme butonu — Client tarafında açılır */}
+            {/* İstemci bileşeni (Client Component) */}
             <ContactButton
               adId={ad.id}
               adTitle={ad.title}
@@ -190,45 +190,5 @@ export default async function AdDetailPage({ params }) {
         </aside>
       </div>
     </div>
-  );
-}
-
-// ─── Inline Client Button ──────────────────────────────────────────────────────
-// Küçük bir istemci bileşeni — mesaj modalını açar
-
-'use client';
-
-import { useState } from 'react';
-import { MessageSquare } from 'lucide-react';
-import MessageThread from '@/components/messages/MessageThread';
-
-/**
- * "Mesaj Gönder" butonunu ve açılan sohbet panelini render eder.
- */
-function ContactButton({ adId, adTitle, receiverId, receiverName }) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <>
-      <button
-        id="contact-seller-btn"
-        onClick={() => setOpen(!open)}
-        className="btn-primary w-full"
-      >
-        <MessageSquare className="w-4 h-4" />
-        {open ? 'Kapat' : 'Mesaj Gönder'}
-      </button>
-
-      {open && (
-        <div className="mt-4 border border-surface-tertiary rounded-2xl overflow-hidden h-80 flex flex-col">
-          <MessageThread
-            adId={adId}
-            adTitle={adTitle}
-            receiverId={receiverId}
-            receiverName={receiverName}
-          />
-        </div>
-      )}
-    </>
   );
 }
