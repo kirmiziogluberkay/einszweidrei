@@ -55,6 +55,7 @@ export default async function AdDetailPage({ params }) {
       created_at,
       updated_at,
       owner:profiles!owner_id(id, username, phone),
+      // NEW: Fetched category with its parent to display 'Home / Parent / Sub' hierarchy
       category:categories(id, name, slug, parent:categories!parent_id(id, name, slug))
     `)
     .eq('serial_number', params.seriNo)
@@ -70,6 +71,7 @@ export default async function AdDetailPage({ params }) {
       <nav className="flex items-center gap-1.5 text-sm text-ink-tertiary mb-6" aria-label="Breadcrumb">
         <Link href="/" className="hover:text-ink transition-colors">Home</Link>
         <span className="opacity-40">/</span>
+        {/* NEW: Display parent category (e.g., Second Hand Items) if it exists */}
         {ad.category?.parent && (
           <>
             <Link href={`/category/${ad.category.parent.slug}`} className="hover:text-ink transition-colors">
