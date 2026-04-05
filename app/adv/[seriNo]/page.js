@@ -55,7 +55,7 @@ export default async function AdDetailPage({ params }) {
       created_at,
       updated_at,
       owner:profiles!owner_id(id, username, phone),
-      // NEW: Fetched category with its parent to display 'Home / Parent / Sub' hierarchy
+      // NEW: Fetched category WITH its parent to display 'Home / Parent / Sub' hierarchy
       category:categories(id, name, slug, parent:categories!parent_id(id, name, slug))
     `)
     .eq('serial_number', params.seriNo)
@@ -68,9 +68,11 @@ export default async function AdDetailPage({ params }) {
   return (
     <div className="container-app py-8">
 
+      {/* Breadcrumb Navigation */}
       <nav className="flex items-center gap-1.5 text-sm text-ink-tertiary mb-6" aria-label="Breadcrumb">
         <Link href="/" className="hover:text-ink transition-colors">Home</Link>
         <span className="opacity-40">/</span>
+        
         {/* NEW: Display parent category (e.g., Second Hand Items) if it exists */}
         {ad.category?.parent && (
           <>
@@ -80,6 +82,8 @@ export default async function AdDetailPage({ params }) {
             <span className="opacity-40">/</span>
           </>
         )}
+
+        {/* Display sub-category (e.g., Furniture) if it exists */}
         {ad.category && (
           <>
             <Link href={`/category/${ad.category.slug}`} className="hover:text-ink transition-colors">
@@ -88,6 +92,7 @@ export default async function AdDetailPage({ params }) {
             <span className="opacity-40">/</span>
           </>
         )}
+        
         <span className="text-ink font-medium truncate max-w-[200px]">{ad.title}</span>
       </nav>
 
