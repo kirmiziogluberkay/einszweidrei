@@ -14,7 +14,9 @@ import { Search } from 'lucide-react';
 import { useAds } from '@/hooks/useAds';
 import AdGrid from '@/components/ads/AdGrid';
 
-export default function AraPage() {
+import { Suspense } from 'react';
+
+function AraContent() {
   const searchParams = useSearchParams();
   const router       = useRouter();
 
@@ -94,5 +96,13 @@ export default function AraPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AraPage() {
+  return (
+    <Suspense fallback={<div className="container-app py-8 flex justify-center"><p>Yükleniyor...</p></div>}>
+      <AraContent />
+    </Suspense>
   );
 }

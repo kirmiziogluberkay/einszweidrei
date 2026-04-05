@@ -18,7 +18,9 @@ import { SITE_NAME } from '@/constants/config';
 
 // Metadata 'use client' dosyalarında kullanılamaz, o yüzden sildik.
 
-export default function LoginPage() {
+import { Suspense } from 'react';
+
+function LoginContent() {
   const supabase    = createClient();
   const router      = useRouter();
   const searchParams = useSearchParams();
@@ -141,5 +143,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[80vh] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-brand-500" /></div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
