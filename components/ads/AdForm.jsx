@@ -162,6 +162,12 @@ export default function AdForm({ initialData = null }) {
       return;
     }
 
+    if (!formData.category_id) {
+      setError('Please select a category for your ad.');
+      setSubmitting(false);
+      return;
+    }
+
     const payload = {
       title:       formData.title.trim(),
       description: formData.description.trim(),
@@ -338,15 +344,16 @@ export default function AdForm({ initialData = null }) {
 
         {/* Kategori */}
         <div>
-          <label htmlFor="ad-category" className="label">Category</label>
+          <label htmlFor="ad-category" className="label">Category *</label>
           <select
             id="ad-category"
             name="category_id"
             value={formData.category_id}
             onChange={handleChange}
             className="input"
+            required
           >
-            <option value="">Select Category</option>
+            <option value="" disabled>Select Category</option>
             {categories
               // Önce üst kategoriler
               .filter((c) => !c.parent_id)
