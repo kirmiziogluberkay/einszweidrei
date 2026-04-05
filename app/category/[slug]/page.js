@@ -10,6 +10,8 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import KategoriClient from './KategoriClient';
 
+export const revalidate = 0; // Force dynamic rendering for newest categories
+
 /** Dynamic SEO metadata */
 export async function generateMetadata({ params }) {
   const supabase = await createClient();
@@ -43,7 +45,9 @@ export default async function CategoryPage({ params }) {
   // 2. Find all children (for showing subcategory ads)
   const { data: allCats } = await supabase
     .from('categories')
-    .select('id, name, slug, parent_id');
+    .select('id, name, slug, parent_id, sort_order')
+    .order('sort_order', { ascending: true })
+    .order('name', { ascending: true });
 
   // Resolve parent via DB
   let parent = allCats?.find(c => c.id === category.parent_id) ?? null;
@@ -74,11 +78,16 @@ export default async function CategoryPage({ params }) {
 
   // Build the full category tree for sidebar navigation
   // roots = top-level categories; each has children attached
+  const sortBySortOrder = (a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999);
+
   const roots = allCats
     ?.filter(c => !c.parent_id)
+    .sort(sortBySortOrder)
     .map(root => ({
       ...root,
-      children: allCats.filter(c => c.parent_id === root.id),
+      children: allCats
+        .filter(c => c.parent_id === root.id)
+        .sort(sortBySortOrder),
     })) ?? [];
 
   return <KategoriClient category={enrichedCategory} categoryTree={roots} />;
