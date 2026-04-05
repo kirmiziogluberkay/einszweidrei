@@ -38,16 +38,17 @@ export default async function CategoryPage({ params }) {
 
   if (!category) notFound();
 
-  // Fetch ALL categories to build the hierarchy manually if parent_id is missing
+  // Fetch ALL categories to:
+  // 1. Resolve the parent category (for breadcrumb)
+  // 2. Find all children (for showing subcategory ads)
   const { data: allCats } = await supabase
     .from('categories')
     .select('id, name, slug, parent_id');
 
-  // Build parent chain: walk up parent_id links
+  // Resolve parent via DB
   let parent = allCats?.find(c => c.id === category.parent_id) ?? null;
 
-  // EMERGENCY OVERRIDE: If no parent found via DB, use keyword matching.
-  // This works around the case where parent_id is null in the database.
+  // EMERGENCY OVERRIDE: If no parent in DB, resolve via keyword matching
   if (!parent) {
     const catName = category.name.toLowerCase();
     const secondHandKeywords = ['furniture', 'electronics', 'clothing', 'baby', 'sports', 'home', 'books'];
@@ -60,10 +61,15 @@ export default async function CategoryPage({ params }) {
     }
   }
 
-  // Build the enriched category object with resolved parent
+  // Find direct children of this category (subcategories)
+  // Used so that parent categories show ads from ALL their subcategories
+  const children = allCats?.filter(c => c.parent_id === category.id) ?? [];
+
+  // Build the enriched category object
   const enrichedCategory = {
     ...category,
     parent: parent ?? null,
+    children,
   };
 
   return <KategoriClient category={enrichedCategory} />;

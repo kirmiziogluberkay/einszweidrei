@@ -2,7 +2,7 @@
  * app/category/[slug]/KategoriClient.jsx
  * ─────────────────────────────────────────────────────
  * Category page client component.
- * Ad listing, pagination.
+ * Shows ads from current category AND all its subcategories.
  * ─────────────────────────────────────────────────────
  */
 
@@ -13,11 +13,26 @@ import Link from 'next/link';
 import { useAds } from '@/hooks/useAds';
 import AdGrid from '@/components/ads/AdGrid';
 
+/**
+ * @param {{
+ *   category: { id, name, slug, parent, children }
+ * }} props
+ */
 export default function KategoriClient({ category }) {
   const [page, setPage] = useState(1);
 
+  // Build list of category IDs to query:
+  // Include the current category + all its direct children (subcategories)
+  const childIds = category.children?.map(c => c.id) ?? [];
+  // If it's a parent category (has children), show ads from ALL subcategories
+  // If it's a leaf category, just show ads from itself
+  const categoryIds = childIds.length > 0
+    ? [category.id, ...childIds]
+    : null;
+
   const { ads, loading, error, total, totalPages } = useAds({
-    categoryId: category.id,
+    categoryId: categoryIds ? null : category.id,
+    categoryIds: categoryIds ?? undefined,
     page,
   });
 

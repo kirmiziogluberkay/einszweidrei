@@ -33,7 +33,7 @@ import { ADS_PER_PAGE } from '@/constants/config';
 export function useAds(filters = {}) {
   const supabase = createClient();
 
-  const { categoryId, ownerId, searchQuery, page = 1 } = filters;
+  const { categoryId, categoryIds, ownerId, searchQuery, page = 1 } = filters;
 
   const [ads, setAds] = useState([]);
   const [total, setTotal] = useState(0);
@@ -66,8 +66,11 @@ export function useAds(filters = {}) {
       .eq('status', 'active')
       .order('created_at', { ascending: false });
 
-    // Kategori filtresi
-    if (categoryId) {
+    // Kategori filtresi — tek id veya çoklu id listesi desteklenir
+    if (categoryIds && categoryIds.length > 0) {
+      // Birden fazla kategori: "in" operatörü ile filtrele
+      query = query.in('category_id', categoryIds);
+    } else if (categoryId) {
       query = query.eq('category_id', categoryId);
     }
 
@@ -99,7 +102,7 @@ export function useAds(filters = {}) {
     setAds(data ?? []);
     setTotal(count ?? 0);
     setLoading(false);
-  }, [supabase, categoryId, ownerId, searchQuery, page]);
+  }, [supabase, categoryId, categoryIds?.join(','), ownerId, searchQuery, page]);
 
   useEffect(() => {
     fetchAds();
