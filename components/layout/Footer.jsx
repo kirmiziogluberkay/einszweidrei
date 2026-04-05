@@ -51,7 +51,7 @@ export default function Footer() {
               {[
                 { label: 'Log In',     href: '/login'    },
                 { label: 'Sign Up',    href: '/register' },
-                { label: 'My Profile', href: '/profilim' },
+                { label: 'My Profile', href: '/myprofile' },
                 { label: 'Messages',   href: '/mesajlar' },
               ].map((link) => (
                 <li key={link.href}>

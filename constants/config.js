@@ -149,7 +149,7 @@ export const STATIC_NAV_LINKS = [
 export const AUTH_NAV_LINKS = [
   { label: 'Post Ad',    href: '/ilan-ver'  },
   { label: 'Messages',   href: '/mesajlar'  },
-  { label: 'My Profile', href: '/profilim'  },
+  { label: 'My Profile', href: '/myprofile'  },
 ];
 
 // ─── Hata Mesajları ───────────────────────────────────────────────────────────

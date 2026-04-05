@@ -1,9 +1,8 @@
 /**
- * app/profilim/page.js
+ * app/myprofile/page.js
  * ─────────────────────────────────────────────────────
- * Kullanıcı profil sayfası.
- * - Profil bilgileri düzenleme
- * - Kullanıcının kendi ilanları
+ * User profile page.
+ * URL: /myprofile
  * ─────────────────────────────────────────────────────
  */
 
@@ -19,7 +18,7 @@ import { formatPrice, buildAdUrl, timeAgo } from '@/lib/helpers';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES, AD_STATUSES, AD_URL_PREFIX } from '@/constants/config';
 
 
-export default function ProfilimPage() {
+export default function MyProfilePage() {
   const supabase          = createClient();
   const { user, profile, loading: authLoading } = useAuth();
 
@@ -34,10 +33,6 @@ export default function ProfilimPage() {
   const [msg,       setMsg]       = useState(null);
   const [msgType,   setMsgType]   = useState('success');
 
-  /**
-   * Profil bilgilerini kaydeder.
-   * @param {React.FormEvent} e
-   */
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -60,10 +55,6 @@ export default function ProfilimPage() {
     setSaving(false);
   };
 
-  /**
-   * İlanı siler.
-   * @param {string} adId
-   */
   const handleDeleteAd = async (adId) => {
     if (!confirm('Are you sure you want to delete this ad?')) return;
 
@@ -92,7 +83,6 @@ export default function ProfilimPage() {
     <div className="container-app py-8 max-w-3xl">
       <h1 className="section-title">My Profile</h1>
 
-      {/* ── Mesaj ── */}
       {msg && (
         <div className={`flex items-start gap-2 p-4 rounded-2xl text-sm mb-6 ${
           msgType === 'success'
@@ -104,7 +94,6 @@ export default function ProfilimPage() {
         </div>
       )}
 
-      {/* ── Profil bilgileri ── */}
       <div className="card p-6 mb-8">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-semibold text-ink">My Information</h2>
@@ -170,7 +159,6 @@ export default function ProfilimPage() {
         )}
       </div>
 
-      {/* ── İlanlarım ── */}
       <div>
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold text-ink">My Ads ({ads.length})</h2>
@@ -195,15 +183,12 @@ export default function ProfilimPage() {
               const statusInfo = AD_STATUSES[ad.status] ?? AD_STATUSES.active;
               return (
                 <div key={ad.id} className="card p-4 flex items-center gap-4">
-                  {/* Küçük fotoğraf */}
                   <div className="w-14 h-14 rounded-xl bg-surface-secondary flex-shrink-0 overflow-hidden">
                     {ad.images?.[0] && (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover" />
                     )}
                   </div>
 
-                  {/* Bilgiler */}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-ink text-sm truncate">{ad.title}</p>
                     <p className="text-xs text-ink-tertiary mt-0.5">
@@ -211,7 +196,6 @@ export default function ProfilimPage() {
                     </p>
                   </div>
 
-                  {/* Durum */}
                   <span className={`badge text-xs ${
                     ad.status === 'active'  ? 'bg-green-100 text-green-600' :
                     ad.status === 'sold'    ? 'bg-red-100 text-red-600' :
@@ -220,7 +204,6 @@ export default function ProfilimPage() {
                     {statusInfo.label}
                   </span>
 
-                  {/* Eylemler */}
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <Link
                       href={buildAdUrl(ad.serial_number)}
