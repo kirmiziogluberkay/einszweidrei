@@ -75,14 +75,7 @@ export default function Navbar() {
           {/* ── Sağ: Eylemler ── */}
           <div className="flex items-center gap-2">
 
-            {/* Arama */}
-            <Link
-              href="/ara"
-              className="p-2 rounded-xl text-ink-secondary hover:text-ink hover:bg-surface-secondary transition-colors"
-              aria-label="Search"
-            >
-              <Search className="w-5 h-5" />
-            </Link>
+            {/* Arama ikonu kullanıcının talebi üzerine kaldırıldı */}
 
             {user ? (
               <>
