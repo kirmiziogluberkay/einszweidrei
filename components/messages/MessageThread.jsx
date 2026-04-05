@@ -157,7 +157,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 ? (
           <p className="text-center text-sm text-ink-tertiary py-8">
-            Henüz mesaj yok. İlk mesajı siz gönderin!
+            No messages yet. Be the first to send a message!
           </p>
         ) : (
           messages.map((msg) => {
@@ -212,7 +212,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
               type="text"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Mesaj yaz..."
+              placeholder="Write a message..."
               maxLength={1000}
               className="input flex-1"
               id="message-input"
