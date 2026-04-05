@@ -145,7 +145,7 @@ export default function RegisterPage() {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                placeholder="kullanici_adi"
+                placeholder="user_name"
                 required
                 autoComplete="username"
                 className="input"
@@ -161,7 +161,7 @@ export default function RegisterPage() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="ornek@mail.com"
+                placeholder="sample@mail.com"
                 required
                 autoComplete="email"
                 className="input"

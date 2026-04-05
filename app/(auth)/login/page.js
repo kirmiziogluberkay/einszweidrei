@@ -95,7 +95,7 @@ function LoginContent() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ornek@mail.com"
+                placeholder="sample@mail.com"
                 required
                 autoComplete="email"
                 className="input"
