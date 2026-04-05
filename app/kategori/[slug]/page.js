@@ -21,10 +21,10 @@ export async function generateMetadata({ params }) {
     .eq('slug', params.slug)
     .single();
 
-  if (!category) return { title: 'Kategori Bulunamadı' };
+  if (!category) return { title: 'Category Not Found' };
   return {
-    title:       `${category.name} İlanları`,
-    description: `${category.name} kategorisindeki ikinci el ve kiralık eşya ilanları.`,
+    title:       `${category.name} Ads`,
+    description: `Second-hand and rental items in ${category.name} category.`,
   };
 }
 

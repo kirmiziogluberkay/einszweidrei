@@ -25,7 +25,7 @@ export default function ContactButton({ adId, adTitle, receiverId, receiverName 
         className="btn-primary w-full"
       >
         <MessageSquare className="w-4 h-4 mr-2" />
-        {open ? 'Kapat' : 'Mesaj Gönder'}
+        {open ? 'Close' : 'Send Message'}
       </button>
 
       {open && (

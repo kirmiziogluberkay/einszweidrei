@@ -84,7 +84,7 @@ export default function MesajlarPage() {
    * @param {string} otherId
    */
   const handleDeleteThread = async (adId, otherId) => {
-    if (!confirm('Bu konuşmayı silmek istediğinize emin misiniz?')) return;
+    if (!confirm('Are you sure you want to delete this chat?')) return;
 
     await supabase
       .from('messages')
@@ -110,12 +110,12 @@ export default function MesajlarPage() {
 
   return (
     <div className="container-app py-8">
-      <h1 className="section-title">Mesajlarım</h1>
+      <h1 className="section-title">Messages</h1>
 
       {threads.length === 0 ? (
         <div className="card p-16 text-center">
           <MessageSquareOff className="w-12 h-12 text-ink-tertiary mx-auto mb-4" />
-          <p className="text-ink-secondary text-sm">Henüz mesajınız yok.</p>
+          <p className="text-ink-secondary text-sm">You have no messages yet.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px]">
@@ -123,7 +123,7 @@ export default function MesajlarPage() {
           {/* ── Sol: Konuşma listesi ── */}
           <div className="md:col-span-1 card overflow-hidden flex flex-col">
             <div className="p-4 border-b border-surface-tertiary">
-              <h2 className="font-semibold text-ink text-sm">Konuşmalar</h2>
+              <h2 className="font-semibold text-ink text-sm">Conversations</h2>
             </div>
             <div className="flex-1 overflow-y-auto divide-y divide-surface-tertiary">
               {threads.map((thread) => (
@@ -166,7 +166,7 @@ export default function MesajlarPage() {
                       e.stopPropagation();
                       handleDeleteThread(thread.adId, thread.otherId);
                     }}
-                    aria-label="Konuşmayı sil"
+                    aria-label="Delete chat"
                     className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100
                                p-1 rounded-lg text-ink-tertiary hover:text-red-400 transition-all"
                   >
@@ -188,7 +188,7 @@ export default function MesajlarPage() {
               />
             ) : (
               <div className="flex-1 flex items-center justify-center text-ink-tertiary text-sm">
-                Bir konuşma seçin
+                Select a conversation
               </div>
             )}
           </div>
