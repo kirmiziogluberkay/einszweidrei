@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/server';
 import ShareButtons from '@/components/ads/ShareButtons';
 import AdDetailClient from './AdDetailClient';
 import ContactButton from './ContactButton';
+import { Pencil } from 'lucide-react';
 import { formatPrice, formatDate } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
 
@@ -62,6 +63,21 @@ export default async function AdDetailPage({ params }) {
     .single();
 
   if (!ad) notFound();
+
+  // Aktif oturum ve yetkileri kontrol et
+  const { data: { user } } = await supabase.auth.getUser();
+  let isAdmin = false;
+  
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    if (profile?.role === 'admin') isAdmin = true;
+  }
+
+  const canEdit = user && (user.id === ad.owner_id || isAdmin);
 
   // Fetch all categories to identify parent names manually
   const { data: allCats } = await supabase
@@ -188,7 +204,20 @@ export default async function AdDetailPage({ params }) {
                     {statusInfo.label}
                   </span>
                 )}
-                <h1 className="text-2xl font-bold text-ink leading-tight">{ad.title}</h1>
+                
+                <div className="flex items-start justify-between">
+                  <h1 className="text-2xl font-bold text-ink leading-tight">{ad.title}</h1>
+                  {canEdit && (
+                    <Link
+                      href={`/ilan/${ad.serial_number}/duzenle`}
+                      className="ml-4 p-2 shrink-0 rounded-xl bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50 transition-colors"
+                      title="Edit Ad"
+                    >
+                      <Pencil className="w-5 h-5" />
+                    </Link>
+                  )}
+                </div>
+
                 {/* Free in green if no price given */}
                 {(!ad.price || ad.price === 0) ? (
                   <p className="text-3xl font-bold text-green-500">Free</p>

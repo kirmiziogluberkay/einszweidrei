@@ -39,7 +39,7 @@ import { buildAdUrl } from '@/lib/helpers';
 export default function AdForm({ initialData = null }) {
   const supabase  = createClient();
   const router    = useRouter();
-  const { user }  = useAuth();
+  const { user, isAdmin } = useAuth();
   const { categories } = useCategories();
   const fileInputRef = useRef(null);
 
@@ -175,20 +175,25 @@ export default function AdForm({ initialData = null }) {
       currency:    DEFAULT_CURRENCY,
       category_id: formData.category_id || null,
       images:      uploadedImages,
-      owner_id:    user.id,
+      // Admin başkasının ilanını güncellerken ilan sahibini değiştirmemek için:
+      owner_id:    initialData?.owner_id || user.id,
     };
 
     let result;
 
     if (initialData?.id) {
       // ── Güncelleme modu ──
-      result = await supabase
+      let query = supabase
         .from('ads')
         .update({ ...payload, updated_at: new Date().toISOString() })
-        .eq('id', initialData.id)
-        .eq('owner_id', user.id) // Başkasının ilanını değiştiremez
-        .select('serial_number')
-        .single();
+        .eq('id', initialData.id);
+
+      // Sadece admin DEĞİLSE kendi ilanını değiştirme şartı koş
+      if (!isAdmin) {
+        query = query.eq('owner_id', user.id);
+      }
+
+      result = await query.select('serial_number').single();
     } else {
       // ── Oluşturma modu (serial_number trigger ile atanır) ──
       result = await supabase
