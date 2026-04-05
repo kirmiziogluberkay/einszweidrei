@@ -69,63 +69,7 @@ export default function Navbar() {
 
           {/* ── Orta: Kategori Menüsü (Desktop) ── */}
           <div className="hidden md:flex items-center gap-1">
-            {categoryTree.map((cat) => (
-              <div key={cat.id} className="relative">
-                <button
-                  onMouseEnter={() => setOpenDropdown(cat.id)}
-                  onMouseLeave={() => setOpenDropdown(null)}
-                  onClick={() => setOpenDropdown(
-                    openDropdown === cat.id ? null : cat.id
-                  )}
-                  className={cn(
-                    'flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                    openDropdown === cat.id
-                      ? 'bg-surface-secondary text-brand-500'
-                      : 'text-ink-secondary hover:text-ink hover:bg-surface-secondary'
-                  )}
-                  aria-expanded={openDropdown === cat.id}
-                  aria-haspopup="menu"
-                >
-                  {cat.name}
-                  {cat.children?.length > 0 && (
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  )}
-                </button>
-
-                {/* Dropdown */}
-                {cat.children?.length > 0 && openDropdown === cat.id && (
-                  <div
-                    role="menu"
-                    onMouseEnter={() => setOpenDropdown(cat.id)}
-                    onMouseLeave={() => setOpenDropdown(null)}
-                    className="absolute top-full left-0 mt-1 w-52 bg-white rounded-2xl shadow-[var(--shadow-xl)]
-                               border border-surface-tertiary py-2 animate-fade-in"
-                  >
-                    <Link
-                      href={`/category/${cat.slug}`}
-                      className="block px-4 py-2 text-sm text-ink-secondary hover:text-ink
-                                 hover:bg-surface-secondary transition-colors font-medium"
-                    >
-                      All — {cat.name}
-                    </Link>
-                    <div className="border-t border-surface-tertiary my-1" />
-                    {cat.children.map((sub) => (
-                      <Link
-                        key={sub.id}
-                        href={`/category/${sub.slug}`}
-                        role="menuitem"
-                        className="block px-4 py-2 text-sm text-ink-secondary
-                                   hover:text-ink hover:bg-surface-secondary transition-colors"
-                      >
-                        {sub.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+            {/* Kategori dropdown'ları kullanıcının talebi üzerine kaldırıldı */}
           </div>
 
           {/* ── Sağ: Eylemler ── */}
