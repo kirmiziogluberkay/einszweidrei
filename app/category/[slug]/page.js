@@ -72,5 +72,14 @@ export default async function CategoryPage({ params }) {
     children,
   };
 
-  return <KategoriClient category={enrichedCategory} />;
+  // Build the full category tree for sidebar navigation
+  // roots = top-level categories; each has children attached
+  const roots = allCats
+    ?.filter(c => !c.parent_id)
+    .map(root => ({
+      ...root,
+      children: allCats.filter(c => c.parent_id === root.id),
+    })) ?? [];
+
+  return <KategoriClient category={enrichedCategory} categoryTree={roots} />;
 }
