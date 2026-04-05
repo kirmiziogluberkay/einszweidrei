@@ -162,7 +162,7 @@ export default function MyProfilePage() {
       <div>
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold text-ink">My Ads ({ads.length})</h2>
-          <Link href="/ilan-ver" className="btn-primary">
+          <Link href="/post-ad" className="btn-primary">
             <Plus className="w-4 h-4" /> New Ad
           </Link>
         </div>

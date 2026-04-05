@@ -68,7 +68,7 @@ export default async function AdDetailPage({ params }) {
     .from('categories')
     .select('id, name, slug, parent_id');
 
-  // Breadcrumb structure: Home / [Parent] / [Sub] / [Title]
+  // CORRECT HIERARCHY FIX: Breadcrumb structure: Home / [Parent] / [Sub] / [Title]
   const breadcrumbs = [];
   
   // Find current subcategory (e.g., Furniture)
@@ -78,7 +78,7 @@ export default async function AdDetailPage({ params }) {
     // Check if it has a direct parent link in the DB
     let parent = allCats?.find(pc => pc.id === currentCategory.parent_id);
 
-    // EMERGENCY OVERRIDE (Hardcore Fix): 
+    // CORRECT HIERARCHY FIX: EMERGENCY OVERRIDE (Hardcore Fix)
     // If the database has no parent linked, we manually determine it based on keywords.
     if (!parent) {
       const catName = currentCategory.name.toLowerCase();
@@ -109,7 +109,7 @@ export default async function AdDetailPage({ params }) {
   return (
     <div className="container-app py-8">
 
-      {/* Breadcrumb Navigation - FIXED to always show Second Hand / Rental labels */}
+      {/* CORRECT HIERARCHY FIX: Navigation - FIXED to always show Second Hand / Rental labels */}
       <nav className="flex items-center gap-1.5 text-sm text-ink-tertiary mb-6" aria-label="Breadcrumb">
         <Link href="/" className="hover:text-ink transition-colors">Home</Link>
         <span className="opacity-40">/</span>

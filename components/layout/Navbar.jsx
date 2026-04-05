@@ -143,7 +143,7 @@ export default function Navbar() {
             {user ? (
               <>
                 {/* İlan Ver */}
-                <Link href="/ilan-ver" className="btn-primary hidden sm:inline-flex">
+                <Link href="/post-ad" className="btn-primary hidden sm:inline-flex">
                   <Plus className="w-4 h-4" />
                   Post Ad
                 </Link>
@@ -265,7 +265,7 @@ export default function Navbar() {
             <div className="border-t border-surface-tertiary pt-3 mt-3 space-y-1">
               {user ? (
                 <>
-                  <Link href="/ilan-ver" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brand-500">
+                  <Link href="/post-ad" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brand-500">
                     <Plus className="w-4 h-4" /> Post Ad
                   </Link>
                   {AUTH_NAV_LINKS.map((link) => (
