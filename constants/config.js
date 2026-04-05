@@ -29,7 +29,7 @@ export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
 /** İlan detay sayfası URL öneki */
-export const AD_URL_PREFIX = '/ad';
+export const AD_URL_PREFIX = '/ilan';
 
 // ─── Sayfalama ────────────────────────────────────────────────────────────────
 
