@@ -90,7 +90,7 @@ export default function ProfilimPage() {
 
   return (
     <div className="container-app py-8 max-w-3xl">
-      <h1 className="section-title">Profilim</h1>
+      <h1 className="section-title">My Profile</h1>
 
       {/* ── Mesaj ── */}
       {msg && (
@@ -107,7 +107,7 @@ export default function ProfilimPage() {
       {/* ── Profil bilgileri ── */}
       <div className="card p-6 mb-8">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-semibold text-ink">Bilgilerim</h2>
+          <h2 className="text-lg font-semibold text-ink">My Information</h2>
           {!editMode && (
             <button
               onClick={() => {
@@ -117,7 +117,7 @@ export default function ProfilimPage() {
               }}
               className="btn-secondary py-2 text-sm"
             >
-              <Edit3 className="w-4 h-4" /> Düzenle
+              <Edit3 className="w-4 h-4" /> Edit
             </button>
           )}
         </div>
@@ -125,7 +125,7 @@ export default function ProfilimPage() {
         {editMode ? (
           <form onSubmit={handleSaveProfile} className="space-y-5">
             <div>
-              <label htmlFor="profile-username" className="label">Kullanıcı Adı</label>
+              <label htmlFor="profile-username" className="label">Username</label>
               <input
                 id="profile-username"
                 type="text"
@@ -135,35 +135,35 @@ export default function ProfilimPage() {
               />
             </div>
             <div>
-              <label htmlFor="profile-phone" className="label">Telefon</label>
+              <label htmlFor="profile-phone" className="label">Phone</label>
               <input
                 id="profile-phone"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+90 5xx xxx xx xx"
+                placeholder="+xx xxx xxx xx xx"
                 className="input"
               />
             </div>
             <div className="flex gap-3">
               <button type="submit" disabled={saving} className="btn-primary">
-                {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Kaydediliyor</> : 'Kaydet'}
+                {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving</> : 'Save'}
               </button>
-              <button type="button" onClick={() => setEditMode(false)} className="btn-secondary">İptal</button>
+              <button type="button" onClick={() => setEditMode(false)} className="btn-secondary">Cancel</button>
             </div>
           </form>
         ) : (
           <dl className="space-y-4 text-sm">
             <div className="flex justify-between">
-              <dt className="text-ink-secondary">Kullanıcı Adı</dt>
+              <dt className="text-ink-secondary">Username</dt>
               <dd className="font-medium text-ink">{profile?.username ?? '—'}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-ink-secondary">E-posta</dt>
+              <dt className="text-ink-secondary">Email</dt>
               <dd className="font-medium text-ink">{user?.email}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-ink-secondary">Telefon</dt>
+              <dt className="text-ink-secondary">Phone</dt>
               <dd className="font-medium text-ink">{profile?.phone ?? '—'}</dd>
             </div>
           </dl>
@@ -173,9 +173,9 @@ export default function ProfilimPage() {
       {/* ── İlanlarım ── */}
       <div>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-ink">İlanlarım ({ads.length})</h2>
+          <h2 className="text-xl font-bold text-ink">My Ads ({ads.length})</h2>
           <Link href="/ilan-ver" className="btn-primary">
-            <Plus className="w-4 h-4" /> Yeni İlan
+            <Plus className="w-4 h-4" /> New Ad
           </Link>
         </div>
 
@@ -187,7 +187,7 @@ export default function ProfilimPage() {
           </div>
         ) : ads.length === 0 ? (
           <div className="card p-10 text-center text-ink-secondary text-sm">
-            Henüz ilan vermediniz.
+            You haven't posted any ads yet.
           </div>
         ) : (
           <div className="space-y-3">
@@ -225,20 +225,20 @@ export default function ProfilimPage() {
                     <Link
                       href={buildAdUrl(ad.serial_number)}
                       className="p-2 rounded-xl text-ink-tertiary hover:text-ink hover:bg-surface-secondary transition-colors"
-                      aria-label="İlanı görüntüle"
+                      aria-label="View ad"
                     >
                       <Eye className="w-4 h-4" />
                     </Link>
                     <Link
                       href={`/ilan/${ad.serial_number}/duzenle`}
                       className="p-2 rounded-xl text-ink-tertiary hover:text-ink hover:bg-surface-secondary transition-colors"
-                      aria-label="İlanı düzenle"
+                      aria-label="Edit ad"
                     >
                       <Edit3 className="w-4 h-4" />
                     </Link>
                     <button
                       onClick={() => handleDeleteAd(ad.id)}
-                      aria-label="İlanı sil"
+                      aria-label="Delete ad"
                       className="p-2 rounded-xl text-ink-tertiary hover:text-red-500 hover:bg-red-50 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
