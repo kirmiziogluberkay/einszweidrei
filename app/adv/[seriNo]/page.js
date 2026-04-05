@@ -41,6 +41,7 @@ export async function generateMetadata({ params }) {
 export default async function AdDetailPage({ params }) {
   const supabase = await createClient();
 
+  // Fetch the ad and its category details in one query
   const { data: ad } = await supabase
     .from('ads')
     .select(`
@@ -62,38 +63,45 @@ export default async function AdDetailPage({ params }) {
 
   if (!ad) notFound();
 
-  // Fetch all categories to build the hierarchy manually if parent_id is missing in joined query
-  const { data: allCategories } = await supabase
+  // Fetch all categories to identify parent names manually
+  const { data: allCats } = await supabase
     .from('categories')
     .select('id, name, slug, parent_id');
 
-  // Manual hierarchy builder for breadcrumbs
-  const findCategory = (id) => allCategories?.find(c => c.id === id);
-  
-  let currentCat = findCategory(ad.category?.id);
+  // Breadcrumb structure: Home / [Parent] / [Sub] / [Title]
   const breadcrumbs = [];
+  
+  // Find current subcategory (e.g., Furniture)
+  const currentCategory = allCats?.find(c => c.id === ad.category?.id);
+  
+  if (currentCategory) {
+    // Check if it has a direct parent link in the DB
+    let parent = allCats?.find(pc => pc.id === currentCategory.parent_id);
 
-  if (currentCat) {
-    breadcrumbs.unshift(currentCat);
-    let parent = findCategory(currentCat.parent_id);
-    while (parent) {
-      breadcrumbs.unshift(parent);
-      parent = findCategory(parent.parent_id);
-    }
-  }
+    // EMERGENCY OVERRIDE (Hardcore Fix): 
+    // If the database has no parent linked, we manually determine it based on keywords.
+    if (!parent) {
+      const catName = currentCategory.name.toLowerCase();
+      
+      // Keywords that typically belong to "Second Hand Items"
+      const secondHandKeywords = ['furniture', 'electronics', 'clothing', 'baby', 'sports', 'home'];
+      // Keywords that typically belong to "Rental Items"
+      const rentalKeywords = ['rental', 'apartments', 'car', 'tools'];
 
-  // HARDCORE FIX: If no parent found, but we know it's a subcategory (like Furniture)
-  // We force add "Second Hand Items" or "Rental Items" based on common logic 
-  // until you update your database parent_ids.
-  if (breadcrumbs.length === 1) {
-    const catName = breadcrumbs[0].name.toLowerCase();
-    if (catName.includes('furniture') || catName.includes('electronics')) {
-      const parent = allCategories?.find(c => c.name.toLowerCase().includes('second hand'));
-      if (parent) breadcrumbs.unshift(parent);
-    } else if (catName.includes('rental')) {
-        const parent = allCategories?.find(c => c.name.toLowerCase().includes('rental items'));
-        if (parent) breadcrumbs.unshift(parent);
+      if (secondHandKeywords.some(key => catName.includes(key))) {
+        parent = allCats?.find(c => c.name.toLowerCase().includes('second hand'));
+      } else if (rentalKeywords.some(key => catName.includes(key))) {
+        parent = allCats?.find(c => c.name.toLowerCase().includes('rental items'));
+      }
     }
+
+    // Add found parent to list
+    if (parent) {
+      breadcrumbs.push({ name: parent.name, slug: parent.slug });
+    }
+    
+    // Add current subcategory to list
+    breadcrumbs.push({ name: currentCategory.name, slug: currentCategory.slug });
   }
 
   const statusInfo = AD_STATUSES[ad.status] ?? AD_STATUSES.active;
@@ -101,13 +109,13 @@ export default async function AdDetailPage({ params }) {
   return (
     <div className="container-app py-8">
 
-      {/* Breadcrumb Navigation */}
+      {/* Breadcrumb Navigation - FIXED to always show Second Hand / Rental labels */}
       <nav className="flex items-center gap-1.5 text-sm text-ink-tertiary mb-6" aria-label="Breadcrumb">
         <Link href="/" className="hover:text-ink transition-colors">Home</Link>
         <span className="opacity-40">/</span>
         
-        {breadcrumbs.map((bc, idx) => (
-          <span key={bc.id} className="flex items-center gap-1.5">
+        {breadcrumbs.map((bc, index) => (
+          <span key={index} className="flex items-center gap-1.5">
             <Link href={`/category/${bc.slug}`} className="hover:text-ink transition-colors">
               {bc.name}
             </Link>
