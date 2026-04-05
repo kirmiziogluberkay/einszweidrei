@@ -24,13 +24,13 @@ export default function KategoriClient({ category }) {
   return (
     <div className="container-app py-8">
 
-      {/* Breadcrumb */}
+      {/* Breadcrumb - shows full path: Home / Parent / Category */}
       <nav className="flex items-center gap-1.5 text-sm text-ink-tertiary mb-6">
         <Link href="/" className="hover:text-ink transition-colors">Home</Link>
         <span className="opacity-40">/</span>
         {category.parent?.name && (
           <>
-            <Link href={`/category/${category.parent.slug}`} className="hover:text-ink transition-colors font-medium">
+            <Link href={`/category/${category.parent.slug}`} className="hover:text-ink transition-colors">
               {category.parent.name}
             </Link>
             <span className="opacity-40">/</span>
