@@ -104,7 +104,19 @@ export function useAds(filters = {}) {
       return;
     }
 
-    setAds(data ?? []);
+    // Sayfa içinde görselli ilanları öne, görselsizleri arkaya al, kendi içlerinde tarihe göre sırala
+    const sortedData = (data ?? []).sort((a, b) => {
+      const aHasImg = a.images && a.images.length > 0;
+      const bHasImg = b.images && b.images.length > 0;
+      
+      if (aHasImg && !bHasImg) return -1;
+      if (!aHasImg && bHasImg) return 1;
+      
+      // İkisi de görselli ya da görselsiz ise tarihe göre (yeni en üstte)
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+
+    setAds(sortedData);
     setTotal(count ?? 0);
     setLoading(false);
   }, [supabase, categoryId, categoryIds?.join(','), ownerId, searchQuery, maxPrice, page]);
