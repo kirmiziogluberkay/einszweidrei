@@ -28,7 +28,7 @@ export default function KategoriClient({ category }) {
       <nav className="flex items-center gap-1.5 text-sm text-ink-tertiary mb-6">
         <Link href="/" className="hover:text-ink transition-colors">Home</Link>
         <span className="opacity-40">/</span>
-        {category.parent && (
+        {category.parent?.name && (
           <>
             <Link href={`/category/${category.parent.slug}`} className="hover:text-ink transition-colors font-medium">
               {category.parent.name}
