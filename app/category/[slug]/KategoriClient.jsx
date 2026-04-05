@@ -17,7 +17,8 @@ import { cn } from '@/lib/helpers';
 
 export default function KategoriClient({ category, categoryTree = [] }) {
   const [page, setPage] = useState(1);
-  const [maxPrice, setMaxPrice] = useState(6000);
+  const [maxPriceApplied, setMaxPriceApplied] = useState(6000);
+  const [maxPriceLocal, setMaxPriceLocal] = useState(6000);
 
   // Expanded state for each root category in the sidebar
   const [expandedRoots, setExpandedRoots] = useState(() => {
@@ -44,7 +45,7 @@ export default function KategoriClient({ category, categoryTree = [] }) {
   const { ads, loading, error, total, totalPages } = useAds({
     categoryId: categoryIds ? null : category.id,
     categoryIds: categoryIds ?? undefined,
-    maxPrice,
+    maxPrice: maxPriceApplied,
     page,
   });
 
@@ -158,12 +159,11 @@ export default function KategoriClient({ category, categoryTree = [] }) {
                   <input
                     type="number"
                     min="0"
-                    value={maxPrice === 6000 ? '' : maxPrice}
+                    value={maxPriceLocal === 6000 ? '' : maxPriceLocal}
                     placeholder="6000+"
                     onChange={(e) => {
                       const val = e.target.value ? Number(e.target.value) : 6000;
-                      setMaxPrice(val);
-                      setPage(1);
+                      setMaxPriceLocal(val);
                     }}
                     className="w-16 px-1.5 py-1 text-xs border border-surface-tertiary rounded focus:outline-none focus:border-brand-500 text-right font-medium text-ink"
                   />
@@ -176,10 +176,9 @@ export default function KategoriClient({ category, categoryTree = [] }) {
                   min="0"
                   max="6000"
                   step="50"
-                  value={maxPrice > 6000 ? 6000 : maxPrice}
+                  value={maxPriceLocal > 6000 ? 6000 : maxPriceLocal}
                   onChange={(e) => {
-                    setMaxPrice(Number(e.target.value));
-                    setPage(1);
+                    setMaxPriceLocal(Number(e.target.value));
                   }}
                   className="w-full h-1.5 bg-surface-tertiary rounded-lg appearance-none cursor-pointer accent-brand-500"
                 />
@@ -188,6 +187,15 @@ export default function KategoriClient({ category, categoryTree = [] }) {
                   <span>6000€+</span>
                 </div>
               </div>
+              <button
+                onClick={() => {
+                  setMaxPriceApplied(maxPriceLocal);
+                  setPage(1);
+                }}
+                className="w-full mt-4 btn-primary text-xs py-2"
+              >
+                Search
+              </button>
             </div>
 
           </div>
