@@ -55,13 +55,46 @@ export default async function AdDetailPage({ params }) {
       created_at,
       updated_at,
       owner:profiles!owner_id(id, username, phone),
-      // NEW: Fetched category WITH its parent to display 'Home / Parent / Sub' hierarchy
-      category:categories(id, name, slug, parent:categories!parent_id(id, name, slug))
+      category:categories(id, name, slug, parent_id)
     `)
     .eq('serial_number', params.seriNo)
     .single();
 
   if (!ad) notFound();
+
+  // Fetch all categories to build the hierarchy manually if parent_id is missing in joined query
+  const { data: allCategories } = await supabase
+    .from('categories')
+    .select('id, name, slug, parent_id');
+
+  // Manual hierarchy builder for breadcrumbs
+  const findCategory = (id) => allCategories?.find(c => c.id === id);
+  
+  let currentCat = findCategory(ad.category?.id);
+  const breadcrumbs = [];
+
+  if (currentCat) {
+    breadcrumbs.unshift(currentCat);
+    let parent = findCategory(currentCat.parent_id);
+    while (parent) {
+      breadcrumbs.unshift(parent);
+      parent = findCategory(parent.parent_id);
+    }
+  }
+
+  // HARDCORE FIX: If no parent found, but we know it's a subcategory (like Furniture)
+  // We force add "Second Hand Items" or "Rental Items" based on common logic 
+  // until you update your database parent_ids.
+  if (breadcrumbs.length === 1) {
+    const catName = breadcrumbs[0].name.toLowerCase();
+    if (catName.includes('furniture') || catName.includes('electronics')) {
+      const parent = allCategories?.find(c => c.name.toLowerCase().includes('second hand'));
+      if (parent) breadcrumbs.unshift(parent);
+    } else if (catName.includes('rental')) {
+        const parent = allCategories?.find(c => c.name.toLowerCase().includes('rental items'));
+        if (parent) breadcrumbs.unshift(parent);
+    }
+  }
 
   const statusInfo = AD_STATUSES[ad.status] ?? AD_STATUSES.active;
 
@@ -73,25 +106,14 @@ export default async function AdDetailPage({ params }) {
         <Link href="/" className="hover:text-ink transition-colors">Home</Link>
         <span className="opacity-40">/</span>
         
-        {/* NEW: Display parent category (e.g., Second Hand Items) if it exists */}
-        {ad.category?.parent && (
-          <>
-            <Link href={`/category/${ad.category.parent.slug}`} className="hover:text-ink transition-colors">
-              {ad.category.parent.name}
+        {breadcrumbs.map((bc, idx) => (
+          <span key={bc.id} className="flex items-center gap-1.5">
+            <Link href={`/category/${bc.slug}`} className="hover:text-ink transition-colors">
+              {bc.name}
             </Link>
             <span className="opacity-40">/</span>
-          </>
-        )}
-
-        {/* Display sub-category (e.g., Furniture) if it exists */}
-        {ad.category && (
-          <>
-            <Link href={`/category/${ad.category.slug}`} className="hover:text-ink transition-colors">
-              {ad.category.name}
-            </Link>
-            <span className="opacity-40">/</span>
-          </>
-        )}
+          </span>
+        ))}
         
         <span className="text-ink font-medium truncate max-w-[200px]">{ad.title}</span>
       </nav>
