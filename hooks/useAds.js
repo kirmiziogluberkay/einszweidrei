@@ -33,7 +33,7 @@ import { ADS_PER_PAGE } from '@/constants/config';
 export function useAds(filters = {}) {
   const supabase = createClient();
 
-  const { categoryId, categoryIds, ownerId, searchQuery, page = 1 } = filters;
+  const { categoryId, categoryIds, ownerId, searchQuery, maxPrice, page = 1 } = filters;
 
   const [ads, setAds] = useState([]);
   const [total, setTotal] = useState(0);
@@ -86,6 +86,11 @@ export function useAds(filters = {}) {
       );
     }
 
+    // Fiyat filtresi (üst limit)
+    if (maxPrice !== undefined && maxPrice !== null) {
+      query = query.lte('price', maxPrice);
+    }
+
     // Sayfalama
     const from = (page - 1) * ADS_PER_PAGE;
     const to = from + ADS_PER_PAGE - 1;
@@ -102,7 +107,7 @@ export function useAds(filters = {}) {
     setAds(data ?? []);
     setTotal(count ?? 0);
     setLoading(false);
-  }, [supabase, categoryId, categoryIds?.join(','), ownerId, searchQuery, page]);
+  }, [supabase, categoryId, categoryIds?.join(','), ownerId, searchQuery, maxPrice, page]);
 
   useEffect(() => {
     fetchAds();

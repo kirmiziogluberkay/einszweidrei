@@ -23,6 +23,7 @@ export default function HomePage() {
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
   const [expandedRoots, setExpandedRoots] = useState({});
+  const [maxPrice, setMaxPrice] = useState(6000);
 
   const { categoryTree } = useCategories();
 
@@ -30,6 +31,7 @@ export default function HomePage() {
     categoryId: selectedCategoryIds ? null : selectedCategory,
     categoryIds: selectedCategoryIds ?? undefined,
     searchQuery,
+    maxPrice,
     page,
   });
 
@@ -182,6 +184,47 @@ export default function HomePage() {
                 );
               })}
             </ul>
+            
+            {/* ── Price Filter ── */}
+            <div className="mt-8 border-t border-surface-tertiary pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-semibold text-ink-tertiary uppercase tracking-wider">Max Price</h3>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    min="0"
+                    value={maxPrice === 6000 ? '' : maxPrice}
+                    placeholder="6000+"
+                    onChange={(e) => {
+                      const val = e.target.value ? Number(e.target.value) : 6000;
+                      setMaxPrice(val);
+                      setPage(1);
+                    }}
+                    className="w-16 px-1.5 py-1 text-xs border border-surface-tertiary rounded focus:outline-none focus:border-brand-500 text-right font-medium text-ink"
+                  />
+                  <span className="text-xs text-ink-secondary font-medium">€</span>
+                </div>
+              </div>
+              <div className="relative pt-1">
+                <input
+                  type="range"
+                  min="0"
+                  max="6000"
+                  step="50"
+                  value={maxPrice > 6000 ? 6000 : maxPrice}
+                  onChange={(e) => {
+                    setMaxPrice(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  className="w-full h-1.5 bg-surface-tertiary rounded-lg appearance-none cursor-pointer accent-brand-500"
+                />
+                <div className="flex justify-between text-xs text-ink-tertiary mt-2">
+                  <span>Free</span>
+                  <span>6000€+</span>
+                </div>
+              </div>
+            </div>
+
           </div>
         </aside>
 
