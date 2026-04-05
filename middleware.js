@@ -10,7 +10,10 @@
 
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
-import { PROTECTED_ROUTES, ADMIN_ROUTE_PREFIX, USER_ROLES } from './constants/config';
+
+const PROTECTED_ROUTES = ['/ilan-ver', '/profilim', '/mesajlar', '/admin'];
+const ADMIN_ROUTE_PREFIX = '/admin';
+const USER_ROLES = { ADMIN: 'admin', USER:  'user' };
 
 /**
  * Edge middleware — her istek öncesinde çalışır.
