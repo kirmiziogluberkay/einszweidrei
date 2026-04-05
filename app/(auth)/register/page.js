@@ -145,7 +145,7 @@ export default function RegisterPage() {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                placeholder="user_name"
+                placeholder="Please write your user name"
                 required
                 autoComplete="username"
                 className="input"
@@ -177,7 +177,7 @@ export default function RegisterPage() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Min. 8 characters"
+                placeholder="Min. 8 characters and digit and symbols"
                 required
                 autoComplete="new-password"
                 minLength={8}
