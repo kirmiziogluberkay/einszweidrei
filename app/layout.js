@@ -34,7 +34,6 @@ export const metadata = {
 
   // ── PWA ────────────────────────────────────────────
   manifest: '/manifest.json',
-  themeColor: PWA_CONFIG.themeColor,
   appleWebApp: {
     capable:    true,
     title:      SITE_NAME,
@@ -46,6 +45,13 @@ export const metadata = {
     index:  true,
     follow: true,
   },
+};
+
+export const viewport = {
+  themeColor: PWA_CONFIG.themeColor,
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 /**
