@@ -22,14 +22,14 @@ export default function ShareButtons({ title, serialNumber }) {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm text-ink-secondary font-medium">Paylaş:</span>
+      <span className="text-sm text-ink-secondary font-medium">Share:</span>
 
       {/* WhatsApp */}
       <a
         href={whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="WhatsApp ile paylaş"
+        aria-label="Share via WhatsApp"
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl
                    bg-[#25D366] hover:bg-[#1ea355] text-white text-sm font-medium
                    transition-all duration-150 shadow-[0_2px_8px_rgba(37,211,102,0.3)]"
@@ -58,7 +58,7 @@ export default function ShareButtons({ title, serialNumber }) {
         href={telegramUrl}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Telegram ile paylaş"
+        aria-label="Share via Telegram"
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl
                    bg-[#0088cc] hover:bg-[#0077bb] text-white text-sm font-medium
                    transition-all duration-150 shadow-[0_2px_8px_rgba(0,136,204,0.3)]"

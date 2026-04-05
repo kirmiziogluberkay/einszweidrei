@@ -26,7 +26,7 @@ export const SITE_AUTHOR = 'Einszweidrei';
 
 /** Üretim ortamındaki site URL'i (Vercel'e deploy sonrası güncelle) */
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://einszweidrei.vercel.app';
 
 /** İlan detay sayfası URL öneki */
 export const AD_URL_PREFIX = '/ilan';

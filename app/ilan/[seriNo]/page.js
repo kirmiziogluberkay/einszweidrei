@@ -30,7 +30,7 @@ export async function generateMetadata({ params }) {
     .eq('serial_number', params.seriNo)
     .single();
 
-  if (!ad) return { title: 'İlan Bulunamadı' };
+  if (!ad) return { title: 'Ad Not Found' };
 
   return {
     title:       ad.title,
@@ -79,7 +79,7 @@ export default async function AdDetailPage({ params }) {
 
       {/* ── Breadcrumb ── */}
       <nav className="flex items-center gap-2 text-sm text-ink-tertiary mb-6" aria-label="Breadcrumb">
-        <Link href="/" className="hover:text-ink transition-colors">Anasayfa</Link>
+        <Link href="/" className="hover:text-ink transition-colors">Home</Link>
         <span>/</span>
         {ad.category?.parent && (
           <>
@@ -110,9 +110,9 @@ export default async function AdDetailPage({ params }) {
 
           {/* Açıklama */}
           <div className="card p-6">
-            <h2 className="text-lg font-semibold text-ink mb-4">Açıklama</h2>
+            <h2 className="text-lg font-semibold text-ink mb-4">Description</h2>
             <p className="text-ink-secondary text-sm leading-relaxed whitespace-pre-wrap">
-              {ad.description || 'Açıklama belirtilmemiş.'}
+              {ad.description || 'Description not provided.'}
             </p>
           </div>
 
@@ -149,17 +149,17 @@ export default async function AdDetailPage({ params }) {
             <div className="divider" />
             <dl className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <dt className="text-ink-secondary">Seri No</dt>
+                <dt className="text-ink-secondary">Serial No</dt>
                 <dd className="font-mono font-medium text-ink">{ad.serial_number}</dd>
               </div>
               {ad.category && (
                 <div className="flex justify-between">
-                  <dt className="text-ink-secondary">Kategori</dt>
+                  <dt className="text-ink-secondary">Category</dt>
                   <dd className="text-ink">{ad.category.name}</dd>
                 </div>
               )}
               <div className="flex justify-between">
-                <dt className="text-ink-secondary">İlan Tarihi</dt>
+                <dt className="text-ink-secondary">Ad Date</dt>
                 <dd className="text-ink">{formatDate(ad.created_at)}</dd>
               </div>
             </dl>
@@ -167,7 +167,7 @@ export default async function AdDetailPage({ params }) {
 
           {/* İlan sahibi + mesaj */}
           <div className="card p-6">
-            <h3 className="text-base font-semibold text-ink mb-4">İlan Sahibi</h3>
+            <h3 className="text-base font-semibold text-ink mb-4">Seller Information</h3>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-600
                               flex items-center justify-center font-bold text-sm">
@@ -175,7 +175,7 @@ export default async function AdDetailPage({ params }) {
               </div>
               <div>
                 <p className="font-medium text-ink text-sm">{ad.owner?.username}</p>
-                <p className="text-xs text-ink-tertiary">Üye</p>
+                <p className="text-xs text-ink-tertiary">Member</p>
               </div>
             </div>
 
