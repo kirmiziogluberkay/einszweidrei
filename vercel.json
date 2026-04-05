@@ -1,0 +1,4 @@
+{
+  "framework": "nextjs",
+  "commandForIgnoringBuildStep": "npx vercel-skip-build"
+}
