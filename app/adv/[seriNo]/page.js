@@ -73,7 +73,7 @@ export default async function AdDetailPage({ params }) {
         <span>/</span>
         {ad.category?.parent && (
           <>
-            <Link href={`/kategori/${ad.category.parent.slug}`} className="hover:text-ink transition-colors">
+            <Link href={`/category/${ad.category.parent.slug}`} className="hover:text-ink transition-colors">
               {ad.category.parent.name}
             </Link>
             <span>/</span>
@@ -81,7 +81,7 @@ export default async function AdDetailPage({ params }) {
         )}
         {ad.category && (
           <>
-            <Link href={`/kategori/${ad.category.slug}`} className="hover:text-ink transition-colors">
+            <Link href={`/category/${ad.category.slug}`} className="hover:text-ink transition-colors">
               {ad.category.name}
             </Link>
             <span>/</span>

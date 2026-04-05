@@ -104,7 +104,7 @@ export default function Navbar() {
                                border border-surface-tertiary py-2 animate-fade-in"
                   >
                     <Link
-                      href={`/kategori/${cat.slug}`}
+                      href={`/category/${cat.slug}`}
                       className="block px-4 py-2 text-sm text-ink-secondary hover:text-ink
                                  hover:bg-surface-secondary transition-colors font-medium"
                     >
@@ -114,7 +114,7 @@ export default function Navbar() {
                     {cat.children.map((sub) => (
                       <Link
                         key={sub.id}
-                        href={`/kategori/${sub.slug}`}
+                        href={`/category/${sub.slug}`}
                         role="menuitem"
                         className="block px-4 py-2 text-sm text-ink-secondary
                                    hover:text-ink hover:bg-surface-secondary transition-colors"
@@ -249,7 +249,7 @@ export default function Navbar() {
                     {cat.children.map((sub) => (
                       <Link
                         key={sub.id}
-                        href={`/kategori/${sub.slug}`}
+                        href={`/category/${sub.slug}`}
                         className="block px-4 py-2 text-sm text-ink-secondary
                                    rounded-xl hover:bg-surface-secondary transition-colors"
                       >
