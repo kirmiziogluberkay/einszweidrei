@@ -29,7 +29,7 @@ export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://einszweidrei.vercel.app';
 
 /** İlan detay sayfası URL öneki */
-export const AD_URL_PREFIX = '/ilan';
+export const AD_URL_PREFIX = '/adv';
 
 // ─── Sayfalama ────────────────────────────────────────────────────────────────
 

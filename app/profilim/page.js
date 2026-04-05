@@ -230,7 +230,7 @@ export default function ProfilimPage() {
                       <Eye className="w-4 h-4" />
                     </Link>
                     <Link
-                      href={`/ilan/${ad.serial_number}/duzenle`}
+                      href={`${AD_URL_PREFIX}/${ad.serial_number}/duzenle`}
                       className="p-2 rounded-xl text-ink-tertiary hover:text-ink hover:bg-surface-secondary transition-colors"
                       aria-label="Edit ad"
                     >
