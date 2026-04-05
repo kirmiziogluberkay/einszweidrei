@@ -19,6 +19,9 @@ export default function HomePage() {
   /** Aktif kategori filtresi (null = tümü) */
   const [selectedCategory, setSelectedCategory] = useState(null);
 
+  /** Çoklu kategori filtresi — üst kategori seçilince alt kategorileri de içerir */
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState(null);
+
   /** Arama sorgusu */
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -31,18 +34,30 @@ export default function HomePage() {
   const { categoryTree } = useCategories();
 
   const { ads, loading, error, total, totalPages } = useAds({
-    categoryId: selectedCategory,
+    categoryId: selectedCategoryIds ? null : selectedCategory,
+    categoryIds: selectedCategoryIds ?? undefined,
     searchQuery,
     page,
   });
 
   /**
    * Kategori seçildiğinde sayfayı sıfırla.
+   * Eğer üst kategori seçilirse alt kategorileri de dahil et.
    * @param {string|null} categoryId
+   * @param {object|null} parentCat — üst kategori objesi (children dahil)
    */
-  const handleCategorySelect = (categoryId) => {
+  const handleCategorySelect = (categoryId, parentCat = null) => {
     setSelectedCategory(categoryId);
     setPage(1);
+
+    if (parentCat && parentCat.children?.length > 0) {
+      // Üst kategori: kendi ID'si + tüm alt kategorilerin ID'leri
+      const ids = [parentCat.id, ...parentCat.children.map(c => c.id)];
+      setSelectedCategoryIds(ids);
+    } else {
+      // Alt kategori veya null (Tümü): tek ID ile filtrele
+      setSelectedCategoryIds(null);
+    }
   };
 
   /**
@@ -123,7 +138,7 @@ export default function HomePage() {
           {categoryTree.map((parent) => (
             <div key={parent.id} className="flex items-center gap-1">
               <button
-                onClick={() => handleCategorySelect(parent.id)}
+                onClick={() => handleCategorySelect(parent.id, parent)}
                 id={`category-${parent.slug}`}
                 className={cn(
                   'flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all',
@@ -139,7 +154,7 @@ export default function HomePage() {
               {parent.children?.map((child) => (
                 <button
                   key={child.id}
-                  onClick={() => handleCategorySelect(child.id)}
+                  onClick={() => handleCategorySelect(child.id, null)}
                   id={`category-${child.slug}`}
                   className={cn(
                     'flex-shrink-0 px-4 py-2 rounded-full text-sm transition-all',
