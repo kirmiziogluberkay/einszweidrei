@@ -116,10 +116,7 @@ export default function AdCard({ ad }) {
           {title}
         </h3>
 
-        {/* Açıklama */}
-        <p className="text-sm text-ink-secondary line-clamp-2">
-          {truncateText(description, 80)}
-        </p>
+        {/* Açıklama önizlemesi kullanıcının talebi üzerine kaldırıldı */}
 
         {/* Alt bilgiler */}
         <div className="flex items-center justify-between pt-1">
@@ -139,12 +136,7 @@ export default function AdCard({ ad }) {
           </div>
         </div>
 
-        {/* İlan sahibi */}
-        {owner && (
-          <p className="text-xs text-ink-tertiary pt-0.5">
-            {owner.username}
-          </p>
-        )}
+        {/* İlan sahibi önizlemesi kullanıcının talebi üzerine kaldırıldı */}
       </div>
     </Link>
   );
