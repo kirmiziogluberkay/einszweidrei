@@ -70,8 +70,6 @@ export default function KategoriClient({ category, categoryTree = [] }) {
         {/* ── Left Sidebar: Full Category Tree ── */}
         <aside className="hidden md:block w-56 flex-shrink-0">
           <div className="sticky top-20 bg-white border border-surface-tertiary rounded-2xl p-4 shadow-sm">
-            <p className="text-xs font-semibold text-ink-tertiary uppercase tracking-wider mb-3">Categories</p>
-
             <ul className="space-y-0.5 text-sm">
 
               {/* Home link */}
