@@ -86,9 +86,9 @@ export function useAds(filters = {}) {
       );
     }
 
-    // Fiyat filtresi (üst limit)
+    // Fiyat filtresi (üst limit ve ücretsiz/NULL ilanlar)
     if (maxPrice !== undefined && maxPrice !== null) {
-      query = query.lte('price', maxPrice);
+      query = query.or(`price.lte.${maxPrice},price.is.null`);
     }
 
     // Sayfalama
