@@ -15,8 +15,8 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { SITE_NAME } from '@/constants/config';
 
-/** @type {import('next').Metadata} */
-export const metadata = { title: 'Giriş Yap' };
+
+// Metadata 'use client' dosyalarında kullanılamaz, o yüzden sildik.
 
 export default function LoginPage() {
   const supabase    = createClient();

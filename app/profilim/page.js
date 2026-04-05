@@ -18,8 +18,6 @@ import { useAds } from '@/hooks/useAds';
 import { formatPrice, buildAdUrl, timeAgo } from '@/lib/helpers';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES, AD_STATUSES } from '@/constants/config';
 
-/** @type {import('next').Metadata} */
-export const metadata = { title: 'Profilim' };
 
 export default function ProfilimPage() {
   const supabase          = createClient();

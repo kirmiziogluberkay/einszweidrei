@@ -15,8 +15,6 @@ import { useAuth } from '@/hooks/useAuth';
 import MessageThread from '@/components/messages/MessageThread';
 import { timeAgo, truncateText } from '@/lib/helpers';
 
-/** @type {import('next').Metadata} */
-export const metadata = { title: 'Mesajlarım' };
 
 export default function MesajlarPage() {
   const supabase = createClient();
