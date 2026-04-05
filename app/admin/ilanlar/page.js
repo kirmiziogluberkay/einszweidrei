@@ -70,7 +70,7 @@ export default function AdminIlanlarPage() {
    * @param {string} adId
    */
   const handleDelete = async (adId) => {
-    if (!confirm('Bu ilanı silmek istediğinize emin misiniz?')) return;
+    if (!confirm('Are you sure you want to delete this ad?')) return;
     await supabase.from('ads').delete().eq('id', adId);
     setAds((prev) => prev.filter((a) => a.id !== adId));
     setTotal((prev) => prev - 1);

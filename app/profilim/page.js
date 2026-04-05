@@ -65,7 +65,7 @@ export default function ProfilimPage() {
    * @param {string} adId
    */
   const handleDeleteAd = async (adId) => {
-    if (!confirm('Bu ilanı silmek istediğinize emin misiniz?')) return;
+    if (!confirm('Are you sure you want to delete this ad?')) return;
 
     const { error } = await supabase
       .from('ads')
