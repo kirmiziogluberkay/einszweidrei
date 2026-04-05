@@ -67,16 +67,15 @@ export default async function AdDetailPage({ params }) {
   return (
     <div className="container-app py-8">
 
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-ink-tertiary mb-6" aria-label="Breadcrumb">
+      <nav className="flex items-center gap-1.5 text-sm text-ink-tertiary mb-6" aria-label="Breadcrumb">
         <Link href="/" className="hover:text-ink transition-colors">Home</Link>
-        <span>/</span>
+        <span className="opacity-40">/</span>
         {ad.category?.parent && (
           <>
             <Link href={`/category/${ad.category.parent.slug}`} className="hover:text-ink transition-colors">
               {ad.category.parent.name}
             </Link>
-            <span>/</span>
+            <span className="opacity-40">/</span>
           </>
         )}
         {ad.category && (
@@ -84,7 +83,7 @@ export default async function AdDetailPage({ params }) {
             <Link href={`/category/${ad.category.slug}`} className="hover:text-ink transition-colors">
               {ad.category.name}
             </Link>
-            <span>/</span>
+            <span className="opacity-40">/</span>
           </>
         )}
         <span className="text-ink font-medium truncate max-w-[200px]">{ad.title}</span>

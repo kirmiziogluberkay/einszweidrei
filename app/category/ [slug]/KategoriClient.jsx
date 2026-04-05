@@ -25,9 +25,9 @@ export default function KategoriClient({ category }) {
     <div className="container-app py-8">
 
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-ink-tertiary mb-6">
+      <nav className="flex items-center gap-1.5 text-sm text-ink-tertiary mb-6">
         <Link href="/" className="hover:text-ink transition-colors">Home</Link>
-        <span>/</span>
+        <span className="opacity-40">/</span>
         {category.parent && (
           <>
             <Link href={`/category/${category.parent.slug}`} className="hover:text-ink transition-colors font-medium">
