@@ -27,6 +27,7 @@ import {
   SUCCESS_MESSAGES,
   ERROR_MESSAGES,
   CURRENCY_SYMBOL,
+  DEFAULT_CURRENCY,
 } from '@/constants/config';
 import { buildAdUrl } from '@/lib/helpers';
 
@@ -165,6 +166,7 @@ export default function AdForm({ initialData = null }) {
       title:       formData.title.trim(),
       description: formData.description.trim(),
       price:       formData.price ? parseFloat(formData.price) : null,
+      currency:    DEFAULT_CURRENCY,
       category_id: formData.category_id || null,
       images:      uploadedImages,
       owner_id:    user.id,
