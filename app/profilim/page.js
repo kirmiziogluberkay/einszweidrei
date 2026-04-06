@@ -1,8 +1,7 @@
-// update 20:37
+// update 21:05
 // update 20:39
 // update 17:10
 // update 17:07
-// status: category-based toggle logic refined
 /**
  * app/profilim/page.js
  * ─────────────────────────────────────────────────────
@@ -20,6 +19,7 @@ import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle, Lock } from 'lucide-rea
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAds } from '@/hooks/useAds';
+import { useCategories } from '@/hooks/useCategories';
 import { formatPrice, buildAdUrl, timeAgo } from '@/lib/helpers';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES, AD_STATUSES, AD_URL_PREFIX } from '@/constants/config';
 
@@ -29,7 +29,23 @@ export default function ProfilimPage() {
   const { user, profile, loading: authLoading } = useAuth();
 
   const { ads, loading: adsLoading, refetch } = useAds({
-    ownerId: user?.id,
+    owner_id: user?.id,
+  });
+  const { categories } = useCategories();
+
+  // ── İlanları Grupla ──
+  const getRootSlug = (cId) => {
+    const cat = categories.find(c => c.id === cId);
+    if (!cat) return '';
+    if (!cat.parent_id) return cat.slug;
+    return getRootSlug(cat.parent_id);
+  };
+
+  const secondHandAds = ads.filter(ad => getRootSlug(ad.category_id).includes('second-hand'));
+  const rentalAds = ads.filter(ad => getRootSlug(ad.category_id).includes('rental'));
+  const otherAds = ads.filter(ad => {
+    const slug = getRootSlug(ad.category_id);
+    return !slug.includes('second-hand') && !slug.includes('rental');
   });
 
   const [editMode,  setEditMode]  = useState(false);
@@ -233,77 +249,89 @@ export default function ProfilimPage() {
             You haven't posted any ads yet.
           </div>
         ) : (
-          <div className="space-y-3">
-            {ads.map((ad) => {
-              const statusInfo = AD_STATUSES[ad.status] ?? AD_STATUSES.active;
-              return (
-                <div key={ad.id} className="card p-4 flex items-center gap-4">
-                  {/* Küçük fotoğraf */}
-                  <div className="w-14 h-14 rounded-xl bg-surface-secondary flex-shrink-0 overflow-hidden">
-                    {ad.images?.[0] && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover" />
-                    )}
-                  </div>
+          <div className="space-y-10">
+            {/* ── Helpers to render grouped list ── */}
+            {[
+              { title: 'Second Hand Items', list: secondHandAds },
+              { title: 'Rental Items',      list: rentalAds },
+              { title: 'Other Listings',    list: otherAds }
+            ].map((section) => (
+              section.list.length > 0 && (
+                <div key={section.title}>
+                  <h3 className="text-[11px] font-bold text-ink-tertiary uppercase tracking-[0.1em] mb-4 flex items-center gap-2">
+                    <div className="w-1 h-3 bg-brand-500 rounded-full" />
+                    {section.title} ({section.list.length})
+                  </h3>
+                  <div className="space-y-3">
+                    {section.list.map((ad) => {
+                      const statusInfo = AD_STATUSES[ad.status] ?? AD_STATUSES.active;
+                      return (
+                        <div key={ad.id} className="card p-4 flex items-center gap-4">
+                          {/* İnce Fotoğraf */}
+                          <div className="w-14 h-14 rounded-xl bg-surface-secondary flex-shrink-0 overflow-hidden">
+                            {ad.images?.[0] && (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover" />
+                            )}
+                          </div>
 
-                  {/* Bilgiler */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-ink text-sm truncate">{ad.title}</p>
-                    <p className="text-xs text-ink-tertiary mt-0.5">
-                      {timeAgo(ad.created_at)} · {formatPrice(ad.price, ad.currency)}
-                    </p>
-                  </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-ink text-sm truncate">{ad.title}</p>
+                            <p className="text-xs text-ink-tertiary mt-0.5">
+                              {timeAgo(ad.created_at)} · {formatPrice(ad.price, ad.currency)}
+                            </p>
+                          </div>
 
-                  {/* Durum */}
-                  <span className={`badge text-xs shrink-0 ${
-                    ad.status === 'active'   ? 'bg-green-100 text-green-600' :
-                    ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
-                    ad.status === 'rented'   ? 'bg-blue-100 text-blue-600' :
-                    ad.status === 'sold'     ? 'bg-red-100 text-red-600' :
-                    'bg-gray-100 text-gray-500'
-                  }`}>
-                    {statusInfo?.label || ad.status}
-                  </span>
+                          {/* Durum Badge */}
+                          <span className={`badge text-[10px] shrink-0 ${
+                            ad.status === 'active'   ? 'bg-green-100 text-green-600' :
+                            ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
+                            ad.status === 'rented'   ? 'bg-blue-100 text-blue-600' :
+                            ad.status === 'sold'     ? 'bg-red-100 text-red-600' :
+                            'bg-gray-100 text-gray-500'
+                          }`}>
+                            {statusInfo?.label || ad.status}
+                          </span>
 
-                  {/* Eylemler */}
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <button
-                       onClick={() => handleToggleStatus(ad.id, ad.status, ad.category_id)}
-                       aria-label={ad.status === 'active' ? 'Mark as passive' : 'Mark as active'}
-                       title={ad.status === 'active' ? 'Toggle Status' : 'Make Active'}
-                       className={`p-2 rounded-xl transition-colors ${
-                         (ad.status === 'reserved' || ad.status === 'rented')
-                           ? 'text-brand-500 bg-brand-50' 
-                           : 'text-ink-tertiary hover:text-brand-500 hover:bg-surface-secondary'
-                       }`}
-                    >
-                       <Lock className="w-4 h-4" />
-                    </button>
-                    <Link
-                      href={buildAdUrl(ad.serial_number)}
-                      className="p-2 rounded-xl text-ink-tertiary hover:text-ink hover:bg-surface-secondary transition-colors"
-                      aria-label="View ad"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Link>
-                    <Link
-                      href={`${AD_URL_PREFIX}/${ad.serial_number}/duzenle`}
-                      className="p-2 rounded-xl text-ink-tertiary hover:text-ink hover:bg-surface-secondary transition-colors"
-                      aria-label="Edit ad"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </Link>
-                    <button
-                      onClick={() => handleDeleteAd(ad.id)}
-                      aria-label="Delete ad"
-                      className="p-2 rounded-xl text-ink-tertiary hover:text-red-500 hover:bg-red-50 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button
+                               onClick={() => handleToggleStatus(ad.id, ad.status, ad.category_id)}
+                               aria-label="Toggle Status"
+                               title="Toggle Reserved/Rented"
+                               className={`p-2 rounded-xl transition-colors ${
+                                 (ad.status === 'reserved' || ad.status === 'rented')
+                                   ? 'text-brand-500 bg-brand-50' 
+                                   : 'text-ink-tertiary hover:text-brand-500 hover:bg-surface-secondary'
+                               }`}
+                            >
+                               <Lock className="w-4 h-4" />
+                            </button>
+                            <Link
+                              href={`${AD_URL_PREFIX}/${ad.serial_number}`}
+                              className="p-2 rounded-xl text-ink-tertiary hover:text-ink hover:bg-surface-secondary transition-colors"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Link>
+                            <Link
+                              href={`${AD_URL_PREFIX}/${ad.serial_number}/duzenle`}
+                              className="p-2 rounded-xl text-ink-tertiary hover:text-ink hover:bg-surface-secondary transition-colors"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </Link>
+                            <button
+                              onClick={() => handleDeleteAd(ad.id)}
+                              className="p-2 rounded-xl text-ink-tertiary hover:text-red-500 hover:bg-red-50 transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-              );
-            })}
+              )
+            ))}
           </div>
         )}
       </div>
