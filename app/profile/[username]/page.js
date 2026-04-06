@@ -29,7 +29,7 @@ export default async function PublicProfilePage({ params }) {
 
   if (profError || !profile) notFound();
 
-  // 2. Fetch all active ads for this user
+  // 2. Fetch active/reserved/rented ads for this user
   const { data: ads, count } = await supabase
     .from('ads')
     .select(`
@@ -37,7 +37,7 @@ export default async function PublicProfilePage({ params }) {
       category:categories(id, name, slug)
     `, { count: 'exact' })
     .eq('owner_id', profile.id)
-    .eq('status', 'active')
+    .in('status', ['active', 'reserved', 'rented'])
     .order('created_at', { ascending: false });
 
   return (

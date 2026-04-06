@@ -1,5 +1,5 @@
-// update 17:02
-// status: category-based toggle logic added
+// update 17:07
+// status: category-based toggle logic refined
 /**
  * app/profilim/page.js
  * ─────────────────────────────────────────────────────
@@ -88,9 +88,13 @@ export default function ProfilimPage() {
    * @param {string} currentStatus
    */
   const handleToggleStatus = async (adId, currentStatus, categorySlug = '') => {
-    // Kategoriye göre durum geçişi: Rental ise 'rented', değilse 'reserved'
-    const isRental = categorySlug?.toLowerCase().includes('rental');
-    const targetStatus = isRental ? 'rented' : 'reserved';
+    const slug = categorySlug?.toLowerCase() || '';
+    
+    // Kategoriye Göre Keskin Ayrım:
+    // Rental ise 'rented', Second Hand ise 'reserved', diğeri ise 'passive'
+    let targetStatus = 'passive';
+    if (slug.includes('rental')) targetStatus = 'rented';
+    else if (slug.includes('second-hand')) targetStatus = 'reserved';
     
     const newStatus = currentStatus === 'active' ? targetStatus : 'active';
     
@@ -251,8 +255,16 @@ export default function ProfilimPage() {
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                        onClick={() => handleToggleStatus(ad.id, ad.status, ad.category?.slug)}
-                       aria-label={ad.status === 'active' ? 'Mark as reserved/rented' : 'Mark as active'}
-                       title={ad.category?.slug?.includes('rental') ? 'Toggle Rent State' : 'Toggle Reserve State'}
+                       aria-label={
+                         ad.status === 'active' 
+                           ? (ad.category?.slug?.includes('rental') ? 'Mark as rented' : 'Mark as reserved') 
+                           : 'Mark as active'
+                       }
+                       title={
+                         ad.status === 'active'
+                           ? (ad.category?.slug?.includes('rental') ? 'Mark as Rented' : 'Mark as Reserved')
+                           : 'Make Active'
+                       }
                        className={`p-2 rounded-xl transition-colors ${
                          (ad.status === 'reserved' || ad.status === 'rented')
                            ? 'text-brand-500 bg-brand-50' 
