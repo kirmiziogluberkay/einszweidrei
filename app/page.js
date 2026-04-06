@@ -64,9 +64,6 @@ export default function HomePage() {
         <h1 className="text-4xl sm:text-5xl font-bold gradient-text mb-3">
           {SITE_TAGLINE}
         </h1>
-        <p className="text-ink-secondary text-lg max-w-xl mx-auto">
-          You are at the right place for a safe, fast, and easy shopping experience.
-        </p>
       </section>
 
       {/* ── Search bar ── */}
