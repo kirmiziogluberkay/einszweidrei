@@ -192,7 +192,7 @@ export default function AdForm({ initialData = null }) {
       category_id: formData.category_id || null,
       images:      uploadedImages,
       payment_methods: formData.payment_methods,
-      tags:            formData.tags.split(',').map(t => t.trim()).filter(t => t !== ''),
+      tags:            formData.tags.split(',').map(t => t.trim().toLowerCase()).filter(t => t !== ''),
       // Admin başkasının ilanını güncellerken ilan sahibini değiştirmemek için:
       owner_id:    initialData?.owner_id || user.id,
     };

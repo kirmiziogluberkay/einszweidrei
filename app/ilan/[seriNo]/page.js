@@ -185,7 +185,7 @@ export default async function AdDetailPage({ params }) {
                 {ad.tags.map(tag => (
                   <div key={tag} className="flex items-center gap-1.5 px-3 py-1 bg-brand-50 text-brand-600 text-[11px] font-bold uppercase tracking-wide rounded-full border border-brand-100/50">
                     <TagIcon className="w-3 h-3" />
-                    {tag}
+                    {tag.toLowerCase()}
                   </div>
                 ))}
               </div>
