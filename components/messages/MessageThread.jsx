@@ -127,6 +127,8 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
       setError(ERROR_MESSAGES.generic);
     } else {
       setContent('');
+      // Manuel tetikle - Realtime bazen gecikebilir
+      fetchMessages();
     }
 
     setSending(false);
