@@ -133,12 +133,20 @@ export default function InboxPage() {
     // UI'da anında söndür
     setThreads(prev => prev.map(t => t.key === thread.key ? { ...t, unreadCount: 0 } : t));
 
-    // Veritabanında da GARANTİ olarak sönmesini sağla (Admin kararlılığıyla)
+    // Veritabanında da GARANTİ olarak sönmesini sağla
     try {
-      await supabase
+      let query = supabase
         .from('messages')
-        .update({ is_read: true })
-        .eq('ad_id', thread.ad_id)
+        .update({ is_read: true });
+
+      // Eğer bir ilanla ilgiliyse o ilanı, değilse null olarak işaretle
+      if (thread.ad_id) {
+        query = query.eq('ad_id', thread.ad_id);
+      } else {
+        query = query.is('ad_id', null);
+      }
+
+      await query
         .eq('receiver_id', user.id)
         .eq('sender_id', thread.otherId)
         .eq('is_read', false);

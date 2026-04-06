@@ -73,14 +73,21 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
    * Kullanıcıya gelen okunmamış mesajları okundu olarak işaretler.
    */
   const markAsRead = async () => {
-    if (!user || !adId) return;
+    if (!user) return;
 
     try {
-      const { error } = await supabase
+      let query = supabase
         .from('messages')
-        .update({ is_read: true })
-        .eq('ad_id', adId)
-        .eq('receiver_id', user.id) // Bana gelen tüm mesajları baz al
+        .update({ is_read: true });
+        
+      if (adId) {
+        query = query.eq('ad_id', adId);
+      } else {
+        query = query.is('ad_id', null);
+      }
+
+      const { error } = await query
+        .eq('receiver_id', user.id) 
         .eq('is_read', false);
       
       if (error) throw error;
