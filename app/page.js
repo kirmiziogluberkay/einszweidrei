@@ -100,7 +100,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Main layout: sidebar + content ── */}
-      <div className="flex gap-8">
+      <div className="flex gap-4">
 
         {/* ── LEFT SIDEBAR: Category Tree ── */}
         <aside className="hidden md:block w-56 flex-shrink-0">

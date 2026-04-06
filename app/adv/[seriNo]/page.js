@@ -151,7 +151,7 @@ export default async function AdDetailPage({ params }) {
       </nav>
 
       {/* Main layout: sidebar + content */}
-      <div className="flex gap-8">
+      <div className="flex gap-4">
 
         {/* ── Left Sidebar: Tree Navigation ── */}
         <aside className="hidden md:block w-52 flex-shrink-0">
