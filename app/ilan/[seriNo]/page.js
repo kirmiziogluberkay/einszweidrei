@@ -15,6 +15,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import ShareButtons from '@/components/ads/ShareButtons';
+import { CheckCircle2, Tag as TagIcon } from 'lucide-react';
 import AdDetailClient from './AdDetailClient';
 import ContactButton from './ContactButton';
 import { formatPrice, formatDate } from '@/lib/helpers';
@@ -170,22 +171,26 @@ export default async function AdDetailPage({ params }) {
             {ad.tags && ad.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 pt-2">
                 {ad.tags.map(tag => (
-                  <span key={tag} className="px-2 py-1 bg-surface-secondary text-ink-tertiary text-[10px] uppercase tracking-wider font-semibold rounded-md border border-surface-tertiary">
+                  <div key={tag} className="flex items-center gap-1.5 px-3 py-1 bg-brand-50 text-brand-600 text-[11px] font-bold uppercase tracking-wide rounded-full border border-brand-100/50">
+                    <TagIcon className="w-3 h-3" />
                     {tag}
-                  </span>
+                  </div>
                 ))}
               </div>
             )}
 
             {/* Payment Methods */}
             {ad.payment_methods && ad.payment_methods.length > 0 && (
-              <div className="pt-4 border-t border-dashed border-surface-tertiary">
-                <h4 className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-2">Payment Methods</h4>
-                <div className="flex flex-wrap gap-3">
+              <div className="pt-5 border-t border-dashed border-surface-tertiary">
+                <h4 className="text-[11px] font-bold text-ink-tertiary uppercase tracking-[0.1em] mb-3 flex items-center gap-2">
+                  <div className="w-1 h-3 bg-brand-500 rounded-full" />
+                  Payment Methods
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
                   {ad.payment_methods.map(method => (
-                    <div key={method} className="flex items-center gap-1.5 text-sm text-ink-secondary">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                      {method}
+                    <div key={method} className="flex items-center gap-2 px-3 py-2 bg-surface-secondary rounded-xl border border-surface-tertiary/50">
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      <span className="text-sm font-medium text-ink-secondary">{method}</span>
                     </div>
                   ))}
                 </div>

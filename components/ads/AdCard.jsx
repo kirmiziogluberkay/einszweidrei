@@ -46,6 +46,8 @@ export default function AdCard({ ad, layout = 'grid' }) {
     created_at,
     owner,
     category,
+    payment_methods,
+    tags,
   } = ad;
 
   /** İlanın detail sayfası linki */
@@ -101,6 +103,17 @@ export default function AdCard({ ad, layout = 'grid' }) {
               <h3 className="font-bold text-ink text-xl leading-tight group-hover:text-brand-500 transition-colors truncate">
                 {title}
               </h3>
+              {/* Tags in list layout */}
+              {tags && tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {tags.slice(0, 3).map(tag => (
+                    <span key={tag} className="text-[10px] px-1.5 py-0.5 bg-surface-tertiary text-ink-tertiary rounded font-medium uppercase tracking-wider">
+                      {tag}
+                    </span>
+                  ))}
+                  {tags.length > 3 && <span className="text-[10px] text-ink-tertiary">+{tags.length - 3}</span>}
+                </div>
+              )}
             </div>
             <div className="flex-shrink-0 text-right">
               {(!price || price === 0) ? (
@@ -191,6 +204,18 @@ export default function AdCard({ ad, layout = 'grid' }) {
           {title}
         </h3>
 
+        {/* Tags in grid layout */}
+        {tags && tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {tags.slice(0, 2).map(tag => (
+              <span key={tag} className="text-[9px] px-1.5 py-0.5 bg-surface-secondary text-ink-tertiary rounded font-semibold uppercase tracking-tighter border border-surface-tertiary">
+                {tag}
+              </span>
+            ))}
+            {tags.length > 2 && <span className="text-[9px] text-ink-tertiary">+{tags.length - 2}</span>}
+          </div>
+        )}
+
         {/* Açıklama önizlemesi kullanıcının talebi üzerine kaldırıldı */}
 
         {/* Alt bilgiler */}
@@ -210,6 +235,17 @@ export default function AdCard({ ad, layout = 'grid' }) {
             <span>{timeAgo(created_at)}</span>
           </div>
         </div>
+
+        {/* Payment Methods Indicator */}
+        {payment_methods && payment_methods.length > 0 && (
+          <div className="pt-2 flex flex-wrap gap-2 overflow-hidden border-t border-surface-tertiary/30">
+            {payment_methods.map(m => (
+              <span key={m} className="text-[9px] text-brand-600 font-bold uppercase tracking-tight">
+                {m}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* İlan sahibi önizlemesi kullanıcının talebi üzerine kaldırıldı */}
       </div>

@@ -59,6 +59,8 @@ export function useAds(filters = {}) {
         currency,
         images,
         status,
+        payment_methods,
+        tags,
         created_at,
         owner:profiles(id, username),
         category:categories(id, name, slug)
