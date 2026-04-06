@@ -1,4 +1,4 @@
-// git icin push
+// update green mail
 /**
  * components/layout/Navbar.jsx
  * ─────────────────────────────────────────────────────
