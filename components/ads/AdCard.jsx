@@ -101,7 +101,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
                   <span>{category.name}</span>
                 </div>
               )}
-              <h3 className="font-bold text-ink text-xl leading-tight group-hover:text-brand-500 transition-colors truncate">
+              <h3 className="font-bold text-ink text-xl leading-tight group-hover:text-brand-500 transition-colors line-clamp-2">
                 {title}
               </h3>
             </div>

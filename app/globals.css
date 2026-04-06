@@ -32,9 +32,9 @@
     --shadow-xl: 0 20px 40px rgba(0,0,0,0.1);
 
     /* Parametric Ad Actions - BURADAN MÜDAHALE EDEBİLİRSİNİZ */
-    --btn-ad-h:  40px;      /* Düğme yüksekliği (12px dikey hissi verir) */
-    --btn-ad-fz: 12px;      /* Font size (Punto) */
-    --btn-ad-px: 24px;      /* Yatay iç boşluk */
+    --btn-ad-h:  32px;      /* Düğme yüksekliği (Kompakt ve orantılı) */
+    --btn-ad-fz: 11px;      /* Font size (Daha zarif) */
+    --btn-ad-px: 16px;      /* Yatay iç boşluk (Hengeli) */
   }
 
   html {
@@ -173,6 +173,13 @@
 @layer utilities {
 
   /* Metin kısaltma */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
