@@ -2,16 +2,18 @@
  * components/layout/MobileNav.jsx
  * ─────────────────────────────────────────────────────
  * Mobilde ekranın altında görünen tab bar navigasyonu.
- * FINAL STABLE VERSION (No Hook)
+ * Integrated Notification Dot Version
  * ─────────────────────────────────────────────────────
  */
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Search, Plus, MessageSquare, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { createClient } from '@/lib/supabase/client';
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/', icon: Home, authRequired: false },
@@ -24,7 +26,50 @@ const NAV_ITEMS = [
 export default function MobileNav() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const [hasUnread, setHasUnread] = useState(false);
   
+  // Integrated Sync
+  useEffect(() => {
+    if (!user?.id) {
+       setHasUnread(false);
+       return;
+    }
+
+    const supabase = createClient();
+    const checkMail = async () => {
+       try {
+         const { data, error } = await supabase
+           .from('messages')
+           .select('id')
+           .eq('receiver_id', user.id)
+           .eq('is_read', false)
+           .limit(1);
+         
+         if (!error) setHasUnread(data && data.length > 0);
+       } catch (e) {}
+    };
+
+    checkMail();
+
+    const channel = supabase
+       .channel(`mn-inbox-${user.id}`)
+       .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `receiver_id=eq.${user.id}`
+       }, () => {
+          checkMail();
+       })
+       .subscribe();
+
+    return () => {
+       if (supabase && channel) {
+          supabase.removeChannel(channel).catch(() => {});
+       }
+    };
+  }, [user?.id]);
+
   if (pathname.startsWith('/admin')) return null;
 
   return (
@@ -49,6 +94,11 @@ export default function MobileNav() {
                  <div className="relative flex flex-col items-center">
                    <Icon className={`w-6 h-6 transition-transform ${active ? 'scale-110' : ''}`} />
                    <span className="text-[10px] font-bold uppercase tracking-tighter mt-1">{item.label}</span>
+                   
+                   {/* Integrated Red Dot */}
+                   {item.label === 'Inbox' && hasUnread && (
+                      <span className="absolute top-0 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white shadow-sm" />
+                   )}
                  </div>
               )}
             </Link>

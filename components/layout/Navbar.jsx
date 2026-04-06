@@ -1,7 +1,7 @@
 /**
  * components/layout/Navbar.jsx
  * ─────────────────────────────────────────────────────
- * Üst navigasyon çubuğu — FINAL STABLE VERSION
+ * Üst navigasyon çubuğu — Integrated Notification System
  * ─────────────────────────────────────────────────────
  */
 
@@ -12,18 +12,65 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Search, Plus, User, Menu, X, ShieldCheck, ChevronDown, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { createClient } from '@/lib/supabase/client';
 import { SITE_NAME, AUTH_NAV_LINKS } from '@/constants/config';
-import { cn } from '@/lib/helpers';
+import { cn, formatUsername } from '@/lib/helpers';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { user, profile, signOut } = useAuth();
   
-  // Dynamic features are disabled at navigation level for ultimate stability
-  const hasUnread = false;
+  // Local state for notifications to prevent global hook crashes
+  const [hasUnread, setHasUnread] = useState(false);
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  // Integrated Notification Check
+  useEffect(() => {
+    if (!user?.id) {
+       setHasUnread(false);
+       return;
+    }
+
+    const supabase = createClient();
+
+    const checkMail = async () => {
+       try {
+         const { data, error } = await supabase
+           .from('messages')
+           .select('id', { count: 'exact', head: true })
+           .eq('receiver_id', user.id)
+           .eq('is_read', false)
+           .limit(1);
+         
+         if (!error) setHasUnread(data && data.length > 0);
+       } catch (e) {
+         console.warn('Silent sync issue');
+       }
+    };
+
+    checkMail();
+
+    // Listen to real-time changes
+    const channel = supabase
+       .channel(`nv-inbox-${user.id}`)
+       .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `receiver_id=eq.${user.id}`
+       }, () => {
+          checkMail();
+       })
+       .subscribe();
+
+    return () => {
+       if (supabase && channel) {
+          supabase.removeChannel(channel).catch(() => {});
+       }
+    };
+  }, [user?.id]);
 
   /** Sayfa değişince menüyü kapat */
   useEffect(() => {
@@ -37,7 +84,7 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const usernameDisplay = profile?.username || 'User';
+  const usernameDisplay = profile?.username ? formatUsername(profile.username) : 'User';
 
   return (
     <header className={cn(
@@ -48,12 +95,12 @@ export default function Navbar() {
     )}>
       <nav className="container-app h-14 md:h-16 flex items-center justify-between gap-6">
         
-        {/* Logo — Clean & Minimal */}
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
           <span className="text-xl font-black text-ink tracking-tighter lowercase">{SITE_NAME}</span>
         </Link>
 
-        {/* Center: Search — The focus point */}
+        {/* Center: Search */}
         <div className="flex-1 max-w-2xl hidden md:flex items-center justify-center">
              <div className="relative group w-full">
                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-tertiary" />
@@ -65,9 +112,8 @@ export default function Navbar() {
             </div>
         </div>
 
-        {/* Right side Tools */}
+        {/* Right side */}
         <div className="flex items-center gap-4 shrink-0">
-            {/* Post Ad Button */}
             <Link href="/ilan-ver" className="btn-primary py-2 px-5 text-sm h-10 gap-1.5 md:flex hidden rounded-xl">
                <Plus className="w-4 h-4" />
                <span className="font-bold">Post Ad</span>
@@ -77,9 +123,12 @@ export default function Navbar() {
                <Link href="/login" className="btn-primary py-2 px-6 text-sm h-10 rounded-xl">Login</Link>
             ) : (
                <div className="relative group flex items-center">
-                 <button className="flex items-center gap-2 p-1 rounded-2xl hover:bg-surface-secondary transition-all">
+                 <button className="flex items-center gap-2.5 p-1 rounded-2xl hover:bg-surface-secondary transition-all">
                     <div className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs border border-brand-100 shadow-sm relative">
-                       {usernameDisplay.charAt(0).toUpperCase()}
+                       {usernameDisplay.charAt(0)}
+                       {hasUnread && (
+                          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white shadow-sm animate-pulse" />
+                       )}
                     </div>
                     <span className="text-sm font-bold text-ink pr-1 md:block hidden">{usernameDisplay}</span>
                  </button>
@@ -91,8 +140,11 @@ export default function Navbar() {
                        <p className="font-bold text-ink truncate">{usernameDisplay}</p>
                     </div>
                     {(AUTH_NAV_LINKS || []).map((link) => (
-                      <Link key={link.href} href={link.href} className="flex px-4 py-2 text-sm text-ink-secondary hover:text-brand-500 hover:bg-surface-secondary/50 transition-colors">
-                        {link.label}
+                      <Link key={link.href} href={link.href} className="flex justify-between items-center px-4 py-2 text-sm text-ink-secondary hover:text-brand-500 hover:bg-surface-secondary/50 transition-colors">
+                        <span>{link.label}</span>
+                        {(link.label === 'Messages' || link.label === 'Inbox') && hasUnread && (
+                           <span className="w-2 h-2 bg-red-500 rounded-full" />
+                        )}
                       </Link>
                     ))}
                     <div className="mt-1 pt-1 border-t border-surface-tertiary/50 px-2">
@@ -105,7 +157,6 @@ export default function Navbar() {
                </div>
             )}
             
-            {/* Mobile Menu */}
             <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)}>
                {mobileOpen ? <X /> : <Menu />}
             </button>
