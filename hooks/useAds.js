@@ -38,7 +38,7 @@ import { ADS_PER_PAGE } from '@/constants/config';
 export function useAds(filters = {}) {
   const supabase = createClient();
 
-  const { categoryId, categoryIds, ownerId, searchQuery, maxPrice, page = 1 } = filters;
+  const { categoryId, categoryIds, ownerId, owner_id, searchQuery, maxPrice, page = 1 } = filters;
 
   const [ads, setAds] = useState([]);
   const [total, setTotal] = useState(0);
@@ -92,8 +92,9 @@ export function useAds(filters = {}) {
     }
 
     // İlan sahibi filtresi (profil sayfasında kendi ilanları)
-    if (ownerId) {
-      query = query.eq('owner_id', ownerId);
+    const finalOwnerId = owner_id || ownerId;
+    if (finalOwnerId) {
+      query = query.eq('owner_id', finalOwnerId);
     }
 
     // Metin araması (başlık ve açıklama içinde)
