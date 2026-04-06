@@ -1,3 +1,4 @@
+// update 20:39
 // update 17:10
 // update 17:07
 // status: category-based toggle logic refined
@@ -84,18 +85,27 @@ export default function ProfilimPage() {
   };
 
   /**
-   * İlanın durumunu (active/reserved) değiştirir.
+   * İlanın durumunu (active/reserved/rented) değiştirir.
+   * Alt kategoriler de olsa root kategorisine (Second Hand/Rental) bakar.
    * @param {string} adId
    * @param {string} currentStatus
+   * @param {string} categoryId
    */
-  const handleToggleStatus = async (adId, currentStatus, categorySlug = '') => {
-    const slug = categorySlug?.toLowerCase() || '';
+  const handleToggleStatus = async (adId, currentStatus, categoryId) => {
+    // Kök kategorinin slug değerini bul:
+    const findRootSlug = (cId) => {
+      const cat = categories.find(c => c.id === cId);
+      if (!cat) return '';
+      if (!cat.parent_id) return cat.slug;
+      return findRootSlug(cat.parent_id);
+    };
+
+    const rootSlug = findRootSlug(categoryId).toLowerCase();
     
-    // Kategoriye Göre Keskin Ayrım:
-    // Rental ise 'rented', Second Hand ise 'reserved', diğeri ise 'passive'
+    // Kök kategoriye Göre Ayrım:
     let targetStatus = 'passive';
-    if (slug.includes('rental')) targetStatus = 'rented';
-    else if (slug.includes('second-hand')) targetStatus = 'reserved';
+    if (rootSlug.includes('rental')) targetStatus = 'rented';
+    else if (rootSlug.includes('second-hand')) targetStatus = 'reserved';
     
     const newStatus = currentStatus === 'active' ? targetStatus : 'active';
     
@@ -107,6 +117,8 @@ export default function ProfilimPage() {
 
     if (!error) {
       refetch();
+    } else {
+      console.error('Status update failed:', error.message);
     }
   };
 
@@ -255,17 +267,9 @@ export default function ProfilimPage() {
                   {/* Eylemler */}
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
-                       onClick={() => handleToggleStatus(ad.id, ad.status, ad.category?.slug)}
-                       aria-label={
-                         ad.status === 'active' 
-                           ? (ad.category?.slug?.includes('rental') ? 'Mark as rented' : 'Mark as reserved') 
-                           : 'Mark as active'
-                       }
-                       title={
-                         ad.status === 'active'
-                           ? (ad.category?.slug?.includes('rental') ? 'Mark as Rented' : 'Mark as Reserved')
-                           : 'Make Active'
-                       }
+                       onClick={() => handleToggleStatus(ad.id, ad.status, ad.category_id)}
+                       aria-label={ad.status === 'active' ? 'Mark as passive' : 'Mark as active'}
+                       title={ad.status === 'active' ? 'Toggle Status' : 'Make Active'}
                        className={`p-2 rounded-xl transition-colors ${
                          (ad.status === 'reserved' || ad.status === 'rented')
                            ? 'text-brand-500 bg-brand-50' 

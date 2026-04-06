@@ -1,3 +1,4 @@
+// update 20:36
 // update 17:18
 // update 17:02
 // update 16:42
@@ -16,6 +17,7 @@ import ShareButtons from '@/components/ads/ShareButtons';
 import AdDetailClient from './AdDetailClient';
 import ContactButton from './ContactButton';
 import DeleteAdButton from './DeleteAdButton';
+import StatusToggle from '@/components/ads/StatusToggle';
 import { Pencil, CheckCircle2 } from 'lucide-react';
 import { formatPrice, formatDate, formatUsername } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
@@ -59,7 +61,8 @@ export default async function AdDetailPage({ params }) {
       images,
       status,
       payment_methods,
-      payment_methods,
+      owner_id,
+      category_id,
       created_at,
       updated_at,
       owner:profiles!owner_id(id, username, phone),
@@ -217,6 +220,13 @@ export default async function AdDetailPage({ params }) {
                   <h1 className="text-2xl font-bold text-ink leading-tight">{ad.title}</h1>
                   {canEdit && (
                     <div className="flex items-center gap-2 ml-4 shrink-0">
+                      <StatusToggle 
+                        adId={ad.id} 
+                        currentStatus={ad.status} 
+                        categoryId={ad.category_id} 
+                        categories={allCats}
+                        ownerId={ad.owner_id}
+                      />
                       <Link
                         href={`/ilan/${ad.serial_number}/duzenle`}
                         className="p-2 rounded-xl bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50 transition-colors"
