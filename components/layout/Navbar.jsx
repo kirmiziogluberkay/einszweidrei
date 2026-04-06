@@ -1,3 +1,4 @@
+// git icin push
 /**
  * components/layout/Navbar.jsx
  * ─────────────────────────────────────────────────────
