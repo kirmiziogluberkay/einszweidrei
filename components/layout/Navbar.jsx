@@ -130,7 +130,7 @@ export default function Navbar() {
                     <div className="flex items-center gap-1.5 md:flex hidden">
                        <span className="text-sm font-bold text-ink truncate max-w-[100px]">{usernameDisplay}</span>
                        {hasUnread && (
-                          <span className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.4)] animate-pulse" />
+                          <span className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
                        )}
                     </div>
                  </button>

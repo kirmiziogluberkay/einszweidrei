@@ -174,7 +174,7 @@ export default function InboxPage() {
                   onClick={() => handleSelectThread(thread)}
                 >
                   {thread.unreadCount > 0 && (
-                    <span className="absolute top-1/2 -translate-y-1/2 right-6 w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.4)] animate-pulse" />
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full shadow-sm" />
                   )}
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-sm font-bold flex-shrink-0 border-2 border-white shadow-sm">
