@@ -1,4 +1,4 @@
-// update green mail v2
+// logo kaldirildi
 /**
  * components/layout/Navbar.jsx
  * ─────────────────────────────────────────────────────
