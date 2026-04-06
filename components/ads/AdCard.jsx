@@ -124,6 +124,19 @@ export default function AdCard({ ad, layout = 'grid' }) {
               <span className="text-xs text-ink-tertiary font-medium">@{owner.username}</span>
             )}
           </div>
+
+          {/* Payment Methods in List Layout */}
+          {payment_methods && payment_methods.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-surface-tertiary/30">
+              {payment_methods.map(m => (
+                <span key={m} className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                  m === 'PayPal' ? 'bg-blue-50 text-blue-600' : 'bg-surface-tertiary text-ink-secondary'
+                }`}>
+                  {m}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </Link>
     );
@@ -207,6 +220,17 @@ export default function AdCard({ ad, layout = 'grid' }) {
             <span>{timeAgo(created_at)}</span>
           </div>
         </div>
+
+        {/* Payment Methods in Grid Layout */}
+        {payment_methods && payment_methods.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-3 pt-2 border-t border-surface-tertiary/20">
+            {payment_methods.map(m => (
+              <span key={m} className="text-[9px] font-bold text-brand-600 uppercase tracking-tighter">
+                {m}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </Link>
   );
