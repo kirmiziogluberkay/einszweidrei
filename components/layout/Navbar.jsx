@@ -151,7 +151,7 @@ export default function Navbar() {
                       <Link key={link.href} href={link.href} className="flex justify-between items-center px-4 py-2 text-sm text-ink-secondary hover:text-brand-500 hover:bg-surface-secondary/50 transition-colors">
                         <span>{link.label}</span>
                         {(link.label === 'Messages' || link.label === 'Inbox') && hasUnread && (
-                           <span className="w-2 h-2 bg-red-500 rounded-full" />
+                           <span className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
                         )}
                       </Link>
                     ))}
