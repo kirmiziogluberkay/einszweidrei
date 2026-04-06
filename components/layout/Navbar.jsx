@@ -97,7 +97,7 @@ export default function Navbar() {
         
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <span className="text-xl font-black text-ink tracking-tighter lowercase">{SITE_NAME}</span>
+          <img src="/logo.png" alt={SITE_NAME} className="h-10 w-auto object-contain transition-transform group-hover:scale-105" />
         </Link>
 
         {/* Center: Search */}
