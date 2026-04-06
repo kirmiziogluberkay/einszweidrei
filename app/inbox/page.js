@@ -28,6 +28,10 @@ export default function InboxPage() {
 
   const handleSelectThread = (thread) => {
     setActiveThread(thread);
+    // Clear unread count locally for instant feedback
+    setThreads(prev => prev.map(t => 
+      t.key === thread.key ? { ...t, unreadCount: 0 } : t
+    ));
     if (typeof refetchNotifications === 'function') {
       setTimeout(() => refetchNotifications(), 500);
     }
@@ -76,8 +80,10 @@ export default function InboxPage() {
             otherName,
             lastMessage: msg.content || '',
             lastTime:    msg.created_at,
-            unread:      !msg.is_read && msg.receiver?.id === user.id,
+            unreadCount: (!msg.is_read && msg.receiver?.id === user.id) ? 1 : 0,
           };
+        } else if (!msg.is_read && msg.receiver?.id === user.id) {
+          threadMap[key].unreadCount += 1;
         }
       });
 
@@ -167,8 +173,12 @@ export default function InboxPage() {
                   } ${thread.unread ? 'bg-brand-50/50' : ''}`}
                   onClick={() => handleSelectThread(thread)}
                 >
-                  {thread.unread && (
-                    <span className="absolute top-1/2 -translate-y-1/2 right-4 w-2.5 h-2.5 bg-brand-500 rounded-full shadow-[0_0_10px_rgba(14,165,233,0.5)]" />
+                  {thread.unreadCount > 0 && (
+                    <span className="absolute top-1/2 -translate-y-1/2 right-5 w-5 h-5 bg-red-500 text-white
+                                     flex items-center justify-center text-[10px] font-bold rounded-full
+                                     shadow-[0_2px_8px_rgba(239,68,68,0.4)]">
+                      {thread.unreadCount > 9 ? '9+' : thread.unreadCount}
+                    </span>
                   )}
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-sm font-bold flex-shrink-0 border-2 border-white shadow-sm">
@@ -176,10 +186,10 @@ export default function InboxPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1 mb-0.5">
-                        <p className={`text-sm truncate ${thread.unread ? "font-bold" : "font-semibold"} text-ink`}>{formatUsername(thread.otherName)}</p>
+                        <p className={`text-sm truncate ${thread.unreadCount > 0 ? "font-bold" : "font-semibold"} text-ink`}>{formatUsername(thread.otherName)}</p>
                         <span className="text-[10px] text-ink-tertiary whitespace-nowrap">{timeAgo(thread.lastTime)}</span>
                       </div>
-                      <p className={`text-xs truncate ${thread.unread ? "text-ink font-medium" : "text-ink-tertiary"}`}>{truncateText(thread.lastMessage || "", 40)}</p>
+                      <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-ink font-medium" : "text-ink-tertiary"}`}>{truncateText(thread.lastMessage || "", 40)}</p>
                     </div>
                   </div>
                 </div>
