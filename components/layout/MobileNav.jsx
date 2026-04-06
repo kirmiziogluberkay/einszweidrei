@@ -63,7 +63,8 @@ const NAV_ITEMS = [
 export default function MobileNav() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const { unreadCount = 0 } = useNotifications() ?? {};
+  // const { unreadCount = 0 } = useNotifications() || {};
+  const unreadCount = 0;
 
   // Admin sayfasında gösterme
   if (pathname.startsWith('/admin')) return null;
