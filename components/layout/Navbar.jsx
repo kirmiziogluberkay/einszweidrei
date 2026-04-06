@@ -126,6 +126,9 @@ export default function Navbar() {
                  <button className="flex items-center gap-2.5 p-1 rounded-2xl hover:bg-surface-secondary transition-all">
                     <div className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs border border-brand-100 shadow-sm relative shrink-0">
                        {usernameDisplay ? usernameDisplay.charAt(0).toUpperCase() : <User className="w-4 h-4 opacity-20" />}
+                       {hasUnread && (
+                          <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-white shadow-[0_0_8px_rgba(239,68,68,0.3)]" />
+                       )}
                     </div>
                     <div className="flex items-center gap-1.5 md:flex hidden">
                        {usernameDisplay ? (
@@ -134,7 +137,7 @@ export default function Navbar() {
                           <div className="h-4 w-12 bg-surface-tertiary/30 animate-pulse rounded" />
                        )}
                        {hasUnread && (
-                          <span className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
+                          <span className="w-2 h-2 bg-red-600 rounded-full shadow-[0_0_8px_rgba(220,38,38,0.5)]" />
                        )}
                     </div>
                  </button>
