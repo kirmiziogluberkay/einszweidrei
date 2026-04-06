@@ -24,7 +24,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, profile, isAdmin, signOut } = useAuth();
   const { categoryTree } = useCategories();
-  const { unreadCount = 0 } = useNotifications() || {};
+  const notifications = typeof useNotifications === 'function' ? useNotifications() : null;
+  const unreadCount = notifications?.unreadCount || 0;
 
   /** Mobil menünün açık/kapalı durumu */
   const [mobileOpen, setMobileOpen] = useState(false);
