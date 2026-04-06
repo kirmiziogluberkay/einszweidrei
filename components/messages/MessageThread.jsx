@@ -26,7 +26,7 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/constants/config';
  */
 export default function MessageThread({ adId, receiverId, receiverName, adTitle }) {
   const supabase = createClient();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const bottomRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
@@ -116,6 +116,19 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
     setSending(true);
     setError(null);
 
+    // Optimistic update - Mesajı hemen ekrana bas
+    const optimisticMsg = {
+      id:          'temp-' + Date.now(),
+      content:     content.trim(),
+      created_at:  new Date().toISOString(),
+      is_read:     false,
+      sender:      { id: user.id, username: profile?.username || 'Me' },
+      receiver:    { id: receiverId, username: receiverName }
+    };
+
+    setMessages(prev => [...prev, optimisticMsg]);
+    setContent('');
+
     const { error: sendError } = await supabase.from('messages').insert({
       sender_id:   user.id,
       receiver_id: receiverId,
@@ -125,9 +138,10 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
 
     if (sendError) {
       setError(ERROR_MESSAGES.generic);
+      // Hata durumunda optimistik mesajı geri al
+      setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
     } else {
-      setContent('');
-      // Manuel tetikle - Realtime bazen gecikebilir
+      // Başarılı ise gerçek veriyi çek (ID ve tam tarih için)
       fetchMessages();
     }
 

@@ -131,7 +131,7 @@ export default function MesajlarPage() {
                   key={thread.key}
                   className={`relative group cursor-pointer p-4 hover:bg-surface-secondary transition-colors ${
                     activeThread?.key === thread.key ? 'bg-surface-secondary' : ''
-                  }`}
+                  } ${thread.unread ? 'bg-brand-50/50' : ''}`}
                   onClick={() => setActiveThread(thread)}
                   role="button"
                   tabIndex={0}
@@ -139,7 +139,7 @@ export default function MesajlarPage() {
                 >
                   {/* Okunmamış göstergesi */}
                   {thread.unread && (
-                    <span className="absolute top-4 right-4 w-2 h-2 bg-brand-500 rounded-full" />
+                    <span className="absolute top-1/2 -translate-y-1/2 right-4 w-2.5 h-2.5 bg-brand-500 rounded-full shadow-[0_0_8px_rgba(14,165,233,0.4)]" />
                   )}
 
                   <div className="flex items-center gap-3">
