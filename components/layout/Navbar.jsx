@@ -123,19 +123,27 @@ export default function Navbar() {
             ) : (
                <div className="relative group flex items-center">
                  <button className="flex items-center gap-2.5 p-1 rounded-2xl hover:bg-surface-secondary transition-all">
-                    <div className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs border border-brand-100 shadow-sm relative shrink-0">
-                       {usernameDisplay ? usernameDisplay.charAt(0).toUpperCase() : <User className="w-4 h-4 opacity-20" />}
-                       {hasUnread && (
-                          <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-white shadow-[0_0_8px_rgba(239,68,68,0.3)]" />
-                       )}
-                    </div>
-                    <div className="flex items-center gap-1.5 md:flex hidden">
-                       {usernameDisplay ? (
-                          <span className="text-sm font-bold text-ink truncate max-w-[100px]">{usernameDisplay}</span>
-                       ) : (
-                          <div className="h-4 w-12 bg-surface-tertiary/30 animate-pulse rounded" />
-                       )}
-                    </div>
+                    {!usernameDisplay ? (
+                       <div className="flex items-center gap-2.5 animate-pulse">
+                          <div className="w-8 h-8 rounded-full bg-surface-tertiary/40" />
+                          <div className="h-4 w-12 bg-surface-tertiary/30 rounded md:block hidden" />
+                       </div>
+                    ) : (
+                       <>
+                          <div className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs border border-brand-100 shadow-sm relative shrink-0">
+                             {usernameDisplay.charAt(0).toUpperCase()}
+                             {hasUnread && (
+                                <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-white shadow-[0_0_8px_rgba(239,68,68,0.3)]" />
+                             )}
+                          </div>
+                          <div className="flex items-center gap-1.5 md:flex hidden">
+                             <span className="text-sm font-bold text-ink truncate max-w-[100px]">{usernameDisplay}</span>
+                             {hasUnread && (
+                                <span className="w-2 h-2 bg-red-600 rounded-full shadow-[0_0_8px_rgba(220,38,38,0.5)]" />
+                             )}
+                          </div>
+                       </>
+                    )}
                  </button>
 
                  {/* User Dropdown */}
