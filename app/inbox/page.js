@@ -104,6 +104,33 @@ export default function InboxPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading]);
 
+  // 2. Real-time subscription to keep Inbox list in sync
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`inbox-sync-list-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `receiver_id=eq.${user.id}`,
+        },
+        () => {
+          // Re-fetch threads from scratch to get fresh read/unread statuses
+          fetchThreads();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel).catch(() => {});
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   const handleDeleteThread = async (adId, otherId) => {
     if (!confirm('Are you sure you want to delete this chat?')) return;
 
