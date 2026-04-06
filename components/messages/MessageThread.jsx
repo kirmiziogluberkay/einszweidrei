@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { Send, Loader2, Trash2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { formatDate } from '@/lib/helpers';
+import { formatMessageDate } from '@/lib/helpers';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/constants/config';
 
 /**
@@ -220,7 +220,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
                   {/* Zaman ve sil butonu */}
                   <div className={`flex items-center gap-2 mt-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
                     <span className="text-[10px] text-ink-tertiary">
-                      {formatDate(msg.created_at)}
+                      {formatMessageDate(msg.created_at)}
                     </span>
                     {isMine && (
                       <button
