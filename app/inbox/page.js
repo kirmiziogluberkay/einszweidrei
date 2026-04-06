@@ -214,10 +214,10 @@ export default function InboxPage() {
                         {thread.otherName.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className={`text-sm truncate ${thread.unreadCount > 0 ? "font-bold text-ink" : "font-normal text-ink-tertiary"}`}>
+                        <p className={`text-sm truncate ${thread.unreadCount > 0 ? "font-bold text-ink" : "font-normal text-ink-secondary"}`}>
                           {formatUsername(thread.otherName)}
                         </p>
-                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-600 font-bold" : "text-ink-tertiary font-normal"}`}>
+                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-600 font-bold" : "text-ink-secondary font-normal"}`}>
                           {truncateText(thread.lastMessage || "", 40)}
                         </p>
                       </div>
