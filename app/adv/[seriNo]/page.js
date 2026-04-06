@@ -295,7 +295,7 @@ export default async function AdDetailPage({ params }) {
                         {formatUsername(ad.owner?.username).charAt(0) || "?"}
                       </div>
                       <div>
-                        <p className="font-bold text-ink text-sm group-hover:text-brand-500 transition-colors uppercase tracking-tight">
+                        <p className="font-bold text-ink text-sm group-hover:text-brand-500 transition-colors">
                           {formatUsername(ad.owner?.username)}
                         </p>
                         <p className="text-[10px] text-ink-tertiary uppercase font-bold tracking-widest mt-0.5">Verified Seller</p>

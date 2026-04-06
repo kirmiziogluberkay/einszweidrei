@@ -207,7 +207,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
 
       <div className="px-4 py-3 border-b border-surface-tertiary flex items-center justify-between bg-white">
         <div>
-          <p className="text-sm font-bold text-ink uppercase tracking-tight">{formatUsername(receiverName)}</p>
+          <p className="text-sm font-bold text-ink">{formatUsername(receiverName)}</p>
           <p className="text-[10px] text-ink-tertiary">Chatting about this ad</p>
         </div>
       </div>
