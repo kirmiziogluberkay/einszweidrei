@@ -45,7 +45,7 @@ const NAV_ITEMS = [
   },
   {
     label:        'Mesajlar',
-    href:         '/mesajlar',
+    href:         '/messages',
     icon:         MessageSquare,
     authRequired: true,
     exact:        false,

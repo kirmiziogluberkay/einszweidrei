@@ -15,7 +15,7 @@ const ADMIN_NAV = [
   { label: 'Genel Bakış',      href: '/admin',            icon: LayoutDashboard },
   { label: 'İlan Yönetimi',    href: '/admin/ilanlar',    icon: Megaphone       },
   { label: 'Kategori Yönetimi',href: '/admin/kategoriler',icon: FolderTree      },
-  { label: 'Mesaj İzleme',     href: '/admin/mesajlar',   icon: MessageSquare   },
+  { label: 'Message Monitoring', href: '/admin/messages', icon: MessageSquare   },
 ];
 
 export default function AdminLayout({ children }) {
