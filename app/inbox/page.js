@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { timeAgo, truncateText, formatUsername } from '@/lib/helpers';
 import MessageThread from '@/components/messages/MessageThread';
-import { Trash2, MessageSquare, Mail } from 'lucide-react';
+import { Trash2, MessageSquare, Mail, MailOpen } from 'lucide-react';
 
 export default function InboxPage() {
   const supabase = createClient();
@@ -263,11 +263,18 @@ export default function InboxPage() {
                       <span className="text-[10px] text-ink-tertiary">{timeAgo(thread.lastTime)}</span>
                       <div className="flex gap-2">
                          <button 
-                            onClick={(e) => { e.stopPropagation(); handleMarkUnread(thread); }}
-                            title="Mark as unread"
-                            className="p-1 text-ink-tertiary hover:text-green-500 transition-colors opacity-0 group-hover:opacity-100"
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              if (thread.unreadCount > 0) {
+                                handleSelectThread(thread); // Okundu yap
+                              } else {
+                                handleMarkUnread(thread);   // Okunmadı yap
+                              }
+                            }}
+                            title={thread.unreadCount > 0 ? "Mark as read" : "Mark as unread"}
+                            className={`p-1 transition-colors opacity-0 group-hover:opacity-100 ${thread.unreadCount > 0 ? "text-green-600" : "text-ink-tertiary hover:text-green-500"}`}
                          >
-                            <Mail className="w-3.5 h-3.5" />
+                            {thread.unreadCount > 0 ? <Mail className="w-3.5 h-3.5" /> : <MailOpen className="w-3.5 h-3.5" />}
                          </button>
                          <button 
                             onClick={(e) => { e.stopPropagation(); handleDeleteThread(thread.ad_id, thread.otherId); }}
