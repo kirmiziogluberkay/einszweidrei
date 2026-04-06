@@ -23,7 +23,7 @@ export default function HomePage() {
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
   const [expandedRoots, setExpandedRoots] = useState({});
-  const [maxPriceApplied, setMaxPriceApplied] = useState(6000);
+  const [maxPriceApplied, setMaxPriceApplied] = useState(null);
   const [maxPriceLocal, setMaxPriceLocal] = useState(6000);
 
   const { categoryTree } = useCategories();
