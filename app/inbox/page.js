@@ -130,10 +130,11 @@ export default function InboxPage() {
 
     try {
       // 1. Önce bu konuşmadaki tüm mesajların ID'lerini bul (En güvenli yöntem)
+      // RLS zaten kendi mesajlarımızı sınırladığı için sadece otherId'ye odaklanmak yeterli
       let fetchMsgQuery = supabase
         .from('messages')
         .select('id')
-        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${user.id})`);
+        .or(`sender_id.eq.${otherId},receiver_id.eq.${otherId}`);
 
       // İlan ID varsa ekle, yoksa (Admin mesajları gibi) null kontrolü yap
       if (adId && adId !== 'no-ad' && adId !== 'null') {
@@ -145,12 +146,13 @@ export default function InboxPage() {
       const { data: messagesToDelete, error: fetchError } = await fetchMsgQuery;
       
       if (fetchError || !messagesToDelete || messagesToDelete.length === 0) {
-        throw new Error('There is no chat history');
+        throw new Error('There is no chat history or already deleted.');
       }
 
       const msgIds = messagesToDelete.map(m => m.id);
 
       // 2. ID listesini kullanarak kalıcı olarak sil
+      // Bu yöntem en keskin ve hatasız silme yöntemidir.
       const { error: deleteError } = await supabase
         .from('messages')
         .delete()
@@ -158,16 +160,16 @@ export default function InboxPage() {
 
       if (deleteError) throw deleteError;
       
-      // Update local state
+      // Update local state and UI
       setThreads(prev => prev.filter(t => t.otherId !== otherId || (adId && t.ad_id !== adId)));
-      if (activeThread?.otherId === otherId && (adId && activeThread?.ad_id === adId)) {
-        setActiveThread(null);
+      if (activeThread?.otherId === otherId) {
+         setActiveThread(null);
       }
       
-      fetchThreads(); // Listeyi yenile
+      fetchThreads(); // Listeyi son kez tazele
     } catch (err) {
       console.error('Delete failed:', err.message);
-      alert('Delete failed. Possible permission issue.');
+      alert('Delete failed. It might be already deleted or you don\'t have permissions.');
     }
   };
 
