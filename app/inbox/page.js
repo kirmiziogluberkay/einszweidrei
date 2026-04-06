@@ -1,3 +1,4 @@
+// mark as unread: manual toggle feature applied
 'use client';
 
 import { useState, useEffect } from 'react';
