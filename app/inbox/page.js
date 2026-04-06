@@ -109,8 +109,11 @@ export default function InboxPage() {
         .eq('sender_id', thread.otherId)
         .eq('is_read', false);
 
-      if (thread.ad_id) {
-        updateQuery = updateQuery.eq('ad_id', thread.ad_id);
+      // İlan ID kontrolünü daha sağlam yap
+      const realAdId = (thread.ad_id && thread.ad_id !== 'no-ad' && thread.ad_id !== 'null') ? thread.ad_id : null;
+
+      if (realAdId) {
+        updateQuery = updateQuery.eq('ad_id', realAdId);
       } else {
         updateQuery = updateQuery.is('ad_id', null);
       }
