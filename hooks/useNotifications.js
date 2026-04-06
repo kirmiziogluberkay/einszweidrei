@@ -1,70 +1,61 @@
 /**
  * hooks/useNotifications.js
  * ─────────────────────────────────────────────────────
- * Hook to manage real-time unread message notifications.
- * FINAL STABLE VERSION
+ * Simple "Has Unread" notification dot hook.
+ * ULTRA STABLE Version - No counts, just boolean.
  * ─────────────────────────────────────────────────────
  */
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from './useAuth';
 
 export function useNotifications() {
   const { user } = useAuth();
-  const [unreadCount, setUnreadCount] = useState(0);
-  const supabaseRef = useRef(null);
+  const [hasUnread, setHasUnread] = useState(false);
 
   useEffect(() => {
     if (!user?.id) {
-       setUnreadCount(0);
+       setHasUnread(false);
        return;
     }
 
-    // Initialize singleton supabase client for this effect
-    if (!supabaseRef.current) {
-       supabaseRef.current = createClient();
-    }
-    const supabase = supabaseRef.current;
+    const supabase = createClient();
 
-    const fetchCount = async () => {
+    const checkStatus = async () => {
        try {
-         const { count, error } = await supabase
+         const { data, error } = await supabase
            .from('messages')
-           .select('*', { count: 'exact', head: true })
+           .select('id')
            .eq('receiver_id', user.id)
-           .eq('is_read', false);
+           .eq('is_read', false)
+           .limit(1);
          
-         if (!error) setUnreadCount(count || 0);
-       } catch (err) {
-         console.warn('Silent fetch error:', err.message);
-       }
+         if (!error) setHasUnread(data && data.length > 0);
+       } catch (err) { }
     };
 
-    fetchCount();
+    checkStatus();
 
-    // Setup Realtime with stable channel name
-    const channelId = `sync-unread-${user.id}`;
+    // Setup channel for immediate updates
     const channel = supabase
-       .channel(channelId)
+       .channel(`status-sync-${user.id}`)
        .on('postgres_changes', {
           event: '*',
           schema: 'public',
           table: 'messages',
           filter: `receiver_id=eq.${user.id}`
        }, () => {
-          fetchCount();
+          checkStatus();
        })
        .subscribe();
 
     return () => {
-       if (supabase && channel) {
-          supabase.removeChannel(channel).catch(() => {});
-       }
+       supabase.removeChannel(channel).catch(() => {});
     };
-  }, [user?.id]); // Strictly dependent on User ID only
+  }, [user?.id]);
 
-  return { unreadCount, refetch: () => {} };
+  return { hasUnread };
 }
