@@ -2,7 +2,7 @@
  * components/layout/MobileNav.jsx
  * ─────────────────────────────────────────────────────
  * Mobilde ekranın altında görünen tab bar navigasyonu.
- * ULTRA GÜVENLİ VERSİYON
+ * Phase 2: Restoring Labels & Routes
  * ─────────────────────────────────────────────────────
  */
 
@@ -24,11 +24,14 @@ const NAV_ITEMS = [
 export default function MobileNav() {
   const pathname = usePathname();
   const { user } = useAuth();
+  
+  // Static unreadCount for stability check
+  const unreadCount = 0;
 
   if (pathname.startsWith('/admin')) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white border-t border-surface-tertiary">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/80 backdrop-blur-xl border-t border-surface-tertiary">
       <div className="flex items-center justify-around h-16">
         {NAV_ITEMS.map((item) => {
           if (item.authRequired && !user) return null;
@@ -39,17 +42,26 @@ export default function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-1 ${active ? 'text-brand-500' : 'text-ink-tertiary'}`}
+              className={`relative flex flex-col items-center gap-1 min-w-[64px] ${active ? 'text-brand-500' : 'text-ink-tertiary'}`}
             >
               {item.featured ? (
-                 <div className="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center text-white shadow-md">
-                     <Icon className="w-6 h-6" />
+                 <div className="w-12 h-12 rounded-2xl bg-brand-500 flex items-center justify-center text-white shadow-lg -mt-8 border-4 border-white active:scale-90 transition-transform">
+                     <Plus className="w-8 h-8" strokeWidth={3} />
                  </div>
               ) : (
-                 <>
-                   <Icon className="w-6 h-6" />
-                   <span className="text-[10px] uppercase font-bold tracking-tighter">{item.label}</span>
-                 </>
+                 <div className="relative flex flex-col items-center">
+                   <Icon className={`w-6 h-6 transition-transform ${active ? 'scale-110' : ''}`} />
+                   <span className="text-[10px] font-black uppercase tracking-tighter mt-1">{item.label}</span>
+                   
+                   {/* Unread badge placeholder */}
+                   {item.label === 'Inbox' && unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white
+                                      flex items-center justify-center text-[9px] font-bold rounded-full
+                                      ring-2 ring-white">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                   )}
+                 </div>
               )}
             </Link>
           );
