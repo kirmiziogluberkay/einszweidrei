@@ -24,7 +24,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, profile, isAdmin, signOut } = useAuth();
   const { categoryTree } = useCategories();
-  const { unreadCount } = useNotifications();
+  const { unreadCount = 0 } = useNotifications() ?? {};
 
   /** Mobil menünün açık/kapalı durumu */
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -107,15 +107,15 @@ export default function Navbar() {
                   >
                     <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-600
                                     flex items-center justify-center text-xs font-bold">
-                      {profile?.username?.charAt(0).toUpperCase() ?? <User className="w-4 h-4" />}
+                      {profile?.username?.charAt(0).toUpperCase() || <User className="w-4 h-4" />}
                     </div>
-                    {unreadCount > 0 && (
+                    {unreadCount > 0 ? (
                       <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white
                                        text-[10px] font-bold rounded-full flex items-center justify-center
                                        border-2 border-white ring-0">
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </span>
-                    )}
+                    ) : null}
                   </button>
 
                   {/* Profil dropdown menüsü */}
@@ -128,7 +128,7 @@ export default function Navbar() {
                         {profile?.username ?? 'User'}
                       </p>
                     </div>
-                    {AUTH_NAV_LINKS.map((link) => (
+                    {(AUTH_NAV_LINKS || []).map((link) => (
                       <Link
                         key={link.href}
                         href={link.href}
@@ -136,11 +136,11 @@ export default function Navbar() {
                                    hover:text-ink hover:bg-surface-secondary transition-colors"
                       >
                         <span>{link.label}</span>
-                        {link.href.includes('mesaj') && unreadCount > 0 && (
+                        {link.href?.includes('mesaj') && unreadCount > 0 ? (
                           <span className="w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                             {unreadCount}
                           </span>
-                        )}
+                        ) : null}
                       </Link>
                     ))}
                     <div className="border-t border-surface-tertiary mt-1 pt-1">
@@ -180,7 +180,7 @@ export default function Navbar() {
         {/* ── Mobil Menü ── */}
         {mobileOpen && (
           <div className="md:hidden border-t border-surface-tertiary py-4 space-y-1 animate-slide-up">
-            {categoryTree.map((cat) => (
+            {(categoryTree || []).map((cat) => (
               <div key={cat.id}>
                 <button
                   onClick={() => setOpenDropdown(openDropdown === cat.id ? null : cat.id)}
@@ -216,18 +216,18 @@ export default function Navbar() {
             <div className="border-t border-surface-tertiary pt-3 mt-3 space-y-1">
               {user ? (
                 <>
-                  {AUTH_NAV_LINKS.map((link) => (
+                  {(AUTH_NAV_LINKS || []).map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
                       className="flex justify-between items-center px-4 py-2.5 text-sm text-ink-secondary"
                     >
                       <span>{link.label}</span>
-                      {link.href.includes('mesaj') && unreadCount > 0 && (
+                      {link.href?.includes('mesaj') && unreadCount > 0 ? (
                         <span className="px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">
                           {unreadCount}
                         </span>
-                      )}
+                      ) : null}
                     </Link>
                   ))}
                   <button

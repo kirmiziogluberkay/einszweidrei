@@ -27,14 +27,16 @@ import { AD_STATUSES } from '@/constants/config';
  *     status: string,
  *     created_at: string,
  *     owner: { username: string },
- *     category: { name: string, slug: string }
- *   }
- * @param {{
- *   ad: Object,
+ *     category: { name: string, slug: string },
+ *     payment_methods: string[],
+ *     tags: string[]
+ *   },
  *   layout?: 'grid' | 'list'
  * }} props
  */
 export default function AdCard({ ad, layout = 'grid' }) {
+  if (!ad) return null;
+
   const {
     serial_number,
     title,
@@ -46,6 +48,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
     created_at,
     owner,
     category,
+    payment_methods = [],
   } = ad;
 
   /** İlanın detail sayfası linki */
@@ -89,7 +92,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
         </div>
 
         {/* ── Right: Content ── */}
-        <div className="flex-1 flex flex-col h-full min-w-0">
+        <div className="flex-1 flex flex-col min-w-0">
           <div className="flex justify-between items-start gap-4">
             <div className="min-w-0 flex-1">
               {category && (
@@ -111,11 +114,11 @@ export default function AdCard({ ad, layout = 'grid' }) {
             </div>
           </div>
 
-          <p className="text-sm text-ink-secondary mt-3 line-clamp-3 flex-1">
+          <p className="text-sm text-ink-secondary mt-3 line-clamp-3">
             {description}
           </p>
 
-          <div className="flex items-center justify-between pt-4 mt-auto border-t border-surface-tertiary/50">
+          <div className="flex items-center justify-between pt-4 mt-4 border-t border-surface-tertiary/50">
             <div className="flex items-center gap-1 text-xs text-ink-tertiary">
               <Clock className="w-3.5 h-3.5" />
               <span>{timeAgo(created_at)}</span>
@@ -125,11 +128,11 @@ export default function AdCard({ ad, layout = 'grid' }) {
             )}
           </div>
 
-          {/* Payment Methods in List Layout */}
+          {/* Payment Methods */}
           {payment_methods && payment_methods.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-surface-tertiary/30">
-              {payment_methods.map(m => (
-                <span key={m} className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+            <div className="flex flex-wrap gap-2 mt-auto pt-3 border-t border-surface-tertiary/30">
+              {payment_methods.map((m, idx) => (
+                <span key={idx} className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
                   m === 'PayPal' ? 'bg-blue-50 text-blue-600' : 'bg-surface-tertiary text-ink-secondary'
                 }`}>
                   {m}
@@ -145,7 +148,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
   return (
     <Link
       href={adUrl}
-      className="card group block"
+      className="card group block h-full"
       aria-label={`${title} ilanına git`}
     >
       {/* ── Fotoğraf alanı ── */}
@@ -159,7 +162,6 @@ export default function AdCard({ ad, layout = 'grid' }) {
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          /* Fotoğraf yoksa gelişmiş placeholder */
           <div className="w-full h-full flex flex-col items-center justify-center bg-surface-tertiary text-ink-tertiary">
             <svg className="w-10 h-10 mb-2 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
@@ -170,14 +172,12 @@ export default function AdCard({ ad, layout = 'grid' }) {
           </div>
         )}
 
-        {/* Fotoğraf sayısı badge */}
         {images?.length > 1 && (
           <span className="absolute bottom-2 right-2 badge bg-black/50 text-white text-xs">
             +{images.length - 1}
           </span>
         )}
 
-        {/* Pasif/satıldı overlay */}
         {status !== 'active' && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <span className="bg-white text-ink text-xs font-semibold px-3 py-1 rounded-full">
@@ -188,49 +188,47 @@ export default function AdCard({ ad, layout = 'grid' }) {
       </div>
 
       {/* ── Kart içeriği ── */}
-      <div className="p-4 space-y-2">
-
-        {/* Kategori etiketi */}
+      <div className="p-4 flex flex-col h-[calc(100%-75%)] min-h-[160px]">
+        {/* Kategori */}
         {category && (
-          <div className="flex items-center gap-1 text-xs text-ink-tertiary">
+          <div className="flex items-center gap-1 text-xs text-ink-tertiary mb-1">
             <Tag className="w-3 h-3" />
             <span>{category.name}</span>
           </div>
         )}
 
-        <h3 className="font-semibold text-ink text-base leading-snug line-clamp-2
-                       group-hover:text-brand-500 transition-colors">
+        <h3 className="font-semibold text-ink text-base leading-snug line-clamp-2 group-hover:text-brand-500 transition-colors mb-2">
           {title}
         </h3>
 
-        {/* Alt bilgiler */}
-        <div className="flex items-center justify-between pt-1">
-          {/* Fiyat - Free in green if no price given */}
-          {(!price || price === 0) ? (
-            <span className="font-bold text-green-500 text-lg">Free</span>
-          ) : (
-            <span className="font-bold text-ink text-lg">
-              {formatPrice(price, currency)}
-            </span>
-          )}
-
-          {/* Zaman */}
-          <div className="flex items-center gap-1 text-xs text-ink-tertiary">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{timeAgo(created_at)}</span>
-          </div>
-        </div>
-
-        {/* Payment Methods in Grid Layout */}
-        {payment_methods && payment_methods.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-3 pt-2 border-t border-surface-tertiary/20">
-            {payment_methods.map(m => (
-              <span key={m} className="text-[9px] font-bold text-brand-600 uppercase tracking-tighter">
-                {m}
+        <div className="mt-auto">
+          {/* Fiyat ve Zaman */}
+          <div className="flex items-center justify-between pt-1">
+            {(!price || price === 0) ? (
+              <span className="font-bold text-green-500 text-lg">Free</span>
+            ) : (
+              <span className="font-bold text-ink text-lg">
+                {formatPrice(price, currency)}
               </span>
-            ))}
+            )}
+
+            <div className="flex items-center gap-1 text-xs text-ink-tertiary">
+              <Clock className="w-3.5 h-3.5" />
+              <span>{timeAgo(created_at)}</span>
+            </div>
           </div>
-        )}
+
+          {/* Payment Methods */}
+          {payment_methods && payment_methods.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-3 pt-2 border-t border-surface-tertiary/20">
+              {payment_methods.map((m, idx) => (
+                <span key={idx} className="text-[9px] font-bold text-brand-600 uppercase tracking-tighter">
+                  {m}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </Link>
   );
