@@ -285,16 +285,22 @@ export default async function AdDetailPage({ params }) {
                 <h3 className="text-base font-semibold text-ink mb-4">Advertiser</h3>
                 {user ? (
                   <>
-                    <div className="flex items-center gap-3 mb-4">
+                    <Link 
+                      href={`/profile/${ad.owner?.username}`}
+                      className="flex items-center gap-3 mb-4 group cursor-pointer"
+                    >
                       <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-600
-                                      flex items-center justify-center font-bold text-sm">
-                        {ad.owner?.username?.charAt(0).toUpperCase()}
+                                      flex items-center justify-center font-bold text-sm
+                                      group-hover:bg-brand-500 group-hover:text-white transition-all shadow-sm">
+                        {String(ad.owner?.username || "?").charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-medium text-ink text-sm">{ad.owner?.username}</p>
-                        <p className="text-xs text-ink-tertiary">Member</p>
+                        <p className="font-bold text-ink text-sm group-hover:text-brand-500 transition-colors uppercase tracking-tight">
+                          {ad.owner?.username}
+                        </p>
+                        <p className="text-[10px] text-ink-tertiary uppercase font-bold tracking-widest mt-0.5">Verified Seller</p>
                       </div>
-                    </div>
+                    </Link>
                     <ContactButton
                       adId={ad.id}
                       adTitle={ad.title}
