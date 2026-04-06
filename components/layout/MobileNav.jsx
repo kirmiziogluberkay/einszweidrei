@@ -1,3 +1,4 @@
+// notification: green theme applied
 /**
  * components/layout/MobileNav.jsx
  * ─────────────────────────────────────────────────────

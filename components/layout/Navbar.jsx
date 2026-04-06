@@ -1,4 +1,4 @@
-// logo kaldirildi
+// notification: green theme applied
 /**
  * components/layout/Navbar.jsx
  * ─────────────────────────────────────────────────────
