@@ -1,8 +1,8 @@
-// update 21:19
-// update 20:37
-// update 20:34
-// update 17:02
+// update 22:08
 // status: global visibility for reserved/rented enabled
+// feature: owner filter consolidated (supports owner_id and ownerId)
+// feature: public ads show active/reserved/rented (excludes sold)
+// logic: owner dashboard shows EVERYTHING including sold/passive if ownerId is passed
 'use client';
 
 /**

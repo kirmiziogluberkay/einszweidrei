@@ -1,4 +1,5 @@
-// update 21:23
+// update 22:08: Gruplanmış ilanlar (Second Hand vs Rental) + Durum Kilidi (Reserved/Rented) eklendi.
+// update 21:23: My Ads page active migration completed.
 /**
  * app/myprofile/my-ads/page.js
  * ─────────────────────────────────────────────────────
