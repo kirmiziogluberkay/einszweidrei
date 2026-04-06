@@ -1,4 +1,4 @@
-// mark as unread: manual toggle feature applied
+// mail status toggle: dynamic open/close icons added
 'use client';
 
 import { useState, useEffect } from 'react';
