@@ -2,7 +2,7 @@
  * components/layout/MobileNav.jsx
  * ─────────────────────────────────────────────────────
  * Mobilde ekranın altında görünen tab bar navigasyonu.
- * Simple Red Dot Version
+ * FINAL STABLE VERSION (No Hook)
  * ─────────────────────────────────────────────────────
  */
 
@@ -12,20 +12,18 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Search, Plus, MessageSquare, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNotifications } from '@/hooks/useNotifications';
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/', icon: Home, authRequired: false },
   { label: 'Search', href: '/ara', icon: Search, authRequired: false },
   { label: 'Post Ad', href: '/ilan-ver', icon: Plus, authRequired: true, featured: true },
   { label: 'Inbox', href: '/inbox', icon: MessageSquare, authRequired: true },
-  { label: 'Profile', href: '/profilim', icon: User, authRequired: false },
+  { label: 'Profile', href: '/myprofile', icon: User, authRequired: false },
 ];
 
 export default function MobileNav() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const { hasUnread = false } = useNotifications() || {};
   
   if (pathname.startsWith('/admin')) return null;
 
@@ -44,18 +42,13 @@ export default function MobileNav() {
               className={`relative flex flex-col items-center gap-1 min-w-[64px] ${active ? 'text-brand-500' : 'text-ink-tertiary'}`}
             >
               {item.featured ? (
-                 <div className="w-12 h-12 rounded-2xl bg-brand-500 flex items-center justify-center text-white shadow-lg -mt-8 border-4 border-white active:scale-90 transition-transform">
+                 <div className="w-12 h-12 rounded-2xl bg-brand-500 flex items-center justify-center text-white shadow-lg -mt-8 border-4 border-white active:scale-95 transition-transform">
                      <Plus className="w-8 h-8" strokeWidth={3} />
                  </div>
               ) : (
                  <div className="relative flex flex-col items-center">
                    <Icon className={`w-6 h-6 transition-transform ${active ? 'scale-110' : ''}`} />
-                   <span className="text-[10px] font-black uppercase tracking-tighter mt-1">{item.label}</span>
-                   
-                   {/* Small red dot for Inbox */}
-                   {item.label === 'Inbox' && hasUnread && (
-                      <span className="absolute top-0 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white shadow-sm" />
-                   )}
+                   <span className="text-[10px] font-bold uppercase tracking-tighter mt-1">{item.label}</span>
                  </div>
               )}
             </Link>
