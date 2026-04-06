@@ -61,6 +61,8 @@ export default async function AdDetailPage({ params }) {
       currency,
       images,
       status,
+      payment_methods,
+      tags,
       created_at,
       updated_at,
       owner:profiles!owner_id(id, username, phone),
@@ -163,6 +165,32 @@ export default async function AdDetailPage({ params }) {
                 <dd className="text-ink">{formatDate(ad.created_at)}</dd>
               </div>
             </dl>
+
+            {/* Tags (if any) */}
+            {ad.tags && ad.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {ad.tags.map(tag => (
+                  <span key={tag} className="px-2 py-1 bg-surface-secondary text-ink-tertiary text-[10px] uppercase tracking-wider font-semibold rounded-md border border-surface-tertiary">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Payment Methods */}
+            {ad.payment_methods && ad.payment_methods.length > 0 && (
+              <div className="pt-4 border-t border-dashed border-surface-tertiary">
+                <h4 className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-2">Payment Methods</h4>
+                <div className="flex flex-wrap gap-3">
+                  {ad.payment_methods.map(method => (
+                    <div key={method} className="flex items-center gap-1.5 text-sm text-ink-secondary">
+                      <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
+                      {method}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* İlan sahibi + mesaj */}

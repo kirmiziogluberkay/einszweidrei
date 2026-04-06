@@ -22,7 +22,7 @@ export default async function IlanDuzenlemePage({ params }) {
   // İlanı çek
   const { data: ad } = await supabase
     .from('ads')
-    .select('id, serial_number, title, description, price, currency, images, category_id, owner_id')
+    .select('id, serial_number, title, description, price, currency, images, category_id, owner_id, payment_methods, tags')
     .eq('serial_number', params.seriNo)
     .single();
 

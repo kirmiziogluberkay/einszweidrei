@@ -49,6 +49,8 @@ export default function AdForm({ initialData = null }) {
     description: initialData?.description ?? '',
     price:       initialData?.price       ?? '',
     category_id: initialData?.category_id ?? '',
+    payment_methods: initialData?.payment_methods ?? [],
+    tags:            initialData?.tags?.join(', ') ?? '',
   });
 
   /** Yüklenmiş fotoğrafların URL'leri (Supabase Storage) */
@@ -68,8 +70,22 @@ export default function AdForm({ initialData = null }) {
    * @param {React.ChangeEvent} e
    */
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+
+    if (type === 'checkbox' && name === 'payment_methods') {
+      setFormData((prev) => {
+        const methods = [...prev.payment_methods];
+        if (checked) {
+          if (!methods.includes(value)) methods.push(value);
+        } else {
+          const index = methods.indexOf(value);
+          if (index > -1) methods.splice(index, 1);
+        }
+        return { ...prev, [name]: methods };
+      });
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   /**
@@ -175,6 +191,8 @@ export default function AdForm({ initialData = null }) {
       currency:    DEFAULT_CURRENCY,
       category_id: formData.category_id || null,
       images:      uploadedImages,
+      payment_methods: formData.payment_methods,
+      tags:            formData.tags.split(',').map(t => t.trim()).filter(t => t !== ''),
       // Admin başkasının ilanını güncellerken ilan sahibini değiştirmemek için:
       owner_id:    initialData?.owner_id || user.id,
     };
@@ -373,6 +391,53 @@ export default function AdForm({ initialData = null }) {
                 </optgroup>
               ))}
           </select>
+        </div>
+      </div>
+
+      {/* ── Ödeme Yöntemleri & Tagler ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {/* Ödeme Yöntemleri */}
+        <div>
+          <label className="label">Payment Methods</label>
+          <div className="flex flex-wrap gap-4 mt-2">
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                name="payment_methods"
+                value="Cash"
+                checked={formData.payment_methods.includes('Cash')}
+                onChange={handleChange}
+                className="w-5 h-5 rounded border-surface-tertiary text-brand-500 focus:ring-brand-500"
+              />
+              <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors">Cash</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                name="payment_methods"
+                value="PayPal"
+                checked={formData.payment_methods.includes('PayPal')}
+                onChange={handleChange}
+                className="w-5 h-5 rounded border-surface-tertiary text-brand-500 focus:ring-brand-500"
+              />
+              <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors">PayPal</span>
+            </label>
+          </div>
+        </div>
+
+        {/* Tagler */}
+        <div>
+          <label htmlFor="ad-tags" className="label">Tags</label>
+          <input
+            id="ad-tags"
+            type="text"
+            name="tags"
+            value={formData.tags}
+            onChange={handleChange}
+            placeholder="e.g. guitar, music, wood (separate by comma)"
+            className="input"
+          />
+          <p className="text-xs text-ink-tertiary mt-1">Keywords for better searchability.</p>
         </div>
       </div>
 
