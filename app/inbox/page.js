@@ -99,7 +99,7 @@ export default function InboxPage() {
         fetchThreads();
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel).catch(() => {}); };
+    return () => { supabase.removeChannel(channel).catch(() => { }); };
   }, [user?.id]);
 
   /**
@@ -116,7 +116,7 @@ export default function InboxPage() {
         .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${user.id})`);
 
       if (error) throw error;
-      
+
       // Update local state
       setThreads(prev => prev.filter(t => t.ad_id !== adId || t.otherId !== otherId));
       if (activeThread?.ad_id === adId && activeThread?.otherId === otherId) {
@@ -129,7 +129,7 @@ export default function InboxPage() {
 
   const handleSelectThread = async (thread) => {
     setActiveThread(thread);
-    
+
     // UI'da anında söndür
     setThreads(prev => prev.map(t => t.key === thread.key ? { ...t, unreadCount: 0 } : t));
 
@@ -178,9 +178,8 @@ export default function InboxPage() {
               {threads.map((thread) => (
                 <div
                   key={thread.key}
-                  className={`relative group cursor-pointer p-4 hover:bg-surface-secondary transition-all border-l-4 ${
-                    activeThread?.key === thread.key ? 'bg-surface-secondary border-brand-500' : 'border-transparent'
-                  } ${thread.unreadCount > 0 ? 'bg-brand-50 shadow-sm' : 'bg-white'}`}
+                  className={`relative group cursor-pointer p-4 hover:bg-surface-secondary transition-all border-l-4 ${activeThread?.key === thread.key ? 'bg-surface-secondary border-brand-500' : 'border-transparent'
+                    } ${thread.unreadCount > 0 ? 'bg-brand-50 shadow-sm' : 'bg-white'}`}
                   onClick={() => handleSelectThread(thread)}
                 >
                   {thread.unreadCount > 0 && (
@@ -197,22 +196,22 @@ export default function InboxPage() {
                             {formatUsername(thread.otherName)}
                           </p>
                         </div>
-                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-700 font-bold" : "text-ink-tertiary font-light"}`}>
+                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-700 font-bold" : "text-ink-tertiary font-normal"}`}>
                           {truncateText(thread.lastMessage || "", 40)}
                         </p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
-                       <span className="text-[10px] text-ink-tertiary whitespace-nowrap">{timeAgo(thread.lastTime)}</span>
-                       <button 
-                         onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteThread(thread.ad_id, thread.otherId);
-                         }}
-                         className="p-1.5 text-ink-tertiary hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                       >
-                          <Trash2 className="w-4 h-4" />
-                       </button>
+                      <span className="text-[10px] text-ink-tertiary whitespace-nowrap">{timeAgo(thread.lastTime)}</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteThread(thread.ad_id, thread.otherId);
+                        }}
+                        className="p-1.5 text-ink-tertiary hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -227,7 +226,7 @@ export default function InboxPage() {
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center p-12 text-ink-tertiary gap-4">
                 <div className="w-16 h-16 rounded-full bg-surface-secondary flex items-center justify-center">
-                   <MessageSquare className="w-8 h-8 opacity-20" />
+                  <MessageSquare className="w-8 h-8 opacity-20" />
                 </div>
                 <p className="font-medium">Select a conversation to start messaging</p>
               </div>
