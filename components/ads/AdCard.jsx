@@ -11,7 +11,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Clock, Tag } from 'lucide-react';
-import { formatPrice, buildAdUrl, timeAgo } from '@/lib/helpers';
+import { formatPrice, buildAdUrl, timeAgo, formatUsername } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
 
 /**
@@ -124,7 +124,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
               <span>{timeAgo(created_at)}</span>
             </div>
             {owner && (
-              <span className="text-xs text-ink-tertiary font-medium">@{owner.username}</span>
+              <span className="text-xs text-ink-tertiary font-bold tracking-tight">@{formatUsername(owner.username)}</span>
             )}
           </div>
 

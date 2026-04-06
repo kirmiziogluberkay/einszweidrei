@@ -13,7 +13,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import MessageThread from '@/components/messages/MessageThread';
 import { useNotifications } from '@/hooks/useNotifications';
-import { timeAgo, truncateText } from '@/lib/helpers';
+import { timeAgo, truncateText, formatUsername } from '@/lib/helpers';
 
 
 export default function InboxPage() {
@@ -172,11 +172,11 @@ export default function InboxPage() {
                   )}
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-sm font-bold flex-shrink-0 border-2 border-white shadow-sm">
-                      {String(thread.otherName || "?").charAt(0).toUpperCase()}
+                      {formatUsername(thread.otherName).charAt(0) || "?"}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1 mb-0.5">
-                        <p className={`text-sm truncate ${thread.unread ? "font-bold" : "font-semibold"} text-ink`}>{thread.otherName}</p>
+                        <p className={`text-sm truncate ${thread.unread ? "font-bold" : "font-semibold"} text-ink`}>{formatUsername(thread.otherName)}</p>
                         <span className="text-[10px] text-ink-tertiary whitespace-nowrap">{timeAgo(thread.lastTime)}</span>
                       </div>
                       <p className={`text-xs truncate ${thread.unread ? "text-ink font-medium" : "text-ink-tertiary"}`}>{truncateText(thread.lastMessage || "", 40)}</p>

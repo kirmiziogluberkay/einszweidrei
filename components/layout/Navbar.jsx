@@ -18,7 +18,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { useNotifications } from '@/hooks/useNotifications';
 import { SITE_NAME, AUTH_NAV_LINKS } from '@/constants/config';
-import { cn } from '@/lib/helpers';
+import { formatUsername, cn } from '@/lib/helpers';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -108,7 +108,7 @@ export default function Navbar() {
                   >
                     <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-600
                                     flex items-center justify-center text-xs font-bold">
-                      {String(profile?.username || "").charAt(0).toUpperCase() || <User className="w-4 h-4" />}
+                      {formatUsername(profile?.username).charAt(0) || <User className="w-4 h-4" />}
                     </div>
                     {unreadCount > 0 ? (
                       <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white
@@ -125,8 +125,8 @@ export default function Navbar() {
                                   invisible group-hover:visible opacity-0 group-hover:opacity-100
                                   transition-all duration-200">
                     <div className="px-4 py-2 border-b border-surface-tertiary">
-                      <p className="text-sm font-medium text-ink truncate">
-                        {profile?.username ?? 'User'}
+                      <p className="text-sm font-bold text-ink truncate">
+                        {formatUsername(profile?.username) || 'User'}
                       </p>
                     </div>
                     {(AUTH_NAV_LINKS || []).filter(l => l && l.href).map((link) => (

@@ -9,11 +9,11 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import AdGrid from '@/components/ads/AdGrid';
 import { User, Calendar, MapPin, Tag } from 'lucide-react';
-import { formatDate } from '@/lib/helpers';
+import { formatDate, formatUsername } from '@/lib/helpers';
 
 export async function generateMetadata({ params }) {
   return {
-    title: `${params.username}'s Profile`,
+    title: `${formatUsername(params.username)}'s Profile`,
   };
 }
 
@@ -51,12 +51,12 @@ export default async function PublicProfilePage({ params }) {
           {/* Avatar */}
           <div className="w-24 h-24 rounded-full bg-brand-100 ring-4 ring-white shadow-md flex items-center justify-center
                           text-brand-600 text-3xl font-bold flex-shrink-0">
-            {profile.username?.charAt(0).toUpperCase()}
+            {formatUsername(profile.username).charAt(0)}
           </div>
           
           <div className="flex-1 text-center md:text-left space-y-4">
             <div>
-              <h1 className="text-3xl font-extrabold text-ink">{profile.username}</h1>
+              <h1 className="text-3xl font-extrabold text-ink">{formatUsername(profile.username)}</h1>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-2 text-ink-secondary">
                  <div className="flex items-center gap-1.5 text-sm">
                    <Calendar className="w-4 h-4 text-brand-500" />
@@ -75,7 +75,7 @@ export default async function PublicProfilePage({ params }) {
             </div>
             
             <p className="text-sm text-ink-tertiary max-w-2xl">
-               Welcome to {profile.username}'s shop. Here you can find all the items they are currently selling on {process.env.NEXT_PUBLIC_SITE_NAME || 'Einszweidrei'}.
+               Welcome to {formatUsername(profile.username)}'s shop. Here you can find all the items they are currently selling on {process.env.NEXT_PUBLIC_SITE_NAME || 'Einszweidrei'}.
             </p>
           </div>
         </div>

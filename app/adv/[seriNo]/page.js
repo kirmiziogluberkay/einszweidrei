@@ -14,7 +14,7 @@ import AdDetailClient from './AdDetailClient';
 import ContactButton from './ContactButton';
 import DeleteAdButton from './DeleteAdButton';
 import { Pencil, CheckCircle2, Tag as TagIcon } from 'lucide-react';
-import { formatPrice, formatDate } from '@/lib/helpers';
+import { formatPrice, formatDate, formatUsername } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
 
 /** SEO metadata */
@@ -292,11 +292,11 @@ export default async function AdDetailPage({ params }) {
                       <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-600
                                       flex items-center justify-center font-bold text-sm
                                       group-hover:bg-brand-500 group-hover:text-white transition-all shadow-sm">
-                        {String(ad.owner?.username || "?").charAt(0).toUpperCase()}
+                        {formatUsername(ad.owner?.username).charAt(0) || "?"}
                       </div>
                       <div>
                         <p className="font-bold text-ink text-sm group-hover:text-brand-500 transition-colors uppercase tracking-tight">
-                          {ad.owner?.username}
+                          {formatUsername(ad.owner?.username)}
                         </p>
                         <p className="text-[10px] text-ink-tertiary uppercase font-bold tracking-widest mt-0.5">Verified Seller</p>
                       </div>
