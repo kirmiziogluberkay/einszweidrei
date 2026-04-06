@@ -1,5 +1,6 @@
 // update 20:37
-// update 20:36
+// update 20:41
+// update 20:37
 // update 17:18
 // update 17:02
 // update 16:42
@@ -217,10 +218,11 @@ export default async function AdDetailPage({ params }) {
                   </span>
                 )}
                 
-                <div className="flex items-start justify-between">
-                  <h1 className="text-2xl font-bold text-ink leading-tight">{ad.title}</h1>
-                  {canEdit && (
-                    <div className="flex items-center gap-2 ml-4 shrink-0">
+                <h1 className="text-2xl font-bold text-ink leading-tight mb-4">{ad.title}</h1>
+                
+                {canEdit && (
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="w-32">
                       <StatusToggle 
                         adId={ad.id} 
                         currentStatus={ad.status} 
@@ -228,17 +230,18 @@ export default async function AdDetailPage({ params }) {
                         categories={allCats}
                         ownerId={ad.owner_id}
                       />
-                      <Link
-                        href={`/ilan/${ad.serial_number}/duzenle`}
-                        className="p-2 rounded-xl bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50 transition-colors"
-                        title="Edit Ad"
-                      >
-                        <Pencil className="w-5 h-5" />
-                      </Link>
-                      <DeleteAdButton adId={ad.id} />
                     </div>
-                  )}
-                </div>
+                    <Link
+                      href={`/ilan/${ad.serial_number}/duzenle`}
+                      className="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50 transition-colors border border-surface-tertiary font-semibold text-sm"
+                      title="Edit Ad"
+                    >
+                      <Pencil className="w-4 h-4" />
+                      Edit
+                    </Link>
+                    <DeleteAdButton adId={ad.id} />
+                  </div>
+                )}
 
                 {/* Free in green if no price given */}
                 {(!ad.price || ad.price === 0) ? (

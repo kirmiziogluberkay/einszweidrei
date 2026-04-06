@@ -1,4 +1,4 @@
-// update 20:37
+// update 20:41
 'use client';
 
 import { useState } from 'react';
@@ -65,8 +65,8 @@ export default function StatusToggle({ adId, currentStatus, categoryId, categori
         <>
           <Lock className="w-4 h-4" />
           {currentStatus === 'active' 
-            ? (findRootSlug(categoryId).includes('rental') ? 'Mark as Rented' : 'Mark as Reserved')
-            : 'Make Active'
+            ? (findRootSlug(categoryId).includes('rental') ? 'Rented' : 'Reserved')
+            : 'Activate'
           }
         </>
       )}
