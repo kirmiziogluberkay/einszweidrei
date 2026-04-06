@@ -1,12 +1,12 @@
 /**
- * app/messages/page.js - ULTIMATE DEBUG VERSION
+ * app/inbox/page.js - DEBUG PAGE
  */
 
 'use client';
 
 import { useState, useEffect } from 'react';
 
-export default function MessagesPage() {
+export default function InboxPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -21,8 +21,8 @@ export default function MessagesPage() {
       textAlign: 'center',
       fontFamily: 'sans-serif'
     }}>
-      <h1 style={{ fontSize: '24px', marginBottom: '10px' }}>Messages Page Test</h1>
-      <p style={{ color: '#666' }}>If you can see this, the route /messages is working correctly.</p>
+      <h1 style={{ fontSize: '24px', marginBottom: '10px' }}>Inbox Page Test</h1>
+      <p style={{ color: '#666' }}>This confirms the routing for "/inbox" is working.</p>
       <div style={{ marginTop: '20px' }}>
         <button 
           onClick={() => window.location.href = '/'}

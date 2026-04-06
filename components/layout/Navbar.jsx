@@ -107,7 +107,7 @@ export default function Navbar() {
                   >
                     <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-600
                                     flex items-center justify-center text-xs font-bold">
-                      {profile?.username?.charAt(0).toUpperCase() || <User className="w-4 h-4" />}
+                      {String(profile?.username || "").charAt(0).toUpperCase() || <User className="w-4 h-4" />}
                     </div>
                     {unreadCount > 0 ? (
                       <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white
@@ -128,7 +128,7 @@ export default function Navbar() {
                         {profile?.username ?? 'User'}
                       </p>
                     </div>
-                    {(AUTH_NAV_LINKS || []).map((link) => (
+                    {(AUTH_NAV_LINKS || []).filter(l => l && l.href).map((link) => (
                       <Link
                         key={link.href}
                         href={link.href}
@@ -216,7 +216,7 @@ export default function Navbar() {
             <div className="border-t border-surface-tertiary pt-3 mt-3 space-y-1">
               {user ? (
                 <>
-                  {(AUTH_NAV_LINKS || []).map((link) => (
+                  {(AUTH_NAV_LINKS || []).filter(l => l && l.href).map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
