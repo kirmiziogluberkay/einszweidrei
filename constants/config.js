@@ -1,3 +1,4 @@
+// update 17:02
 // status: reserved and rented definitions added
 /**
  * constants/config.js

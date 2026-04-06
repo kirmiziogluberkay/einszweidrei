@@ -1,3 +1,4 @@
+// update 17:02
 // update 16:42
 /**
  * app/adv/[seriNo]/page.js
