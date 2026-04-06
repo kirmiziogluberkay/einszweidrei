@@ -233,7 +233,7 @@ export default async function AdDetailPage({ params }) {
                     </div>
                     <Link
                       href={`/ilan/${ad.serial_number}/duzenle`}
-                      className="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50 transition-colors border border-surface-tertiary font-semibold text-sm"
+                      className="btn-owner-action bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50"
                       title="Edit Ad"
                     >
                       <Pencil className="w-4 h-4" />

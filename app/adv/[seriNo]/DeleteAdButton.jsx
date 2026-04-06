@@ -1,3 +1,4 @@
+// update 20:56
 /**
  * app/adv/[seriNo]/DeleteAdButton.jsx
  * ─────────────────────────────────────────────────────
@@ -49,13 +50,16 @@ export default function DeleteAdButton({ adId }) {
     <button
       onClick={handleDelete}
       disabled={loading}
-      className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+      className="btn-owner-action bg-red-50 text-red-500 border-red-100 hover:bg-red-200"
       title="Delete Ad"
     >
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin" />
+        <Loader2 className="w-4 h-4 animate-spin" />
       ) : (
-        <Trash2 className="w-5 h-5" />
+        <>
+          <Trash2 className="w-4 h-4" />
+          <span>Delete</span>
+        </>
       )}
     </button>
   );

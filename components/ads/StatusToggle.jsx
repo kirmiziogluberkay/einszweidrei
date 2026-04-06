@@ -1,4 +1,4 @@
-// update 20:41
+// update 20:55
 'use client';
 
 import { useState } from 'react';
@@ -53,7 +53,7 @@ export default function StatusToggle({ adId, currentStatus, categoryId, categori
     <button
       onClick={handleToggle}
       disabled={loading}
-      className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold transition-all shadow-sm border
+      className={`btn-owner-action
         ${isReservedOrRented 
           ? 'bg-brand-50 border-brand-100 text-brand-600 hover:bg-brand-100' 
           : 'bg-white border-surface-tertiary text-ink hover:bg-surface-secondary'
