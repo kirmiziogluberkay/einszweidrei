@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { timeAgo, truncateText, formatUsername } from '@/lib/helpers';
 import MessageThread from '@/components/messages/MessageThread';
-import { Trash2, MessageSquare } from 'lucide-react';
+import { Trash2, MessageSquare, Mail } from 'lucide-react';
 
 export default function InboxPage() {
   const supabase = createClient();
@@ -131,6 +131,42 @@ export default function InboxPage() {
     }
   };
 
+  const handleMarkUnread = async (thread) => {
+    try {
+      // 1. Önce bu konuşmadaki son mesajın ID'sini bul
+      let fetchLastQuery = supabase
+        .from('messages')
+        .select('id')
+        .eq('receiver_id', user.id)
+        .eq('sender_id', thread.otherId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      const realAdId = (thread.ad_id && thread.ad_id !== 'no-ad' && thread.ad_id !== 'null') ? thread.ad_id : null;
+      if (realAdId) {
+        fetchLastQuery = fetchLastQuery.eq('ad_id', realAdId);
+      } else {
+        fetchLastQuery = fetchLastQuery.is('ad_id', null);
+      }
+
+      const { data: lastMsgs } = await fetchLastQuery;
+      
+      if (!lastMsgs || lastMsgs.length === 0) return;
+
+      // 2. Bu mesajı "Okunmadı" (false) olarak işaretle
+      const { error } = await supabase
+        .from('messages')
+        .update({ is_read: false })
+        .eq('id', lastMsgs[0].id);
+
+      if (error) throw error;
+      
+      fetchThreads(); // Listeyi yenile (Bold görünmesi için)
+    } catch (err) {
+      console.error('Mark as unread failed:', err.message);
+    }
+  };
+
   const handleDeleteThread = async (adId, otherId) => {
     if (!confirm('Are you sure you want to delete this conversation? This will clear all messages.')) return;
 
@@ -224,12 +260,21 @@ export default function InboxPage() {
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       <span className="text-[10px] text-ink-tertiary">{timeAgo(thread.lastTime)}</span>
-                      <button 
-                         onClick={(e) => { e.stopPropagation(); handleDeleteThread(thread.ad_id, thread.otherId); }}
-                         className="p-1 text-ink-tertiary hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                         <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex gap-2">
+                         <button 
+                            onClick={(e) => { e.stopPropagation(); handleMarkUnread(thread); }}
+                            title="Mark as unread"
+                            className="p-1 text-ink-tertiary hover:text-green-500 transition-colors opacity-0 group-hover:opacity-100"
+                         >
+                            <Mail className="w-3.5 h-3.5" />
+                         </button>
+                         <button 
+                            onClick={(e) => { e.stopPropagation(); handleDeleteThread(thread.ad_id, thread.otherId); }}
+                            className="p-1 text-ink-tertiary hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                         >
+                            <Trash2 className="w-3.5 h-3.5" />
+                         </button>
+                      </div>
                     </div>
                   </div>
                 </div>
