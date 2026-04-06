@@ -101,17 +101,7 @@ export default function Navbar() {
           <span className="text-xl font-black text-ink tracking-tighter">EinsZweiDrei</span>
         </Link>
 
-        {/* Center: Search */}
-        <div className="flex-1 max-w-2xl hidden md:flex items-center justify-center">
-             <div className="relative group w-full">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-tertiary" />
-               <input 
-                 type="text" 
-                 placeholder="Search ads..." 
-                 className="h-10 pl-11 pr-4 bg-surface-secondary border-none rounded-2xl text-sm w-full focus:ring-2 ring-brand-500/10 transition-all"
-               />
-            </div>
-        </div>
+
 
         {/* Right side */}
         <div className="flex items-center gap-4 shrink-0">
