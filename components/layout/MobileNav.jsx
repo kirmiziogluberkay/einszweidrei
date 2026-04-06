@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Search, Plus, MessageSquare, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotifications } from '@/hooks/useNotifications';
 import { cn } from '@/lib/helpers';
 
 /**
@@ -44,8 +45,8 @@ const NAV_ITEMS = [
     featured:     true,
   },
   {
-    label:        'Mesajlar',
-    href:         '/messages',
+    label:        'Messages',
+    href:         '/inbox',
     icon:         MessageSquare,
     authRequired: true,
     exact:        false,
@@ -62,6 +63,7 @@ const NAV_ITEMS = [
 export default function MobileNav() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { unreadCount = 0 } = useNotifications() ?? {};
 
   // Admin sayfasında gösterme
   if (pathname.startsWith('/admin')) return null;
@@ -123,7 +125,16 @@ export default function MobileNav() {
                 active ? 'text-brand-500' : 'text-ink-tertiary'
               )}
             >
-              <Icon className="w-6 h-6" strokeWidth={active ? 2.5 : 1.8} />
+              <div className="relative">
+                <Icon className="w-6 h-6" strokeWidth={active ? 2.5 : 1.8} />
+                {item.label === 'Messages' && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1.5 w-4 h-4 bg-red-500 text-white
+                                   text-[9px] font-bold rounded-full flex items-center justify-center
+                                   border border-white">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </div>
               <span className="text-[10px] font-medium leading-none">{item.label}</span>
             </Link>
           );

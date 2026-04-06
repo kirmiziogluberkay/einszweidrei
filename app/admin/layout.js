@@ -12,10 +12,10 @@ import { LayoutDashboard, Megaphone, FolderTree, MessageSquare, ArrowLeft } from
 
 /** Admin yan menü linkleri */
 const ADMIN_NAV = [
-  { label: 'Genel Bakış',      href: '/admin',            icon: LayoutDashboard },
-  { label: 'İlan Yönetimi',    href: '/admin/ilanlar',    icon: Megaphone       },
-  { label: 'Kategori Yönetimi',href: '/admin/kategoriler',icon: FolderTree      },
-  { label: 'Message Monitoring', href: '/admin/messages', icon: MessageSquare   },
+  { label: 'Overview',           href: '/admin',            icon: LayoutDashboard   },
+  { label: 'Ads Management',     href: '/admin/ilanlar',    icon: Megaphone         },
+  { label: 'Category Management',href: '/admin/kategoriler',icon: FolderTree        },
+  { label: 'Inboxes',            href: '/admin/inbox',      icon: MessageSquare     },
 ];
 
 export default function AdminLayout({ children }) {

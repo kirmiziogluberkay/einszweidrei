@@ -68,7 +68,7 @@ export default async function AdminDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
         <StatCard label="Toplam İlan"     value={adsCount}        icon={Megaphone}     href="/admin/ilanlar"     color="brand" />
         <StatCard label="Kullanıcı"       value={usersCount}      icon={Users}         href="/admin"             color="green" />
-        <StatCard label="Messages"        value={messagesCount}   icon={MessageSquare} href="/admin/messages"    color="amber" />
+        <StatCard label="Inboxes"         value={messagesCount}   icon={MessageSquare} href="/admin/inbox"       color="amber" />
         <StatCard label="Kategori"        value={categoriesCount} icon={FolderTree}    href="/admin/kategoriler" color="blue"  />
       </div>
 

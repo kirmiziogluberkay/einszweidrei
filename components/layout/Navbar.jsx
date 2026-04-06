@@ -136,7 +136,7 @@ export default function Navbar() {
                                    hover:text-ink hover:bg-surface-secondary transition-colors"
                       >
                         <span>{link.label}</span>
-                        {link.href?.includes('message') && unreadCount > 0 ? (
+                        {link.href?.includes('inbox') && unreadCount > 0 ? (
                           <span className="w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                             {unreadCount}
                           </span>
@@ -223,7 +223,7 @@ export default function Navbar() {
                       className="flex justify-between items-center px-4 py-2.5 text-sm text-ink-secondary"
                     >
                       <span>{link.label}</span>
-                      {link.href?.includes('message') && unreadCount > 0 ? (
+                      {link.href?.includes('inbox') && unreadCount > 0 ? (
                         <span className="px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">
                           {unreadCount}
                         </span>

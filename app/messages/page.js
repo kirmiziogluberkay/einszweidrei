@@ -1,43 +1,22 @@
 /**
- * app/messages/page.js - ULTIMATE DEBUG VERSION
+ * app/messages/page.js - REDIRECTING TO /INBOX
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function MessagesPage() {
-  const [mounted, setMounted] = useState(false);
+export default function MessagesRedirect() {
+  const router = useRouter();
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return <div style={{ padding: '20px' }}>Loading...</div>;
+    router.replace('/inbox');
+  }, [router]);
 
   return (
-    <div style={{
-      padding: '50px',
-      textAlign: 'center',
-      fontFamily: 'sans-serif'
-    }}>
-      <h1 style={{ fontSize: '24px', marginBottom: '10px' }}>Messages Page Test</h1>
-      <p style={{ color: '#666' }}>If you can see this, the route /messages is working correctly.</p>
-      <div style={{ marginTop: '20px' }}>
-        <button 
-          onClick={() => window.location.href = '/'}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#0ea5e9',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer'
-          }}
-        >
-          Go Back Home
-        </button>
-      </div>
+    <div style={{ padding: '20px', textAlign: 'center' }}>
+      Redirecting to Inbox...
     </div>
   );
 }

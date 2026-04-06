@@ -147,7 +147,7 @@ export const STATIC_NAV_LINKS = [
 
 /** Giriş yapılmış kullanıcı için ek nav linkleri */
 export const AUTH_NAV_LINKS = [
-  { label: 'Messages',   href: '/messages'  },
+  { label: 'Messages',   href: '/inbox'  },
   { label: 'Ads',        href: '/myprofile/my-ads'  },
   { label: 'Profile',    href: '/myprofile'  },
 ];
