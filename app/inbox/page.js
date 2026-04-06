@@ -123,18 +123,35 @@ export default function InboxPage() {
   };
 
   const handleDeleteThread = async (adId, otherId) => {
-    if (!confirm('Are you sure you want to delete this conversation?')) return;
+    if (!confirm('Are you sure you want to delete this conversation? This will clear all messages.')) return;
+
     try {
-      const { error } = await supabase
+      let deleteQuery = supabase
         .from('messages')
         .delete()
-        .eq('ad_id', adId)
         .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${user.id})`);
+
+      // İlan ID varsa ekle, yoksa (Admin mesajları gibi) null kontrolü yap
+      if (adId && adId !== 'no-ad' && adId !== 'null') {
+        deleteQuery = deleteQuery.eq('ad_id', adId);
+      } else {
+        deleteQuery = deleteQuery.is('ad_id', null);
+      }
+
+      const { error } = await deleteQuery;
       if (error) throw error;
-      setThreads(prev => prev.filter(t => t.ad_id !== adId || t.otherId !== otherId));
-      if (activeThread?.ad_id === adId && activeThread?.otherId === otherId) setActiveThread(null);
+      
+      // Update local state
+      setThreads(prev => prev.filter(t => t.otherId !== otherId || (adId && t.ad_id !== adId)));
+      if (activeThread?.otherId === otherId && (adId && activeThread?.ad_id === adId)) {
+        setActiveThread(null);
+      }
+      
+      // Refresh to be sure
+      fetchThreads();
     } catch (err) {
-      alert('Delete failed');
+      console.error('Delete failed:', err.message);
+      alert('Delete failed. Please try again.');
     }
   };
 
