@@ -135,9 +135,6 @@ export default function Navbar() {
                        ) : (
                           <div className="h-4 w-12 bg-surface-tertiary/30 animate-pulse rounded" />
                        )}
-                       {hasUnread && (
-                          <span className="w-2 h-2 bg-red-600 rounded-full shadow-[0_0_8px_rgba(220,38,38,0.5)]" />
-                       )}
                     </div>
                  </button>
 
