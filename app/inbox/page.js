@@ -193,11 +193,11 @@ export default function InboxPage() {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1 mb-0.5">
-                          <p className={`text-sm truncate ${thread.unreadCount > 0 ? "font-black text-ink" : "font-medium text-ink-secondary"}`}>
+                          <p className={`text-sm truncate ${thread.unreadCount > 0 ? "font-black text-ink" : "font-normal text-ink-tertiary"}`}>
                             {formatUsername(thread.otherName)}
                           </p>
                         </div>
-                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-700 font-bold" : "text-ink-tertiary font-normal"}`}>
+                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-700 font-bold" : "text-ink-tertiary font-light"}`}>
                           {truncateText(thread.lastMessage || "", 40)}
                         </p>
                       </div>
