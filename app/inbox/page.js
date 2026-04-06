@@ -180,7 +180,7 @@ export default function InboxPage() {
                   key={thread.key}
                   className={`relative group cursor-pointer p-4 hover:bg-surface-secondary transition-all border-l-4 ${
                     activeThread?.key === thread.key ? 'bg-surface-secondary border-brand-500' : 'border-transparent'
-                  } ${thread.unreadCount > 0 ? 'bg-brand-50 font-black shadow-sm' : 'bg-white font-normal'}`}
+                  } ${thread.unreadCount > 0 ? 'bg-brand-50 shadow-sm' : 'bg-white'}`}
                   onClick={() => handleSelectThread(thread)}
                 >
                   {thread.unreadCount > 0 && (
@@ -193,11 +193,11 @@ export default function InboxPage() {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1 mb-0.5">
-                          <p className={`text-sm truncate ${thread.unreadCount > 0 ? "font-black text-ink" : "font-semibold text-ink-secondary"}`}>
+                          <p className={`text-sm truncate ${thread.unreadCount > 0 ? "font-black text-ink" : "font-medium text-ink-secondary"}`}>
                             {formatUsername(thread.otherName)}
                           </p>
                         </div>
-                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-700 font-bold" : "text-ink-tertiary font-medium"}`}>
+                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-700 font-bold" : "text-ink-tertiary font-normal"}`}>
                           {truncateText(thread.lastMessage || "", 40)}
                         </p>
                       </div>
