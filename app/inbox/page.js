@@ -142,7 +142,7 @@ export default function InboxPage() {
       const { data: messagesToDelete, error: fetchError } = await fetchMsgQuery;
       
       if (fetchError || !messagesToDelete || messagesToDelete.length === 0) {
-        throw new Error('Sohbet verisi bulunamadı.');
+        throw new Error('There is no chat history');
       }
 
       const msgIds = messagesToDelete.map(m => m.id);
