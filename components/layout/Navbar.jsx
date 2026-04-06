@@ -18,7 +18,7 @@ import { cn, formatUsername } from '@/lib/helpers';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, authLoading, signOut } = useAuth();
   
   // Local state for notifications to prevent global hook crashes
   const [hasUnread, setHasUnread] = useState(false);
@@ -84,7 +84,7 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const usernameDisplay = profile?.username ? formatUsername(profile.username) : 'User';
+  const usernameDisplay = profile?.username ? formatUsername(profile.username) : null;
 
   return (
     <header className={cn(
@@ -125,10 +125,14 @@ export default function Navbar() {
                <div className="relative group flex items-center">
                  <button className="flex items-center gap-2.5 p-1 rounded-2xl hover:bg-surface-secondary transition-all">
                     <div className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs border border-brand-100 shadow-sm relative shrink-0">
-                       {usernameDisplay.charAt(0)}
+                       {usernameDisplay ? usernameDisplay.charAt(0).toUpperCase() : <User className="w-4 h-4 opacity-20" />}
                     </div>
                     <div className="flex items-center gap-1.5 md:flex hidden">
-                       <span className="text-sm font-bold text-ink truncate max-w-[100px]">{usernameDisplay}</span>
+                       {usernameDisplay ? (
+                          <span className="text-sm font-bold text-ink truncate max-w-[100px]">{usernameDisplay}</span>
+                       ) : (
+                          <div className="h-4 w-12 bg-surface-tertiary/30 animate-pulse rounded" />
+                       )}
                        {hasUnread && (
                           <span className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
                        )}
