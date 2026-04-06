@@ -78,6 +78,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
       .from('messages')
       .update({ is_read: true })
       .eq('ad_id', adId)
+      .eq('sender_id', receiverId)
       .eq('receiver_id', user.id)
       .eq('is_read', false);
   };

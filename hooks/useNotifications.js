@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -16,8 +16,8 @@ export function useNotifications() {
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
-  /** Fetch initial count */
-  const fetchCount = async () => {
+  /** Fetch initial count from database */
+  const fetchCount = useCallback(async () => {
     if (!user) return;
     try {
       const { count, error } = await supabase
@@ -31,7 +31,7 @@ export function useNotifications() {
     } catch (err) {
       console.warn('Error fetching unread count:', err.message);
     }
-  };
+  }, [user, supabase]);
 
   useEffect(() => {
     if (!user) {
@@ -42,39 +42,30 @@ export function useNotifications() {
     // 1. Initial fetch
     fetchCount();
 
-    // 2. Real-time subscription (with safe cleanup)
-    let channel = null;
-
-    try {
-      channel = supabase
-        .channel(`unread-count-${user.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'messages',
-            filter: `receiver_id=eq.${user.id}`,
-          },
-          () => {
-            fetchCount();
-          }
-        )
-        .subscribe((status) => {
-           if (status === 'CHANNEL_ERROR') {
-             console.warn('Realtime channel error for unread count');
-           }
-        });
-    } catch (e) {
-      console.error('Realtime subscription failed:', e);
-    }
+    // 2. Real-time subscription
+    // Listening to ALL changes on messages table where I am the receiver.
+    // This catches both INSERT (new message) and UPDATE (marked as read).
+    const channel = supabase
+      .channel(`inbox-notifications-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `receiver_id=eq.${user.id}`,
+        },
+        () => {
+          // Re-fetch count immediately when any message I received changes
+          fetchCount();
+        }
+      )
+      .subscribe();
 
     return () => {
-      if (channel) {
-        supabase.removeChannel(channel).catch(e => console.warn('Channel remove error:', e));
-      }
+      supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, fetchCount, supabase]);
 
   return { 
     unreadCount: typeof unreadCount === 'number' ? unreadCount : 0, 
