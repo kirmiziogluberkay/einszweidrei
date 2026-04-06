@@ -1,5 +1,6 @@
+// update 20:34
 // update 17:02
-// status: owner visibility for reserved/rented added
+// status: global visibility for reserved/rented enabled
 'use client';
 
 /**
@@ -62,17 +63,18 @@ export function useAds(filters = {}) {
         images,
         status,
         payment_methods,
-        tags,
         created_at,
         owner:profiles(id, username),
         category:categories(id, name, slug)
       `, { count: 'exact' });
 
-    // Durum filtresi — sahibi bakıyorsa rezerve/kiralık olanları da görsün, normal aramada sadece aktifleri görsün
+    // Durum filtresi — Artık reserved ve rented tüm ziyaretçilere her yerde görünür.
+    // Sadece 'sold' olanlar genel aramadan gizlenir.
+    query = query.in('status', ['active', 'reserved', 'rented']);
+    
+    // Eğer kişi kendi ilanlarına bakıyorsa, satılmış (sold) olanları da görsün
     if (ownerId) {
-      query = query.in('status', ['active', 'reserved', 'rented', 'sold']); 
-    } else {
-      query = query.eq('status', 'active');
+      // Not: ownerId filtresi aşağıda eq('owner_id') olarak zaten ekleniyor.
     }
 
     query = query.order('created_at', { ascending: false });
