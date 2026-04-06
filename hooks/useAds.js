@@ -1,3 +1,4 @@
+// update 21:19
 // update 20:37
 // update 20:34
 // update 17:02
@@ -64,6 +65,8 @@ export function useAds(filters = {}) {
         images,
         status,
         payment_methods,
+        category_id,
+        owner_id,
         created_at,
         owner:profiles(id, username),
         category:categories(id, name, slug)
