@@ -10,7 +10,7 @@
 // ─── Site Genel Bilgileri ─────────────────────────────────────────────────────
 
 /** Tarayıcı sekmesinde ve SEO için kullanılan site adı */
-export const SITE_NAME = 'Einszweidrei';
+export const SITE_NAME = 'EinsZweiDrei';
 
 /** Site açıklaması (meta description) */
 export const SITE_DESCRIPTION =
@@ -20,7 +20,7 @@ export const SITE_DESCRIPTION =
 export const SITE_TAGLINE = 'Second-Hand & Rental Items Platform';
 
 /** Geliştirici / şirket adı */
-export const SITE_AUTHOR = 'Einszweidrei';
+export const SITE_AUTHOR = 'EinsZweiDrei';
 
 // ─── URL Yapılandırması ───────────────────────────────────────────────────────
 
