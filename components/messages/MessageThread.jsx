@@ -80,7 +80,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
         .from('messages')
         .update({ is_read: true });
         
-      if (adId) {
+      if (adId && adId !== 'null') {
         query = query.eq('ad_id', adId);
       } else {
         query = query.is('ad_id', null);

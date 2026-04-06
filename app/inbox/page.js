@@ -139,8 +139,8 @@ export default function InboxPage() {
         .from('messages')
         .update({ is_read: true });
 
-      // Eğer bir ilanla ilgiliyse o ilanı, değilse null olarak işaretle
-      if (thread.ad_id) {
+      // İlan ID kontrolünü daha sağlam yap (null veya undefined durumları için)
+      if (thread.ad_id && thread.ad_id !== 'null') {
         query = query.eq('ad_id', thread.ad_id);
       } else {
         query = query.is('ad_id', null);
