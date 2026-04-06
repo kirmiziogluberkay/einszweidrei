@@ -1,3 +1,4 @@
+// update 17:18
 // update 17:02
 // update 16:42
 /**
@@ -203,7 +204,10 @@ export default async function AdDetailPage({ params }) {
               <div className="card p-6 space-y-4">
                 {ad.status !== 'active' && (
                   <span className={`badge ${
-                    ad.status === 'sold' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'
+                    ad.status === 'sold'     ? 'bg-red-100 text-red-600' :
+                    ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
+                    ad.status === 'rented'   ? 'bg-blue-100 text-blue-600' :
+                    'bg-gray-100 text-gray-600'
                   }`}>
                     {statusInfo.label}
                   </span>
