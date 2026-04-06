@@ -68,9 +68,10 @@ export const PRICE_LOCALE = 'en-US';
 
 /** Mevcut ilan durumları ve etiketleri */
 export const AD_STATUSES = {
-  active:  { label: 'Active',  color: 'green' },
-  passive: { label: 'Passive', color: 'gray'  },
-  sold:    { label: 'Sold',    color: 'red'   },
+  active:   { label: 'Active',   color: 'green' },
+  reserved: { label: 'Reserved', color: 'amber' },
+  passive:  { label: 'Passive',  color: 'gray'  },
+  sold:     { label: 'Sold',     color: 'red'   },
 };
 
 // ─── Kullanıcı Rolleri ────────────────────────────────────────────────────────

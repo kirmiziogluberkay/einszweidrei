@@ -11,7 +11,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle } from 'lucide-react';
+import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle, Lock } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAds } from '@/hooks/useAds';
@@ -76,6 +76,25 @@ export default function ProfilimPage() {
     if (!error) {
       setMsg(SUCCESS_MESSAGES.adDeleted);
       setMsgType('success');
+      refetch();
+    }
+  };
+
+  /**
+   * İlanın durumunu (active/reserved) değiştirir.
+   * @param {string} adId
+   * @param {string} currentStatus
+   */
+  const handleToggleStatus = async (adId, currentStatus) => {
+    const newStatus = currentStatus === 'active' ? 'reserved' : 'active';
+    
+    const { error } = await supabase
+      .from('ads')
+      .update({ status: newStatus })
+      .eq('id', adId)
+      .eq('owner_id', user.id);
+
+    if (!error) {
       refetch();
     }
   };
@@ -212,16 +231,29 @@ export default function ProfilimPage() {
                   </div>
 
                   {/* Durum */}
-                  <span className={`badge text-xs ${
-                    ad.status === 'active'  ? 'bg-green-100 text-green-600' :
-                    ad.status === 'sold'    ? 'bg-red-100 text-red-600' :
+                  <span className={`badge text-xs shrink-0 ${
+                    ad.status === 'active'   ? 'bg-green-100 text-green-600' :
+                    ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
+                    ad.status === 'sold'     ? 'bg-red-100 text-red-600' :
                     'bg-gray-100 text-gray-500'
                   }`}>
-                    {statusInfo.label}
+                    {statusInfo?.label || ad.status}
                   </span>
 
                   {/* Eylemler */}
                   <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                       onClick={() => handleToggleStatus(ad.id, ad.status)}
+                       aria-label={ad.status === 'active' ? 'Mark as reserved' : 'Mark as active'}
+                       title={ad.status === 'active' ? 'Mark as reserved' : 'Mark as active'}
+                       className={`p-2 rounded-xl transition-colors ${
+                         ad.status === 'reserved' 
+                           ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' 
+                           : 'text-ink-tertiary hover:text-amber-500 hover:bg-surface-secondary'
+                       }`}
+                    >
+                       <Lock className="w-4 h-4" />
+                    </button>
                     <Link
                       href={buildAdUrl(ad.serial_number)}
                       className="p-2 rounded-xl text-ink-tertiary hover:text-ink hover:bg-surface-secondary transition-colors"

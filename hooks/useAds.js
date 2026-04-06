@@ -64,9 +64,16 @@ export function useAds(filters = {}) {
         created_at,
         owner:profiles(id, username),
         category:categories(id, name, slug)
-      `, { count: 'exact' })
-      .eq('status', 'active')
-      .order('created_at', { ascending: false });
+      `, { count: 'exact' });
+
+    // Durum filtresi — sahibi bakıyorsa rezerve olanları da görsün, normal aramada sadece aktifleri görsün
+    if (ownerId) {
+      query = query.in('status', ['active', 'reserved', 'sold']); 
+    } else {
+      query = query.eq('status', 'active');
+    }
+
+    query = query.order('created_at', { ascending: false });
 
     // Kategori filtresi — tek id veya çoklu id listesi desteklenir
     if (categoryIds && categoryIds.length > 0) {
