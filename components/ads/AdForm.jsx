@@ -29,7 +29,7 @@ import {
   CURRENCY_SYMBOL,
   DEFAULT_CURRENCY,
 } from '@/constants/config';
-import { buildAdUrl } from '@/lib/helpers';
+import { buildAdUrl, cn } from '@/lib/helpers';
 
 /**
  * @param {{
