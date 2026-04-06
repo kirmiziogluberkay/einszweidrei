@@ -1,3 +1,4 @@
+// status: reserved and rented definitions added
 /**
  * constants/config.js
  * =====================================================

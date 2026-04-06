@@ -1,3 +1,4 @@
+// status: category-based toggle logic added
 /**
  * app/profilim/page.js
  * ─────────────────────────────────────────────────────

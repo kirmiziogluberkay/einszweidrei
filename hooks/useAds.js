@@ -1,3 +1,4 @@
+// status: owner visibility for reserved/rented added
 'use client';
 
 /**
