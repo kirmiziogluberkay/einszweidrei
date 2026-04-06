@@ -168,9 +168,9 @@ export default function InboxPage() {
               {threads.map((thread) => (
                 <div
                   key={thread.key}
-                  className={`relative group cursor-pointer p-4 hover:bg-surface-secondary transition-all ${
-                    activeThread?.key === thread.key ? 'bg-surface-secondary' : ''
-                  } ${thread.unread ? 'bg-brand-50/50' : ''}`}
+                  className={`relative group cursor-pointer p-4 hover:bg-surface-secondary transition-all border-l-4 ${
+                    activeThread?.key === thread.key ? 'bg-surface-secondary border-brand-500' : 'border-transparent'
+                  } ${thread.unreadCount > 0 ? 'bg-brand-50/50' : ''}`}
                   onClick={() => handleSelectThread(thread)}
                 >
                   {thread.unreadCount > 0 && (
