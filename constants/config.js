@@ -70,6 +70,7 @@ export const PRICE_LOCALE = 'en-US';
 export const AD_STATUSES = {
   active:   { label: 'Active',   color: 'green' },
   reserved: { label: 'Reserved', color: 'amber' },
+  rented:   { label: 'Rented',   color: 'blue'  },
   passive:  { label: 'Passive',  color: 'gray'  },
   sold:     { label: 'Sold',     color: 'red'   },
 };

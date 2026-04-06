@@ -66,9 +66,9 @@ export function useAds(filters = {}) {
         category:categories(id, name, slug)
       `, { count: 'exact' });
 
-    // Durum filtresi — sahibi bakıyorsa rezerve olanları da görsün, normal aramada sadece aktifleri görsün
+    // Durum filtresi — sahibi bakıyorsa rezerve/kiralık olanları da görsün, normal aramada sadece aktifleri görsün
     if (ownerId) {
-      query = query.in('status', ['active', 'reserved', 'sold']); 
+      query = query.in('status', ['active', 'reserved', 'rented', 'sold']); 
     } else {
       query = query.eq('status', 'active');
     }

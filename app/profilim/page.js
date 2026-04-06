@@ -85,8 +85,12 @@ export default function ProfilimPage() {
    * @param {string} adId
    * @param {string} currentStatus
    */
-  const handleToggleStatus = async (adId, currentStatus) => {
-    const newStatus = currentStatus === 'active' ? 'reserved' : 'active';
+  const handleToggleStatus = async (adId, currentStatus, categorySlug = '') => {
+    // Kategoriye göre durum geçişi: Rental ise 'rented', değilse 'reserved'
+    const isRental = categorySlug?.toLowerCase().includes('rental');
+    const targetStatus = isRental ? 'rented' : 'reserved';
+    
+    const newStatus = currentStatus === 'active' ? targetStatus : 'active';
     
     const { error } = await supabase
       .from('ads')
@@ -234,6 +238,7 @@ export default function ProfilimPage() {
                   <span className={`badge text-xs shrink-0 ${
                     ad.status === 'active'   ? 'bg-green-100 text-green-600' :
                     ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
+                    ad.status === 'rented'   ? 'bg-blue-100 text-blue-600' :
                     ad.status === 'sold'     ? 'bg-red-100 text-red-600' :
                     'bg-gray-100 text-gray-500'
                   }`}>
@@ -243,13 +248,13 @@ export default function ProfilimPage() {
                   {/* Eylemler */}
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
-                       onClick={() => handleToggleStatus(ad.id, ad.status)}
-                       aria-label={ad.status === 'active' ? 'Mark as reserved' : 'Mark as active'}
-                       title={ad.status === 'active' ? 'Mark as reserved' : 'Mark as active'}
+                       onClick={() => handleToggleStatus(ad.id, ad.status, ad.category?.slug)}
+                       aria-label={ad.status === 'active' ? 'Mark as reserved/rented' : 'Mark as active'}
+                       title={ad.category?.slug?.includes('rental') ? 'Toggle Rent State' : 'Toggle Reserve State'}
                        className={`p-2 rounded-xl transition-colors ${
-                         ad.status === 'reserved' 
-                           ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' 
-                           : 'text-ink-tertiary hover:text-amber-500 hover:bg-surface-secondary'
+                         (ad.status === 'reserved' || ad.status === 'rented')
+                           ? 'text-brand-500 bg-brand-50' 
+                           : 'text-ink-tertiary hover:text-brand-500 hover:bg-surface-secondary'
                        }`}
                     >
                        <Lock className="w-4 h-4" />
