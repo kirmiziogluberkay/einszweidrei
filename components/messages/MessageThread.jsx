@@ -100,6 +100,13 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adId, user]);
 
+  // Mesaj listesi degisince de okundu isaretle (yeni mesaj gelirse)
+  useEffect(() => {
+    if (messages.some(m => !m.is_read && m.receiver?.id === user?.id)) {
+      markAsRead();
+    }
+  }, [messages, user]);
+
   // Yeni mesaj gelince en alta kaydır
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });

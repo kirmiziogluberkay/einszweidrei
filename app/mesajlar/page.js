@@ -13,12 +13,14 @@ import { Loader2, Trash2, MessageSquareOff } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import MessageThread from '@/components/messages/MessageThread';
+import { useNotifications } from '@/hooks/useNotifications';
 import { timeAgo, truncateText } from '@/lib/helpers';
 
 
 export default function MesajlarPage() {
   const supabase = createClient();
   const { user, loading: authLoading } = useAuth();
+  const { refetch: refetchNotifications } = useNotifications();
 
   /** Konuşma listesi — (ad_id, diğer kullanıcı) bazında gruplandırılmış */
   const [threads, setThreads] = useState([]);
@@ -26,6 +28,11 @@ export default function MesajlarPage() {
 
   /** Seçili konuşma */
   const [activeThread, setActiveThread] = useState(null);
+
+  const handleSelectThread = (thread) => {
+    setActiveThread(thread);
+    setTimeout(() => refetchNotifications(), 500); // DB'nin guncellenmesi icin kisa bekleme
+  };
 
   /**
    * Gelen/gönderilen mesajları çekip ad bazında gruplandırır.
@@ -132,7 +139,7 @@ export default function MesajlarPage() {
                   className={`relative group cursor-pointer p-4 hover:bg-surface-secondary transition-colors ${
                     activeThread?.key === thread.key ? 'bg-surface-secondary' : ''
                   } ${thread.unread ? 'bg-brand-50/50' : ''}`}
-                  onClick={() => setActiveThread(thread)}
+                  onClick={() => handleSelectThread(thread)}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => e.key === 'Enter' && setActiveThread(thread)}

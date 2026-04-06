@@ -40,17 +40,17 @@ export function useNotifications() {
 
     /** Subscribe to real-time changes in messages table */
     const channel = supabase
-      .channel('messages-unread-count')
+      .channel(`unread-count-${user.id}`)
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: '*', // Listen to INSERT (new msg) and UPDATE (marked as read)
           schema: 'public',
           table: 'messages',
           filter: `receiver_id=eq.${user.id}`,
         },
         () => {
-          // Re-fetch count when any change occurs for this user's incoming messages
+          // Re-fetch count immediately on any change for this user
           fetchCount();
         }
       )
