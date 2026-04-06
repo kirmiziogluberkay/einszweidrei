@@ -127,9 +127,24 @@ export default function InboxPage() {
     }
   };
 
-  const handleSelectThread = (thread) => {
+  const handleSelectThread = async (thread) => {
     setActiveThread(thread);
+    
+    // UI'da anında söndür
     setThreads(prev => prev.map(t => t.key === thread.key ? { ...t, unreadCount: 0 } : t));
+
+    // Veritabanında da GARANTİ olarak sönmesini sağla (Admin kararlılığıyla)
+    try {
+      await supabase
+        .from('messages')
+        .update({ is_read: true })
+        .eq('ad_id', thread.ad_id)
+        .eq('receiver_id', user.id)
+        .eq('sender_id', thread.otherId)
+        .eq('is_read', false);
+    } catch (err) {
+      console.warn('Selection update failed');
+    }
   };
 
   if (authLoading || loading) return <div className="container-app py-12 text-center text-ink-tertiary">Loading inbox...</div>;
