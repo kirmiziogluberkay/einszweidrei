@@ -73,14 +73,21 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
    * Kullanıcıya gelen okunmamış mesajları okundu olarak işaretler.
    */
   const markAsRead = async () => {
-    if (!user) return;
-    await supabase
-      .from('messages')
-      .update({ is_read: true })
-      .eq('ad_id', adId)
-      .eq('sender_id', receiverId)
-      .eq('receiver_id', user.id)
-      .eq('is_read', false);
+    if (!user || !adId || !receiverId) return;
+
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ is_read: true })
+        .eq('ad_id', adId)
+        .eq('receiver_id', user.id) // Alıcı BEN olmalıyım
+        .eq('sender_id', receiverId)  // Gönderen karşı taraf olmalı
+        .eq('is_read', false);
+      
+      if (error) throw error;
+    } catch (err) {
+      console.error('Mark as read failed:', err.message);
+    }
   };
 
   useEffect(() => {
@@ -103,10 +110,11 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
 
   // Mesaj listesi degisince de okundu isaretle (yeni mesaj gelirse)
   useEffect(() => {
-    if (messages.some(m => !m.is_read && m.receiver?.id === user?.id)) {
+    // Herhangi bir okunmamış mesaj VEYA bana gelen bir mesaj varsa okunmuş say
+    if (messages.some(m => !m.is_read && m.receiver_id === user?.id)) {
       markAsRead();
     }
-  }, [messages, user]);
+  }, [messages, user?.id]);
 
   // Yeni mesaj gelince en alta kaydır
   useEffect(() => {
