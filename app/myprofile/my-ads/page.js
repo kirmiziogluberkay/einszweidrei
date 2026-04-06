@@ -1,6 +1,5 @@
 // force-rebuild-v1
-// update 22:08: Gruplanmış ilanlar (Second Hand vs Rental) + Durum Kilidi (Reserved/Rented) eklendi.
-// update 21:23: My Ads page active migration completed.
+// update 22:46: img changed to Image. next/image import added.
 /**
  * app/myprofile/my-ads/page.js
  * ─────────────────────────────────────────────────────
@@ -13,6 +12,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle, Lock } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -68,7 +68,6 @@ export default function MyAdsPage() {
   };
 
   const handleToggleStatus = async (adId, currentStatus, categoryId) => {
-    // Kök kategorinin slug değerini bul:
     const findRootSlug = (cId) => {
       const cat = categories.find(c => c.id === cId);
       if (!cat) return '';
@@ -77,8 +76,6 @@ export default function MyAdsPage() {
     };
 
     const rootSlug = findRootSlug(categoryId).toLowerCase();
-    
-    // Kök kategoriye Göre Ayrım:
     let targetStatus = 'passive';
     if (rootSlug.includes('rental')) targetStatus = 'rented';
     else if (rootSlug.includes('second-hand')) targetStatus = 'reserved';
@@ -142,7 +139,6 @@ export default function MyAdsPage() {
         </div>
       ) : (
         <div className="space-y-10">
-          {/* ── Helpers to render grouped list ── */}
           {[
             { title: 'Second Hand Items', list: secondHandAds },
             { title: 'Rental Items',      list: rentalAds },
@@ -161,7 +157,13 @@ export default function MyAdsPage() {
                       <div key={ad.id} className="card p-4 flex items-center gap-4 hover:shadow-md transition-shadow group">
                         <div className="relative w-16 h-16 rounded-xl bg-surface-secondary flex-shrink-0 overflow-hidden">
                           {ad.images?.[0] ? (
-                            <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover" />
+                            <Image 
+                              src={ad.images[0]} 
+                              alt={ad.title} 
+                              fill 
+                              sizes="64px"
+                              className="object-cover" 
+                            />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-ink-tertiary">
                               <Plus className="w-5 h-5 opacity-20" />

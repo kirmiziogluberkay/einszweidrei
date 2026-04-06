@@ -229,7 +229,6 @@ export default async function AdDetailPage({ params }) {
                         currentStatus={ad.status} 
                         categoryId={ad.category_id} 
                         categories={allCats}
-                        ownerId={ad.owner_id}
                       />
                     </div>
                     <Link

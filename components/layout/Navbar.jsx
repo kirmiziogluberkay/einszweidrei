@@ -12,7 +12,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Plus, User, Menu, X, ShieldCheck, ChevronDown, LogOut, Mail } from 'lucide-react';
+import { Plus, User, Menu, X, ShieldCheck, ChevronDown, LogOut, Mail } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
 import { SITE_NAME, AUTH_NAV_LINKS } from '@/constants/config';
