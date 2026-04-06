@@ -30,7 +30,6 @@ export default function InboxPage() {
       const grouped = {};
       messages.forEach(msg => {
         const otherId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
-        // Key oluştururken null güvenliği
         const adKey = msg.ad_id ? msg.ad_id : 'no-ad';
         const key = `${adKey}_${otherId}`;
 
@@ -85,7 +84,7 @@ export default function InboxPage() {
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel(`inbox-sync-list-${user.id}`)
+      .channel(`inbox-sync-${user.id}`)
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -100,11 +99,8 @@ export default function InboxPage() {
 
   const handleSelectThread = async (thread) => {
     setActiveThread(thread);
-
-    // UI'da vurguyu (unreadCount) hemen sıfırla
     setThreads(prev => prev.map(t => t.key === thread.key ? { ...t, unreadCount: 0 } : t));
 
-    // VERİTABANI GÜNCELLEMESİ - Kritik Alan
     try {
       let updateQuery = supabase
         .from('messages')
@@ -113,7 +109,6 @@ export default function InboxPage() {
         .eq('sender_id', thread.otherId)
         .eq('is_read', false);
 
-      // İlan ID varsa ekle, yoksa null kontrolü yap
       if (thread.ad_id) {
         updateQuery = updateQuery.eq('ad_id', thread.ad_id);
       } else {
@@ -122,13 +117,26 @@ export default function InboxPage() {
 
       const { error } = await updateQuery;
       if (error) throw error;
-
     } catch (err) {
       console.error('Okundu işaretleme hatası:', err.message);
     }
   };
 
-  // ... handleDeleteThread aynı kalabilir ...
+  const handleDeleteThread = async (adId, otherId) => {
+    if (!confirm('Are you sure you want to delete this conversation?')) return;
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('ad_id', adId)
+        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${user.id})`);
+      if (error) throw error;
+      setThreads(prev => prev.filter(t => t.ad_id !== adId || t.otherId !== otherId));
+      if (activeThread?.ad_id === adId && activeThread?.otherId === otherId) setActiveThread(null);
+    } catch (err) {
+      alert('Delete failed');
+    }
+  };
 
   if (authLoading || loading) return <div className="container-app py-12 text-center text-ink-tertiary">Loading...</div>;
 
@@ -152,30 +160,35 @@ export default function InboxPage() {
               {threads.map((thread) => (
                 <div
                   key={thread.key}
-                  className={`relative group cursor-pointer p-4 transition-all border-l-4 ${activeThread?.key === thread.key
+                  className={`relative group cursor-pointer p-4 transition-all border-l-4 ${
+                    activeThread?.key === thread.key
                       ? 'bg-surface-secondary border-brand-500'
                       : 'bg-white border-transparent hover:bg-surface-secondary'
-                    }`}
+                  }`}
                   onClick={() => handleSelectThread(thread)}
                 >
-                  {/* KIRMIZI NOKTA KALDIRILDI */}
-
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 overflow-hidden">
                       <div className="w-12 h-12 rounded-full bg-surface-secondary text-ink flex items-center justify-center text-sm font-bold flex-shrink-0 border border-surface-tertiary">
                         {thread.otherName.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className={`text-sm truncate ${thread.unreadCount > 0 ? "font-bold text-ink" : "text-ink-tertiary"}`}>
+                        <p className={`text-sm truncate ${thread.unreadCount > 0 ? "font-bold text-ink" : "font-normal text-ink-tertiary"}`}>
                           {formatUsername(thread.otherName)}
                         </p>
-                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-600 font-semibold" : "text-ink-tertiary"}`}>
+                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-600 font-bold" : "text-ink-tertiary font-normal"}`}>
                           {truncateText(thread.lastMessage || "", 40)}
                         </p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       <span className="text-[10px] text-ink-tertiary">{timeAgo(thread.lastTime)}</span>
+                      <button 
+                         onClick={(e) => { e.stopPropagation(); handleDeleteThread(thread.ad_id, thread.otherId); }}
+                         className="p-1 text-ink-tertiary hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                         <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -183,18 +196,14 @@ export default function InboxPage() {
             </div>
           </div>
 
-          {/* Chat Alanı */}
+          {/* Chat Field */}
           <div className="md:col-span-2 card overflow-hidden flex flex-col bg-white">
             {activeThread ? (
-              <MessageThread
-                adId={activeThread.ad_id}
-                receiverId={activeThread.otherId}
-                receiverName={activeThread.otherName}
-              />
+              <MessageThread adId={activeThread.ad_id} receiverId={activeThread.otherId} />
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center p-12 text-ink-tertiary gap-4">
+              <div className="flex-1 flex flex-col items-center justify-center p-12 text-ink-tertiary gap-4 text-center">
                 <MessageSquare className="w-12 h-12 opacity-10" />
-                <p>Select a conversation to start</p>
+                <p>Select a conversation to start messaging</p>
               </div>
             )}
           </div>
