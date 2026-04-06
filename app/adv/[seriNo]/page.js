@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/server';
 import ShareButtons from '@/components/ads/ShareButtons';
 import AdDetailClient from './AdDetailClient';
 import ContactButton from './ContactButton';
+import DeleteAdButton from './DeleteAdButton';
 import { Pencil, CheckCircle2, Tag as TagIcon } from 'lucide-react';
 import { formatPrice, formatDate } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
@@ -209,13 +210,16 @@ export default async function AdDetailPage({ params }) {
                 <div className="flex items-start justify-between">
                   <h1 className="text-2xl font-bold text-ink leading-tight">{ad.title}</h1>
                   {canEdit && (
-                    <Link
-                      href={`/ilan/${ad.serial_number}/duzenle`}
-                      className="ml-4 p-2 shrink-0 rounded-xl bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50 transition-colors"
-                      title="Edit Ad"
-                    >
-                      <Pencil className="w-5 h-5" />
-                    </Link>
+                    <div className="flex items-center gap-2 ml-4 shrink-0">
+                      <Link
+                        href={`/ilan/${ad.serial_number}/duzenle`}
+                        className="p-2 rounded-xl bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50 transition-colors"
+                        title="Edit Ad"
+                      >
+                        <Pencil className="w-5 h-5" />
+                      </Link>
+                      <DeleteAdButton adId={ad.id} />
+                    </div>
                   )}
                 </div>
 
@@ -278,7 +282,7 @@ export default async function AdDetailPage({ params }) {
               </div>
 
               <div className="card p-6">
-                <h3 className="text-base font-semibold text-ink mb-4">Seller Information</h3>
+                <h3 className="text-base font-semibold text-ink mb-4">Advertiser</h3>
                 {user ? (
                   <>
                     <div className="flex items-center gap-3 mb-4">
