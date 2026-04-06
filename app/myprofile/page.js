@@ -1,7 +1,7 @@
 /**
  * app/myprofile/page.js
  * ─────────────────────────────────────────────────────
- * User profile page.
+ * User profile page (Information only).
  * URL: /myprofile
  * ─────────────────────────────────────────────────────
  */
@@ -9,22 +9,14 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle } from 'lucide-react';
+import { Loader2, Edit3, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useAds } from '@/hooks/useAds';
-import { formatPrice, buildAdUrl, timeAgo } from '@/lib/helpers';
-import { SUCCESS_MESSAGES, ERROR_MESSAGES, AD_STATUSES, AD_URL_PREFIX } from '@/constants/config';
-
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '@/constants/config';
 
 export default function MyProfilePage() {
   const supabase          = createClient();
   const { user, profile, loading: authLoading } = useAuth();
-
-  const { ads, loading: adsLoading, refetch } = useAds({
-    ownerId: user?.id,
-  });
 
   const [editMode,  setEditMode]  = useState(false);
   const [username,  setUsername]  = useState(profile?.username ?? '');
@@ -53,22 +45,6 @@ export default function MyProfilePage() {
     }
 
     setSaving(false);
-  };
-
-  const handleDeleteAd = async (adId) => {
-    if (!confirm('Are you sure you want to delete this ad?')) return;
-
-    const { error } = await supabase
-      .from('ads')
-      .delete()
-      .eq('id', adId)
-      .eq('owner_id', user.id);
-
-    if (!error) {
-      setMsg(SUCCESS_MESSAGES.adDeleted);
-      setMsgType('success');
-      refetch();
-    }
   };
 
   if (authLoading) {
@@ -156,81 +132,6 @@ export default function MyProfilePage() {
               <dd className="font-medium text-ink">{profile?.phone ?? '—'}</dd>
             </div>
           </dl>
-        )}
-      </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-ink">My Ads ({ads.length})</h2>
-          <Link href="/post-ad" className="btn-primary">
-            <Plus className="w-4 h-4" /> New Ad
-          </Link>
-        </div>
-
-        {adsLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="skeleton h-20 rounded-2xl" />
-            ))}
-          </div>
-        ) : ads.length === 0 ? (
-          <div className="card p-10 text-center text-ink-secondary text-sm">
-            You haven't posted any ads yet.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {ads.map((ad) => {
-              const statusInfo = AD_STATUSES[ad.status] ?? AD_STATUSES.active;
-              return (
-                <div key={ad.id} className="card p-4 flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-surface-secondary flex-shrink-0 overflow-hidden">
-                    {ad.images?.[0] && (
-                      <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-ink text-sm truncate">{ad.title}</p>
-                    <p className="text-xs text-ink-tertiary mt-0.5">
-                      {timeAgo(ad.created_at)} · {formatPrice(ad.price, ad.currency)}
-                    </p>
-                  </div>
-
-                  <span className={`badge text-xs ${
-                    ad.status === 'active'  ? 'bg-green-100 text-green-600' :
-                    ad.status === 'sold'    ? 'bg-red-100 text-red-600' :
-                    'bg-gray-100 text-gray-500'
-                  }`}>
-                    {statusInfo.label}
-                  </span>
-
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Link
-                      href={buildAdUrl(ad.serial_number)}
-                      className="p-2 rounded-xl text-ink-tertiary hover:text-ink hover:bg-surface-secondary transition-colors"
-                      aria-label="View ad"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Link>
-                    <Link
-                      href={`${AD_URL_PREFIX}/${ad.serial_number}/duzenle`}
-                      className="p-2 rounded-xl text-ink-tertiary hover:text-ink hover:bg-surface-secondary transition-colors"
-                      aria-label="Edit ad"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </Link>
-                    <button
-                      onClick={() => handleDeleteAd(ad.id)}
-                      aria-label="Delete ad"
-                      className="p-2 rounded-xl text-ink-tertiary hover:text-red-500 hover:bg-red-50 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         )}
       </div>
     </div>

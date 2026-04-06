@@ -15,7 +15,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import ShareButtons from '@/components/ads/ShareButtons';
-import { CheckCircle2, Tag as TagIcon } from 'lucide-react';
+import { CheckCircle2, Tag as TagIcon, PencilLine } from 'lucide-react';
 import AdDetailClient from './AdDetailClient';
 import ContactButton from './ContactButton';
 import { formatPrice, formatDate } from '@/lib/helpers';
@@ -49,6 +49,7 @@ export async function generateMetadata({ params }) {
  */
 export default async function AdDetailPage({ params }) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   // İlanı tüm ilgili verilerle çek
   const { data: ad } = await supabase
@@ -130,6 +131,17 @@ export default async function AdDetailPage({ params }) {
 
           {/* İlan özeti kartı */}
           <div className="card p-6 space-y-4">
+            
+            {/* Owner Actions */}
+            {user?.id === ad.owner_id && (
+              <Link
+                href={`/ilan/${ad.serial_number}/duzenle`}
+                className="w-full btn-secondary flex items-center justify-center gap-2 py-3 border-brand-200 text-brand-600 hover:bg-brand-50"
+              >
+                <PencilLine className="w-4 h-4" />
+                Edit Ad
+              </Link>
+            )}
 
             {/* Durum badge */}
             {ad.status !== 'active' && (

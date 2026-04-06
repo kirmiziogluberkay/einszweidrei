@@ -12,7 +12,7 @@ import { createClient } from '@/lib/supabase/server';
 import ShareButtons from '@/components/ads/ShareButtons';
 import AdDetailClient from './AdDetailClient';
 import ContactButton from './ContactButton';
-import { Pencil } from 'lucide-react';
+import { Pencil, CheckCircle2, Tag as TagIcon } from 'lucide-react';
 import { formatPrice, formatDate } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
 
@@ -54,6 +54,8 @@ export default async function AdDetailPage({ params }) {
       currency,
       images,
       status,
+      payment_methods,
+      tags,
       created_at,
       updated_at,
       owner:profiles!owner_id(id, username, phone),
@@ -243,6 +245,36 @@ export default async function AdDetailPage({ params }) {
                     <dd className="text-ink">{formatDate(ad.created_at)}</dd>
                   </div>
                 </dl>
+
+                {/* Tags (if any) */}
+                {ad.tags && ad.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-surface-tertiary">
+                    {ad.tags.map(tag => (
+                      <div key={tag} className="flex items-center gap-1.5 px-3 py-1 bg-brand-50 text-brand-600 text-[11px] font-bold uppercase tracking-wide rounded-full border border-brand-100/50">
+                        <TagIcon className="w-3 h-3" />
+                        {tag}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Payment Methods */}
+                {ad.payment_methods && ad.payment_methods.length > 0 && (
+                  <div className="pt-5 border-t border-dashed border-surface-tertiary">
+                    <h4 className="text-[11px] font-bold text-ink-tertiary uppercase tracking-[0.1em] mb-3 flex items-center gap-2">
+                      <div className="w-1 h-3 bg-brand-500 rounded-full" />
+                      Payment Methods
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {ad.payment_methods.map(method => (
+                        <div key={method} className="flex items-center gap-2 px-3 py-2 bg-surface-secondary rounded-xl border border-surface-tertiary/50">
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                          <span className="text-sm font-medium text-ink-secondary">{method}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="card p-6">
