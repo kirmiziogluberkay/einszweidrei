@@ -196,7 +196,7 @@ export default function InboxPage() {
                             {formatUsername(thread.otherName)}
                           </p>
                         </div>
-                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-700 font-bold" : "text-ink-tertiary font-normal"}`}>
+                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-700 font-bold" : "text-ink-tertiary font-light"}`}>
                           {truncateText(thread.lastMessage || "", 40)}
                         </p>
                       </div>
