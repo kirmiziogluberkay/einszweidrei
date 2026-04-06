@@ -1,3 +1,4 @@
+// force-rebuild-v1
 /**
  * components/ads/AdCard.jsx
  * ─────────────────────────────────────────────────────

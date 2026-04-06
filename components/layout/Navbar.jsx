@@ -1,5 +1,5 @@
-// update1547
-// notification: green theme applied
+// force-rebuild-v1
+// update 21:46: Search bar removed.
 /**
  * components/layout/Navbar.jsx
  * ─────────────────────────────────────────────────────
