@@ -168,7 +168,7 @@ export default function MyAdsPage() {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <Link href={`${AD_URL_PREFIX}/${ad.serial_number}`} className="text-[12px] font-bold text-ink hover:text-brand-500 transition-colors block truncate">
+                          <Link href={`${AD_URL_PREFIX}/${ad.serial_number}`} className="text-[14px] font-bold text-ink hover:text-brand-500 transition-colors block truncate">
                             {ad.title}
                           </Link>
                           <p className="text-xs text-ink-secondary mt-1">

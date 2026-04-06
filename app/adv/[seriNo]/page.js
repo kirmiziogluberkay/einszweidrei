@@ -218,7 +218,7 @@ export default async function AdDetailPage({ params }) {
                   </span>
                 )}
                 
-                <h1 className="text-[12px] font-bold text-ink leading-tight mb-4">{ad.title}</h1>
+                <h1 className="text-[14px] font-bold text-ink leading-tight mb-4">{ad.title}</h1>
                 
                 {canEdit && (
                   <div className="flex items-center gap-2 mb-6">
