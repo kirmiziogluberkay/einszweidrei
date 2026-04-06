@@ -10,9 +10,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Plus, User, Menu, X, ShieldCheck, ChevronDown, LogOut, LayoutGrid, Heart } from 'lucide-react';
+import { Search, Plus, User, Menu, X, ShieldCheck, ChevronDown, LogOut, LayoutGrid, Heart, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
+import { useNotifications } from '@/hooks/useNotifications';
 import { SITE_NAME, AUTH_NAV_LINKS } from '@/constants/config';
 import { cn, formatUsername } from '@/lib/helpers';
 
@@ -20,9 +21,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, profile, isAdmin, signOut } = useAuth();
   const { categoryTree = [] } = useCategories();
-  
-  // Static state for now to ensure stability
-  const unreadCount = 0;
+  const { unreadCount = 0 } = useNotifications() || {};
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -99,8 +98,15 @@ export default function Navbar() {
             ) : (
                <div className="relative group flex items-center">
                  <button className="flex items-center gap-2 p-1 rounded-2xl hover:bg-surface-secondary transition-all">
-                    <div className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-black text-xs border border-brand-100 shadow-sm">
+                    <div className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-black text-xs border border-brand-100 shadow-sm relative">
                        {safeUsername.charAt(0)}
+                       {unreadCount > 0 && (
+                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white
+                                          flex items-center justify-center text-[9px] font-bold rounded-full
+                                          ring-2 ring-white">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                       )}
                     </div>
                     <span className="text-sm font-bold text-ink pr-1 md:block hidden">{safeUsername}</span>
                  </button>
@@ -119,6 +125,11 @@ export default function Navbar() {
                         className="flex items-center gap-3 px-5 py-2.5 text-sm text-ink-secondary hover:text-brand-500 hover:bg-surface-secondary/50 transition-colors"
                       >
                         {link.label}
+                        {link.label === 'Inbox' && unreadCount > 0 && (
+                           <span className="ml-auto bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                              {unreadCount}
+                           </span>
+                        )}
                       </Link>
                     ))}
 

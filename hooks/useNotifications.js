@@ -2,76 +2,69 @@
  * hooks/useNotifications.js
  * ─────────────────────────────────────────────────────
  * Hook to manage real-time unread message notifications.
- * Hardened version to prevent infinite render loops.
+ * FINAL STABLE VERSION
  * ─────────────────────────────────────────────────────
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from './useAuth';
 
 export function useNotifications() {
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
+  const supabaseRef = useRef(null);
 
   useEffect(() => {
-    if (!user) {
-      setUnreadCount(0);
-      return;
+    if (!user?.id) {
+       setUnreadCount(0);
+       return;
     }
 
-    // 1. Stable client for this specific effect
-    const supabase = createClient();
+    // Initialize singleton supabase client for this effect
+    if (!supabaseRef.current) {
+       supabaseRef.current = createClient();
+    }
+    const supabase = supabaseRef.current;
 
-    const fetchInternal = async () => {
-      try {
-        const { count, error } = await supabase
-          .from('messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('receiver_id', user.id)
-          .eq('is_read', false);
-        
-        if (!error) setUnreadCount(count || 0);
-      } catch (err) {
-        console.warn('Silent fetch error:', err.message);
-      }
+    const fetchCount = async () => {
+       try {
+         const { count, error } = await supabase
+           .from('messages')
+           .select('*', { count: 'exact', head: true })
+           .eq('receiver_id', user.id)
+           .eq('is_read', false);
+         
+         if (!error) setUnreadCount(count || 0);
+       } catch (err) {
+         console.warn('Silent fetch error:', err.message);
+       }
     };
 
-    // Initial fetch
-    fetchInternal();
+    fetchCount();
 
-    // 2. Real-time subscription (Stable channel)
+    // Setup Realtime with stable channel name
+    const channelId = `sync-unread-${user.id}`;
     const channel = supabase
-      .channel(`inbox-sync-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
+       .channel(channelId)
+       .on('postgres_changes', {
           event: '*',
           schema: 'public',
           table: 'messages',
-          filter: `receiver_id=eq.${user.id}`,
-        },
-        () => {
-          fetchInternal();
-        }
-      )
-      .subscribe();
+          filter: `receiver_id=eq.${user.id}`
+       }, () => {
+          fetchCount();
+       })
+       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel).catch(() => {});
+       if (supabase && channel) {
+          supabase.removeChannel(channel).catch(() => {});
+       }
     };
-  }, [user?.id]); // Only re-run if USER ID changes, NOT the user object itself
+  }, [user?.id]); // Strictly dependent on User ID only
 
-  return { 
-    unreadCount: typeof unreadCount === 'number' ? unreadCount : 0,
-    refetch: () => {
-       // Manual trigger support
-       const s = createClient();
-       s.from('messages').select('*', { count: 'exact', head: true })
-        .eq('receiver_id', user?.id).eq('is_read', false)
-        .then(({ count }) => count !== undefined && setUnreadCount(count || 0));
-    }
-  };
+  return { unreadCount, refetch: () => {} };
 }

@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Search, Plus, MessageSquare, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/', icon: Home, authRequired: false },
@@ -24,9 +25,7 @@ const NAV_ITEMS = [
 export default function MobileNav() {
   const pathname = usePathname();
   const { user } = useAuth();
-  
-  // Static unreadCount for stability check
-  const unreadCount = 0;
+  const { unreadCount = 0 } = useNotifications() || {};
 
   if (pathname.startsWith('/admin')) return null;
 
