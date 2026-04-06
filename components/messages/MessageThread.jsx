@@ -220,7 +220,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
             No messages yet. Be the first to send a message!
           </p>
         ) : (
-          messages.map((msg) => {
+          messages.filter(m => m && m.id).map((msg) => {
             const isMine = msg.sender?.id === user?.id;
 
             return (
@@ -233,11 +233,11 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
                   <div
                     className={`px-4 py-2.5 rounded-2xl text-sm ${
                       isMine
-                        ? 'bg-brand-500 text-white rounded-br-md'
-                        : 'bg-white text-ink border border-surface-tertiary rounded-bl-md'
+                        ? 'bg-brand-500 text-white rounded-br-md shadow-[0_2px_4px_rgba(14,165,233,0.2)]'
+                        : 'bg-white text-ink border border-surface-tertiary rounded-bl-md shadow-sm'
                     }`}
                   >
-                    {msg.content}
+                    {msg.content || ''}
                   </div>
 
                   {/* Zaman ve sil butonu */}
@@ -245,11 +245,11 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
                     <span className="text-[10px] text-ink-tertiary">
                       {formatMessageDate(msg.created_at)}
                     </span>
-                    {isMine && (
+                    {isMine && msg.id && !String(msg.id).startsWith('temp-') && (
                       <button
                         onClick={() => handleDeleteMessage(msg.id)}
-                        aria-label="Mesajı sil"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-ink-tertiary hover:text-red-400"
+                        aria-label="Delete message"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-ink-tertiary hover:text-red-500"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
