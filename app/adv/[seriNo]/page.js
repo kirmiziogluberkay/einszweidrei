@@ -80,7 +80,7 @@ export default async function AdDetailPage({ params }) {
     if (profile?.role === 'admin') isAdmin = true;
   }
 
-  const canEdit = user && (user.id === ad.owner_id || isAdmin);
+  const canEdit = user && (user.id === ad.owner?.id || isAdmin);
 
   // Fetch all categories to identify parent names manually
   const { data: allCats } = await supabase
