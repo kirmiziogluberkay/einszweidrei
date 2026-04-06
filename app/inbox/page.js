@@ -101,6 +101,7 @@ export default function InboxPage() {
     setActiveThread(thread);
     setThreads(prev => prev.map(t => t.key === thread.key ? { ...t, unreadCount: 0 } : t));
 
+    // VERİTABANI GÜNCELLEMESİ - Kritik Alan
     try {
       let updateQuery = supabase
         .from('messages')
@@ -118,10 +119,15 @@ export default function InboxPage() {
         updateQuery = updateQuery.is('ad_id', null);
       }
 
-      const { error } = await updateQuery;
-      if (error) throw error;
+      const { data, error } = await updateQuery.select(); // Güncellemeyi doğrula
+      
+      if (error) {
+        console.error('Veritabanı Okundu Güncelleme Hatası (RLS?):', error.message);
+      } else {
+        console.log('Veritabanı başarıyla güncellendi:', data?.length, 'adet mesaj okundu işaretlendi.');
+      }
     } catch (err) {
-      console.error('Okundu işaretleme hatası:', err.message);
+      console.error('Update catch error:', err.message);
     }
   };
 
