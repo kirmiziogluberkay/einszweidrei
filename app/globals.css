@@ -32,9 +32,9 @@
     --shadow-xl: 0 20px 40px rgba(0,0,0,0.1);
 
     /* Parametric Ad Actions - BURADAN MÜDAHALE EDEBİLİRSİNİZ */
-    --btn-ad-h:  38px;      /* Düğme yüksekliği */
-    --btn-ad-fz: 0.8rem;    /* Font size (Punto) */
-    --btn-ad-px: 0.85rem;   /* Yatay iç boşluk */
+    --btn-ad-h:  40px;      /* Düğme yüksekliği (12px dikey hissi verir) */
+    --btn-ad-fz: 12px;      /* Font size (Punto) */
+    --btn-ad-px: 24px;      /* Yatay iç boşluk */
   }
 
   html {
