@@ -11,7 +11,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Plus, User, Menu, X, ShieldCheck, ChevronDown, LogOut } from 'lucide-react';
+import { Search, Plus, User, Menu, X, ShieldCheck, ChevronDown, LogOut, Mail } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
 import { SITE_NAME, AUTH_NAV_LINKS } from '@/constants/config';
@@ -133,14 +133,11 @@ export default function Navbar() {
                        <>
                           <div className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs border border-brand-100 shadow-sm relative shrink-0">
                              {usernameDisplay.charAt(0).toUpperCase()}
-                             {hasUnread && (
-                                <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-white shadow-[0_0_8px_rgba(239,68,68,0.3)]" />
-                             )}
                           </div>
                           <div className="flex items-center gap-1.5 md:flex hidden">
                              <span className="text-sm font-bold text-ink truncate max-w-[100px]">{usernameDisplay}</span>
                              {hasUnread && (
-                                <span className="w-2 h-2 bg-red-600 rounded-full shadow-[0_0_8px_rgba(220,38,38,0.5)]" />
+                                <Mail className="w-4 h-4 text-green-500 fill-green-50/20" />
                              )}
                           </div>
                        </>
