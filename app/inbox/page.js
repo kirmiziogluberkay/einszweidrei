@@ -1,95 +1,84 @@
 /**
  * app/inbox/page.js
  * ─────────────────────────────────────────────────────
- * Mesaj kutusu — kullanıcının tüm konuşmaları.
+ * Gelen kutusu ve mesajlaşma merkezi.
+ * Phase 5: Conversation Deletion Support
  * ─────────────────────────────────────────────────────
  */
 
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Trash2, MessageSquareOff, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import MessageThread from '@/components/messages/MessageThread';
-import { useNotifications } from '@/hooks/useNotifications';
 import { timeAgo, truncateText, formatUsername } from '@/lib/helpers';
-
+import MessageThread from '@/components/messages/MessageThread';
+import { Trash2, AlertCircle, MessageSquare } from 'lucide-react';
 
 export default function InboxPage() {
   const supabase = createClient();
-  const { user, loading: authLoading } = useAuth();
-  const notifications = useNotifications();
-  const refetchNotifications = notifications?.refetch;
-
+  const { user, authLoading } = useAuth();
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeThread, setActiveThread] = useState(null);
 
-  const handleSelectThread = (thread) => {
-    setActiveThread(thread);
-    // Clear unread count locally for instant feedback
-    setThreads(prev => prev.map(t => 
-      t.key === thread.key ? { ...t, unreadCount: 0 } : t
-    ));
-    if (typeof refetchNotifications === 'function') {
-      setTimeout(() => refetchNotifications(), 500);
-    }
-  };
-
+  /**
+   * Tüm konuşmaları (thread) çek.
+   */
   const fetchThreads = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    if (!user) return;
     setLoading(true);
 
     try {
-      const { data: messages, error: msgError } = await supabase
+      const { data: messages, error } = await supabase
         .from('messages')
-        .select(`
-          id, content, created_at, is_read,
-          sender:profiles!sender_id(id, username),
-          receiver:profiles!receiver_id(id, username),
-          ad:ads!ad_id(id, serial_number, title)
-        `)
+        .select('*')
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
-      if (msgError) throw msgError;
+      if (error) throw error;
 
-      const threadMap = {};
-      (messages || []).forEach((msg) => {
-        if (!msg.ad) return;
+      const grouped = {};
+      messages.forEach(msg => {
+        const otherId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+        const key = `${msg.ad_id}_${otherId}`;
 
-        const otherUser = msg.sender?.id === user.id ? msg.receiver : msg.sender;
-        if (!otherUser) return;
-
-        const otherId     = otherUser.id;
-        const otherName   = otherUser.username || 'Unknown User';
-        
-        const key = `${msg.ad.id}_${otherId}`;
-
-        if (!threadMap[key]) {
-          threadMap[key] = {
+        if (!grouped[key]) {
+          grouped[key] = {
             key,
-            adId:        msg.ad.id,
-            adTitle:     msg.ad.title,
-            serialNumber:msg.ad.serial_number,
+            ad_id: msg.ad_id,
             otherId,
-            otherName,
-            lastMessage: msg.content || '',
-            lastTime:    msg.created_at,
-            unreadCount: (!msg.is_read && msg.receiver?.id === user.id) ? 1 : 0,
+            lastMessage: msg.content,
+            lastTime: msg.created_at,
+            unreadCount: 0,
+            otherName: 'User'
           };
-        } else if (!msg.is_read && msg.receiver?.id === user.id) {
-          threadMap[key].unreadCount += 1;
+        }
+
+        if (msg.receiver_id === user.id && !msg.is_read) {
+          grouped[key].unreadCount++;
         }
       });
 
-      setThreads(Object.values(threadMap));
+      const threadsArr = Object.values(grouped);
+      const profileIds = [...new Set(threadsArr.map(t => t.otherId))];
+
+      if (profileIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, username')
+          .in('id', profileIds);
+
+        profiles?.forEach(p => {
+          threadsArr.forEach(t => {
+            if (t.otherId === p.id) t.otherName = p.username;
+          });
+        });
+      }
+
+      setThreads(threadsArr);
     } catch (err) {
-      console.error('Error fetching threads:', err);
+      console.error('Fetch threads error:', err);
     } finally {
       setLoading(false);
     }
@@ -98,95 +87,66 @@ export default function InboxPage() {
   useEffect(() => {
     if (!authLoading && user) {
       fetchThreads();
-    } else if (!authLoading && !user) {
-      setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading]);
 
-  // 2. Real-time subscription to keep Inbox list in sync
+  // Real-time sync for Inbox list
   useEffect(() => {
     if (!user) return;
-
     const channel = supabase
       .channel(`inbox-sync-list-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages',
-          filter: `receiver_id=eq.${user.id}`,
-        },
-        () => {
-          // Re-fetch threads from scratch to get fresh read/unread statuses
-          fetchThreads();
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` }, () => {
+        fetchThreads();
+      })
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel).catch(() => {});
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { supabase.removeChannel(channel).catch(() => {}); };
   }, [user?.id]);
 
+  /**
+   * Sohbeti Sil
+   */
   const handleDeleteThread = async (adId, otherId) => {
-    if (!confirm('Are you sure you want to delete this chat?')) return;
+    if (!confirm('Are you sure you want to delete this conversation? This will clear all messages.')) return;
 
-    await supabase
-      .from('messages')
-      .delete()
-      .eq('ad_id', adId)
-      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`);
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('ad_id', adId)
+        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${user.id})`);
 
-    setThreads((prev) =>
-      prev.filter((t) => !(t.adId === adId && t.otherId === otherId))
-    );
-    if (activeThread?.adId === adId && activeThread?.otherId === otherId) {
-      setActiveThread(null);
+      if (error) throw error;
+      
+      // Update local state
+      setThreads(prev => prev.filter(t => t.ad_id !== adId || t.otherId !== otherId));
+      if (activeThread?.ad_id === adId && activeThread?.otherId === otherId) {
+        setActiveThread(null);
+      }
+    } catch (err) {
+      alert('Delete failed: ' + err.message);
     }
   };
 
-  if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
-          <p className="text-xs text-ink-tertiary font-medium">Loading conversations...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleSelectThread = (thread) => {
+    setActiveThread(thread);
+    setThreads(prev => prev.map(t => t.key === thread.key ? { ...t, unreadCount: 0 } : t));
+  };
 
-  if (!user) {
-    return (
-      <div className="container-app py-16 text-center">
-        <div className="card p-12 max-w-md mx-auto shadow-sm">
-          <MessageSquareOff className="w-12 h-12 text-ink-tertiary mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-ink mb-2">Login Required</h2>
-          <p className="text-ink-secondary text-sm mb-6">You need to be logged in to view your messages.</p>
-          <button onClick={() => window.location.href = '/login'} className="btn-primary w-full py-3 h-12 text-base">Log In</button>
-        </div>
-      </div>
-    );
-  }
+  if (authLoading || loading) return <div className="container-app py-12 text-center text-ink-tertiary">Loading inbox...</div>;
+  if (!user) return <div className="container-app py-12 text-center">Please login to view your messages.</div>;
 
   return (
     <div className="container-app py-8">
-      <h1 className="text-2xl font-bold text-ink mb-8">Inbox</h1>
+      <h1 className="text-2xl font-black text-ink mb-8">Messages</h1>
 
       {threads.length === 0 ? (
-        <div className="card p-20 text-center bg-white border-dashed border-2 border-surface-tertiary">
-          <div className="w-16 h-16 bg-surface-secondary rounded-full flex items-center justify-center mx-auto mb-4">
-            <MessageSquareOff className="w-8 h-8 text-ink-tertiary" />
-          </div>
-          <p className="text-ink font-bold">Your inbox is empty</p>
-          <p className="text-ink-secondary text-sm mt-1">When you message people, your chats will appear here.</p>
+        <div className="card p-12 text-center flex flex-col items-center gap-4">
+          <MessageSquare className="w-12 h-12 text-surface-tertiary" />
+          <p className="text-ink-tertiary font-medium">Your inbox is empty.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[75vh] min-h-[600px]">
-          {/* Sidebar */}
+          {/* Conversatıons Sidebar */}
           <div className="md:col-span-1 card overflow-hidden flex flex-col bg-white">
             <div className="p-4 border-b border-surface-tertiary bg-surface-secondary/20">
               <h2 className="font-bold text-ink text-sm">Conversations</h2>
@@ -197,39 +157,56 @@ export default function InboxPage() {
                   key={thread.key}
                   className={`relative group cursor-pointer p-4 hover:bg-surface-secondary transition-all border-l-4 ${
                     activeThread?.key === thread.key ? 'bg-surface-secondary border-brand-500' : 'border-transparent'
-                  } ${thread.unreadCount > 0 ? 'bg-brand-50/50' : ''}`}
+                  } ${thread.unreadCount > 0 ? 'bg-brand-50/50' : 'bg-white'}`}
                   onClick={() => handleSelectThread(thread)}
                 >
                   {thread.unreadCount > 0 && (
                     <span className="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full shadow-sm" />
                   )}
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-sm font-bold flex-shrink-0 border-2 border-white shadow-sm">
-                      {formatUsername(thread.otherName).charAt(0) || "?"}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1 mb-0.5">
-                        <p className={`text-sm truncate ${thread.unreadCount > 0 ? "font-bold" : "font-semibold"} text-ink`}>{formatUsername(thread.otherName)}</p>
-                        <span className="text-[10px] text-ink-tertiary whitespace-nowrap">{timeAgo(thread.lastTime)}</span>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-sm font-bold flex-shrink-0 border-2 border-white shadow-sm">
+                        {thread.otherName.charAt(0).toUpperCase()}
                       </div>
-                      <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-ink font-medium" : "text-ink-tertiary"}`}>{truncateText(thread.lastMessage || "", 40)}</p>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1 mb-0.5">
+                          <p className={`text-sm truncate ${thread.unreadCount > 0 ? "font-bold" : "font-semibold"} text-ink`}>
+                            {formatUsername(thread.otherName)}
+                          </p>
+                        </div>
+                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-ink font-medium" : "text-ink-tertiary"}`}>
+                          {truncateText(thread.lastMessage || "", 40)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                       <span className="text-[10px] text-ink-tertiary whitespace-nowrap">{timeAgo(thread.lastTime)}</span>
+                       <button 
+                         onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteThread(thread.ad_id, thread.otherId);
+                         }}
+                         className="p-1.5 text-ink-tertiary hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                       >
+                          <Trash2 className="w-4 h-4" />
+                       </button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          {/* Main Thread */}
+
+          {/* Active Thread */}
           <div className="md:col-span-2 card overflow-hidden flex flex-col bg-white">
             {activeThread ? (
-              <MessageThread adId={activeThread.adId} adTitle={activeThread.adTitle} receiverId={activeThread.otherId} receiverName={activeThread.otherName} />
+              <MessageThread adId={activeThread.ad_id} receiverId={activeThread.otherId} />
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-ink-tertiary p-12 text-center">
-                <div className="w-20 h-20 bg-surface-secondary rounded-full flex items-center justify-center mb-6 opacity-60">
-                  <Loader2 className="w-8 h-8 opacity-20" />
+              <div className="flex-1 flex flex-col items-center justify-center p-12 text-ink-tertiary gap-4">
+                <div className="w-16 h-16 rounded-full bg-surface-secondary flex items-center justify-center">
+                   <MessageSquare className="w-8 h-8 opacity-20" />
                 </div>
-                <h3 className="text-lg font-bold text-ink mb-2">No conversation selected</h3>
-                <p className="text-sm text-ink-secondary max-w-xs">Select one from the list to start chatting.</p>
+                <p className="font-medium">Select a conversation to start messaging</p>
               </div>
             )}
           </div>
