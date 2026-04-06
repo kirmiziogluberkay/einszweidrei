@@ -1,4 +1,4 @@
-// update green mail
+// update green mail v2
 /**
  * components/layout/Navbar.jsx
  * ─────────────────────────────────────────────────────
