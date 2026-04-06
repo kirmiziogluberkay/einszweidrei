@@ -13,7 +13,7 @@ import ShareButtons from '@/components/ads/ShareButtons';
 import AdDetailClient from './AdDetailClient';
 import ContactButton from './ContactButton';
 import DeleteAdButton from './DeleteAdButton';
-import { Pencil, CheckCircle2, Tag as TagIcon } from 'lucide-react';
+import { Pencil, CheckCircle2 } from 'lucide-react';
 import { formatPrice, formatDate, formatUsername } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
 
@@ -56,7 +56,7 @@ export default async function AdDetailPage({ params }) {
       images,
       status,
       payment_methods,
-      tags,
+      payment_methods,
       created_at,
       updated_at,
       owner:profiles!owner_id(id, username, phone),
@@ -249,18 +249,6 @@ export default async function AdDetailPage({ params }) {
                     <dd className="text-ink">{formatDate(ad.created_at)}</dd>
                   </div>
                 </dl>
-
-                {/* Tags (if any) */}
-                {ad.tags && ad.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-2 border-t border-surface-tertiary">
-                    {ad.tags.map(tag => (
-                      <div key={tag} className="flex items-center gap-1.5 px-3 py-1 bg-brand-50 text-brand-600 text-[11px] font-bold uppercase tracking-wide rounded-full border border-brand-100/50">
-                        <TagIcon className="w-3 h-3" />
-                        {tag.toLowerCase()}
-                      </div>
-                    ))}
-                  </div>
-                )}
 
                 {/* Payment Methods */}
                 {ad.payment_methods && ad.payment_methods.length > 0 && (

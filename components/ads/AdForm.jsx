@@ -50,7 +50,6 @@ export default function AdForm({ initialData = null }) {
     price:       initialData?.price       ?? '',
     category_id: initialData?.category_id ?? '',
     payment_methods: initialData?.payment_methods ?? [],
-    tags:            initialData?.tags?.join(', ') ?? '',
   });
 
   /** Yüklenmiş fotoğrafların URL'leri (Supabase Storage) */
@@ -209,7 +208,6 @@ export default function AdForm({ initialData = null }) {
       category_id: formData.category_id || null,
       images:      uploadedImages,
       payment_methods: formData.payment_methods,
-      tags:            (formData.tags || '').split(',').map(t => t.trim().toLowerCase()).filter(t => t !== ''),
       // Admin başkasının ilanını güncellerken ilan sahibini değiştirmemek için:
       owner_id:    initialData?.owner_id || user.id,
     };
@@ -411,58 +409,40 @@ export default function AdForm({ initialData = null }) {
         </div>
       </div>
 
-      {/* ── Ödeme Yöntemleri & Tagler ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {/* Ödeme Yöntemleri */}
-        <div>
-          <label className="label">Payment Methods {(!formData.price || parseFloat(formData.price) === 0) ? '(Disabled for Free ads)' : '*'}</label>
-          <div className="flex flex-wrap gap-4 mt-2">
-            <label className={cn(
-              "flex items-center gap-2 cursor-pointer group",
-              (!formData.price || parseFloat(formData.price) === 0) && "opacity-50 cursor-not-allowed"
-            )}>
-              <input
-                type="checkbox"
-                name="payment_methods"
-                value="Cash"
-                disabled={!formData.price || parseFloat(formData.price) === 0}
-                checked={formData.payment_methods.includes('Cash')}
-                onChange={handleChange}
-                className="w-5 h-5 rounded border-surface-tertiary text-brand-500 focus:ring-brand-500"
-              />
-              <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors">Cash</span>
-            </label>
-            <label className={cn(
-              "flex items-center gap-2 cursor-pointer group",
-              (!formData.price || parseFloat(formData.price) === 0) && "opacity-50 cursor-not-allowed"
-            )}>
-              <input
-                type="checkbox"
-                name="payment_methods"
-                value="PayPal"
-                disabled={!formData.price || parseFloat(formData.price) === 0}
-                checked={formData.payment_methods.includes('PayPal')}
-                onChange={handleChange}
-                className="w-5 h-5 rounded border-surface-tertiary text-brand-500 focus:ring-brand-500"
-              />
-              <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors">PayPal</span>
-            </label>
-          </div>
-        </div>
-
-        {/* Tagler */}
-        <div>
-          <label htmlFor="ad-tags" className="label">Tags</label>
-          <input
-            id="ad-tags"
-            type="text"
-            name="tags"
-            value={formData.tags}
-            onChange={handleChange}
-            placeholder="e.g. guitar, music, wood (separate by comma)"
-            className="input"
-          />
-          <p className="text-xs text-ink-tertiary mt-1">Keywords for better searchability.</p>
+      {/* ── Ödeme Yöntemleri ── */}
+      <div>
+        <label className="label">Payment Methods {(!formData.price || parseFloat(formData.price) === 0) ? '(Disabled for Free ads)' : '*'}</label>
+        <div className="flex flex-wrap gap-4 mt-2">
+          <label className={cn(
+            "flex items-center gap-2 cursor-pointer group",
+            (!formData.price || parseFloat(formData.price) === 0) && "opacity-50 cursor-not-allowed"
+          )}>
+            <input
+              type="checkbox"
+              name="payment_methods"
+              value="Cash"
+              disabled={!formData.price || parseFloat(formData.price) === 0}
+              checked={formData.payment_methods.includes('Cash')}
+              onChange={handleChange}
+              className="w-5 h-5 rounded border-surface-tertiary text-brand-500 focus:ring-brand-500"
+            />
+            <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors">Cash</span>
+          </label>
+          <label className={cn(
+            "flex items-center gap-2 cursor-pointer group",
+            (!formData.price || parseFloat(formData.price) === 0) && "opacity-50 cursor-not-allowed"
+          )}>
+            <input
+              type="checkbox"
+              name="payment_methods"
+              value="PayPal"
+              disabled={!formData.price || parseFloat(formData.price) === 0}
+              checked={formData.payment_methods.includes('PayPal')}
+              onChange={handleChange}
+              className="w-5 h-5 rounded border-surface-tertiary text-brand-500 focus:ring-brand-500"
+            />
+            <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors">PayPal</span>
+          </label>
         </div>
       </div>
 

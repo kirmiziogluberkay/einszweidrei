@@ -15,7 +15,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import ShareButtons from '@/components/ads/ShareButtons';
-import { CheckCircle2, Tag as TagIcon, PencilLine } from 'lucide-react';
+import { CheckCircle2, PencilLine } from 'lucide-react';
 import AdDetailClient from './AdDetailClient';
 import ContactButton from './ContactButton';
 import { formatPrice, formatDate } from '@/lib/helpers';
@@ -64,7 +64,7 @@ export default async function AdDetailPage({ params }) {
       images,
       status,
       payment_methods,
-      tags,
+      payment_methods,
       created_at,
       updated_at,
       owner:profiles!owner_id(id, username, phone),
@@ -173,23 +173,11 @@ export default async function AdDetailPage({ params }) {
                   <dd className="text-ink">{ad.category.name}</dd>
                 </div>
               )}
-              <div className="flex justify-between">
-                <dt className="text-ink-secondary">Ad Date</dt>
-                <dd className="text-ink">{formatDate(ad.created_at)}</dd>
-              </div>
-            </dl>
-
-            {/* Tags (if any) */}
-            {ad.tags && ad.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-2">
-                {ad.tags.map(tag => (
-                  <div key={tag} className="flex items-center gap-1.5 px-3 py-1 bg-brand-50 text-brand-600 text-[11px] font-bold uppercase tracking-wide rounded-full border border-brand-100/50">
-                    <TagIcon className="w-3 h-3" />
-                    {tag.toLowerCase()}
+                  <div className="flex justify-between">
+                    <dt className="text-ink-secondary">Ad Date</dt>
+                    <dd className="text-ink">{formatDate(ad.created_at)}</dd>
                   </div>
-                ))}
-              </div>
-            )}
+                </dl>
 
             {/* Payment Methods */}
             {ad.payment_methods && ad.payment_methods.length > 0 && (
