@@ -141,10 +141,7 @@ export default function Navbar() {
 
                  {/* User Dropdown */}
                  <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-[var(--shadow-xl)] border border-surface-tertiary py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
-                    <div className="px-4 py-2 mb-1 border-b border-surface-tertiary/50">
-                       <p className="text-xs text-ink-tertiary font-medium">Account</p>
-                       <p className="font-bold text-ink truncate">{usernameDisplay}</p>
-                    </div>
+
                     {(AUTH_NAV_LINKS || []).map((link) => (
                       <Link key={link.href} href={link.href} className="flex justify-between items-center px-4 py-2 text-sm text-ink-secondary hover:text-brand-500 hover:bg-surface-secondary/50 transition-colors">
                         <span>{link.label}</span>
