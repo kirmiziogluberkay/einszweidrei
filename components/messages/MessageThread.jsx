@@ -110,11 +110,15 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
 
   // Mesaj listesi degisince de okundu isaretle (yeni mesaj gelirse)
   useEffect(() => {
-    // Herhangi bir okunmamış mesaj VEYA bana gelen bir mesaj varsa okunmuş say
-    if (messages.some(m => !m.is_read && m.receiver_id === user?.id)) {
+    if (!user?.id || loading || messages.length === 0) return;
+    
+    // Bana gelen ve henüz okunmamış herhangi bir mesaj var mı?
+    const hasUnreadForMe = messages.some(m => !m.is_read && m.receiver_id === user.id);
+    
+    if (hasUnreadForMe) {
       markAsRead();
     }
-  }, [messages, user?.id]);
+  }, [messages, user?.id, loading]);
 
   // Yeni mesaj gelince en alta kaydır
   useEffect(() => {
