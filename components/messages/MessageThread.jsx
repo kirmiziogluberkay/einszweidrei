@@ -9,6 +9,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { Send, Loader2, Trash2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,6 +32,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
   const [messages, setMessages] = useState([]);
   const [content, setContent]   = useState('');
   const [loading, setLoading]   = useState(true);
+  const [adInfo, setAdInfo]     = useState(null);
   const [sending, setSending]   = useState(false);
   const [error, setError]       = useState(null);
 
@@ -53,6 +55,15 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
 
     setMessages(data ?? []);
     setLoading(false);
+
+    // Fetch ad info for preview
+    const { data: adData } = await supabase
+      .from('ads')
+      .select('id, title, price, currency, images, serial_number')
+      .eq('id', adId)
+      .single();
+    
+    if (adData) setAdInfo(adData);
 
     // Okunmamış mesajları okundu olarak işaretle
     markAsRead();
@@ -147,10 +158,36 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
 
   return (
     <div className="flex flex-col h-full">
+      {/* ── İlan Önizlemesi ── */}
+      {adInfo && (
+        <Link 
+          href={`/adv/${adInfo.serial_number}`}
+          className="flex items-center gap-3 p-3 bg-surface-secondary border-b border-surface-tertiary hover:bg-surface-tertiary transition-colors"
+        >
+          <div className="w-12 h-12 rounded-lg bg-white overflow-hidden flex-shrink-0 border border-surface-tertiary/50">
+            {adInfo.images?.[0] && (
+              <img src={adInfo.images[0]} alt={adInfo.title} className="w-full h-full object-cover" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-ink truncate">{adInfo.title}</p>
+            <p className="text-[10px] text-brand-600 font-semibold mt-0.5">
+              {adInfo.price ? `${adInfo.price} ${adInfo.currency}` : 'Free'}
+            </p>
+          </div>
+          <div className="text-[10px] text-ink-tertiary flex items-center gap-1">
+            <span>View Ad</span>
+            <span className="text-sm">›</span>
+          </div>
+        </Link>
+      )}
+
       {/* ── Başlık ── */}
-      <div className="px-4 py-3 border-b border-surface-tertiary">
-        <p className="text-sm font-medium text-ink">{receiverName}</p>
-        <p className="text-xs text-ink-tertiary line-clamp-1">{adTitle}</p>
+      <div className="px-4 py-3 border-b border-surface-tertiary flex items-center justify-between bg-white">
+        <div>
+          <p className="text-sm font-bold text-ink">{receiverName}</p>
+          <p className="text-[10px] text-ink-tertiary">Chatting about this ad</p>
+        </div>
       </div>
 
       {/* ── Mesaj listesi ── */}
