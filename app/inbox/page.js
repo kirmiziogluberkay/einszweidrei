@@ -126,20 +126,34 @@ export default function InboxPage() {
     if (!confirm('Are you sure you want to delete this conversation? This will clear all messages.')) return;
 
     try {
-      let deleteQuery = supabase
+      // 1. Önce bu konuşmadaki tüm mesajların ID'lerini bul (En güvenli yöntem)
+      let fetchMsgQuery = supabase
         .from('messages')
-        .delete()
+        .select('id')
         .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${user.id})`);
 
       // İlan ID varsa ekle, yoksa (Admin mesajları gibi) null kontrolü yap
       if (adId && adId !== 'no-ad' && adId !== 'null') {
-        deleteQuery = deleteQuery.eq('ad_id', adId);
+        fetchMsgQuery = fetchMsgQuery.eq('ad_id', adId);
       } else {
-        deleteQuery = deleteQuery.is('ad_id', null);
+        fetchMsgQuery = fetchMsgQuery.is('ad_id', null);
       }
 
-      const { error } = await deleteQuery;
-      if (error) throw error;
+      const { data: messagesToDelete, error: fetchError } = await fetchMsgQuery;
+      
+      if (fetchError || !messagesToDelete || messagesToDelete.length === 0) {
+        throw new Error('Sohbet verisi bulunamadı.');
+      }
+
+      const msgIds = messagesToDelete.map(m => m.id);
+
+      // 2. ID listesini kullanarak kalıcı olarak sil
+      const { error: deleteError } = await supabase
+        .from('messages')
+        .delete()
+        .in('id', msgIds);
+
+      if (deleteError) throw deleteError;
       
       // Update local state
       setThreads(prev => prev.filter(t => t.otherId !== otherId || (adId && t.ad_id !== adId)));
@@ -147,11 +161,10 @@ export default function InboxPage() {
         setActiveThread(null);
       }
       
-      // Refresh to be sure
-      fetchThreads();
+      fetchThreads(); // Listeyi yenile
     } catch (err) {
       console.error('Delete failed:', err.message);
-      alert('Delete failed. Please try again.');
+      alert('Delete failed. Possible permission issue.');
     }
   };
 
