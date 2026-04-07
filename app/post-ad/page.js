@@ -7,6 +7,8 @@
  * ─────────────────────────────────────────────────────
  */
 
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
 import AdForm from '@/components/ads/AdForm';
 
 /** @type {import('next').Metadata} */
@@ -15,7 +17,14 @@ export const metadata = {
   description: 'Create a new ad and sell or rent out your items.',
 };
 
-export default function PostAdPage() {
+export default async function PostAdPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/register');
+  }
+
   return (
     <div className="container-app py-8 max-w-2xl">
 
