@@ -225,12 +225,6 @@ export default function MyAdsPage() {
                              <Lock className="w-4 h-4" />
                           </button>
                           <Link
-                            href={`${AD_URL_PREFIX}/${ad.serial_number}`}
-                            className="p-2 rounded-xl text-ink-tertiary hover:text-ink hover:bg-surface-secondary transition-colors"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Link>
-                          <Link
                             href={`${AD_URL_PREFIX}/${ad.serial_number}/duzenle`}
                             className="p-2 rounded-xl text-ink-tertiary hover:text-brand-500 hover:bg-brand-50 transition-colors"
                           >
