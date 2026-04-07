@@ -189,14 +189,17 @@ export default function MyAdsPage() {
                           </p>
                         </div>
 
-                        <span className={`font-bold text-[10px] shrink-0 ml-2 ${ad.status === 'active' ? 'text-green-600' :
-                            ad.status === 'reserved' ? 'text-amber-600' :
-                              ad.status === 'rented' ? 'text-blue-600' :
-                                ad.status === 'sold' ? 'text-red-500' :
-                                  'text-ink-tertiary'
-                          }`}>
-                          {statusInfo.label}
-                        </span>
+                        <div className="flex flex-col items-end gap-0.5 ml-2">
+                          <span className="text-[9px] font-bold text-ink-tertiary uppercase tracking-wider">Status</span>
+                          <span className={`font-bold text-[10px] whitespace-nowrap ${ad.status === 'active' ? 'text-green-600' :
+                              ad.status === 'reserved' ? 'text-amber-600' :
+                                ad.status === 'rented' ? 'text-blue-600' :
+                                  ad.status === 'sold' ? 'text-red-500' :
+                                    'text-ink-tertiary'
+                            }`}>
+                            {statusInfo.label}
+                          </span>
+                        </div>
 
                         <div className="flex items-center gap-1 flex-shrink-0">
                           {!getRootSlug(ad.category_id).includes('rental') && (
