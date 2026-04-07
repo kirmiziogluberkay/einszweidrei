@@ -331,6 +331,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
               maxLength={1000}
               className="input flex-1"
               id="message-input"
+              autoComplete="off"
             />
             <button
               type="submit"
