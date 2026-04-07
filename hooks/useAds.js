@@ -73,13 +73,14 @@ export function useAds(filters = {}) {
         category:categories(id, name, slug)
       `, { count: 'exact' });
 
-    // Durum filtresi — Artık reserved ve rented tüm ziyaretçilere her yerde görünür.
-    // Sadece 'sold' olanlar genel aramadan gizlenir.
-    query = query.in('status', ['active', 'reserved', 'rented']);
-    
-    // Eğer kişi kendi ilanlarına bakıyorsa, satılmış (sold) olanları da görsün
-    if (ownerId) {
-      // Not: ownerId filtresi aşağıda eq('owner_id') olarak zaten ekleniyor.
+    // Durum filtresi - Genel ziyaretçiler sadece 'active' ilanları görür.
+    // İlan sahibi (ownerId varsa) kendi profilinde tüm durumları görür.
+    const finalOwnerId = ownerId || owner_id;
+    if (!finalOwnerId) {
+      query = query.eq('status', 'active');
+    } else {
+      // Profil sayfasında her şey görünür (aktif, rezerve, kiralandı, pasif, satıldı)
+      query = query.in('status', ['active', 'reserved', 'rented', 'passive', 'sold']);
     }
 
     query = query.order('created_at', { ascending: false });
@@ -93,7 +94,6 @@ export function useAds(filters = {}) {
     }
 
     // İlan sahibi filtresi (profil sayfasında kendi ilanları)
-    const finalOwnerId = owner_id || ownerId;
     if (finalOwnerId) {
       query = query.eq('owner_id', finalOwnerId);
     }
