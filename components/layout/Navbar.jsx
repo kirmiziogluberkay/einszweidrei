@@ -115,7 +115,7 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-4 shrink-0">
-            <Link href="/ilan-ver" className="btn-primary py-2 px-5 text-sm h-10 gap-1.5 md:flex hidden rounded-xl">
+            <Link href="/post-ad" className="btn-primary py-2 px-5 text-sm h-10 gap-1.5 md:flex hidden rounded-xl">
                <Plus className="w-4 h-4" />
                <span className="font-bold">Post Ad</span>
             </Link>

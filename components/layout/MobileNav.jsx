@@ -20,7 +20,7 @@ import { createClient } from '@/lib/supabase/client';
 const NAV_ITEMS = [
   { label: 'Home', href: '/', icon: Home, authRequired: false },
   { label: 'Search', href: '/ara', icon: Search, authRequired: false },
-  { label: 'Post Ad', href: '/ilan-ver', icon: Plus, authRequired: true, featured: true },
+  { label: 'Post Ad', href: '/post-ad', icon: Plus, authRequired: true, featured: true },
   { label: 'Inbox', href: '/inbox', icon: MessageSquare, authRequired: true },
   { label: 'Profile', href: '/myprofile', icon: User, authRequired: false },
 ];
