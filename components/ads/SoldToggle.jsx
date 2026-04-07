@@ -35,17 +35,18 @@ export default function SoldToggle({ adId, currentStatus }) {
       onClick={handleToggleSold}
       disabled={loading}
       className={`btn-owner-action w-full transition-all duration-200
-        ${isSold 
-          ? 'bg-red-50 border-red-100 text-red-600 hover:bg-red-100' 
+        ${!isSold
+          ? 'text-red-600 bg-red-50 border-red-100 hover:bg-red-100'
           : 'bg-white border-surface-tertiary text-ink hover:bg-surface-secondary'
         } disabled:opacity-50`}
+      title={isSold ? 'For Sale' : 'Sold'}
     >
       {loading ? (
         <Loader2 className="w-4 h-4 animate-spin" />
       ) : (
         <>
-          {isSold ? <CheckCircle className="w-4 h-4 text-red-500" /> : <Circle className="w-4 h-4 text-ink-tertiary group-hover:text-red-500" />}
-          <span>{isSold ? 'Sold' : 'Mark Sold'}</span>
+          {isSold ? <Circle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4 text-red-500" />}
+          <span>{isSold ? 'For Sale' : 'Sold'}</span>
         </>
       )}
     </button>

@@ -22,16 +22,16 @@ import { formatPrice, buildAdUrl, timeAgo } from '@/lib/helpers';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES, AD_STATUSES, AD_URL_PREFIX } from '@/constants/config';
 
 export default function MyAdsPage() {
-  const supabase          = createClient();
+  const supabase = createClient();
   const { user, loading: authLoading } = useAuth();
-  const { categories }    = useCategories();
+  const { categories } = useCategories();
 
   const { ads, loading: adsLoading, refetch } = useAds({
     owner_id: user?.id,
   });
 
-  const [msg,       setMsg]       = useState(null);
-  const [msgType,   setMsgType]   = useState('success');
+  const [msg, setMsg] = useState(null);
+  const [msgType, setMsgType] = useState('success');
 
   // ── İlanları Grupla ──
   const getRootSlug = (cId) => {
@@ -77,9 +77,9 @@ export default function MyAdsPage() {
     let targetStatus = 'passive';
     if (rootSlug.includes('rental')) targetStatus = 'rented';
     else if (rootSlug.includes('second-hand')) targetStatus = 'reserved';
-    
+
     const newStatus = currentStatus === 'active' ? targetStatus : 'active';
-    
+
     const { error } = await supabase
       .from('ads')
       .update({ status: newStatus })
@@ -120,11 +120,10 @@ export default function MyAdsPage() {
       </div>
 
       {msg && (
-        <div className={`flex items-start gap-2 p-4 rounded-2xl text-sm mb-6 ${
-          msgType === 'success'
+        <div className={`flex items-start gap-2 p-4 rounded-2xl text-sm mb-6 ${msgType === 'success'
             ? 'bg-green-50 border border-green-100 text-green-600'
             : 'bg-red-50 border border-red-100 text-red-600'
-        }`}>
+          }`}>
           <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>{msg}</span>
         </div>
@@ -147,9 +146,9 @@ export default function MyAdsPage() {
         <div className="space-y-10">
           {[
             { title: 'Second Hand Items', list: secondHandAds },
-            { title: 'Rental Items',      list: rentalAds },
-            { title: 'Rented Items',      list: rentedAds },
-            { title: 'Sold Items',        list: soldAds }
+            { title: 'Rental Items', list: rentalAds },
+            { title: 'Rented Items', list: rentedAds },
+            { title: 'Sold Items', list: soldAds }
           ].map((section) => (
             section.list.length > 0 && (
               <div key={section.title}>
@@ -165,12 +164,12 @@ export default function MyAdsPage() {
                         <Link href={`${AD_URL_PREFIX}/${ad.serial_number}`} className="flex-shrink-0">
                           <div className="relative w-16 h-16 rounded-xl bg-surface-secondary overflow-hidden hover:opacity-80 transition-opacity">
                             {ad.images?.[0] ? (
-                              <Image 
-                                src={ad.images[0]} 
-                                alt={ad.title} 
-                                fill 
+                              <Image
+                                src={ad.images[0]}
+                                alt={ad.title}
+                                fill
                                 sizes="64px"
-                                className="object-cover" 
+                                className="object-cover"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-ink-tertiary">
@@ -189,40 +188,37 @@ export default function MyAdsPage() {
                           </p>
                         </div>
 
-                        <span className={`font-bold text-[10px] shrink-0 ml-2 ${
-                          ad.status === 'active'   ? 'text-green-600' :
-                          ad.status === 'reserved' ? 'text-amber-600' :
-                          ad.status === 'rented'   ? 'text-blue-600' :
-                          ad.status === 'sold'     ? 'text-red-500' :
-                          'text-ink-tertiary'
-                        }`}>
+                        <span className={`font-bold text-[10px] shrink-0 ml-2 ${ad.status === 'active' ? 'text-green-600' :
+                            ad.status === 'reserved' ? 'text-amber-600' :
+                              ad.status === 'rented' ? 'text-blue-600' :
+                                ad.status === 'sold' ? 'text-red-500' :
+                                  'text-ink-tertiary'
+                          }`}>
                           {statusInfo.label}
                         </span>
 
                         <div className="flex items-center gap-1 flex-shrink-0">
                           {!getRootSlug(ad.category_id).includes('rental') && (
-                             <button
-                               onClick={() => handleMarkSold(ad.id, ad.status)}
-                               title="Mark as Sold"
-                               className={`p-2 rounded-xl transition-colors ${
-                                 ad.status === 'sold'
-                                   ? 'text-red-500 bg-red-50' 
-                                   : 'text-ink-tertiary hover:text-red-500 hover:bg-red-50'
-                               }`}
-                             >
-                                {ad.status === 'sold' ? <CheckCircle className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
-                             </button>
+                            <button
+                              onClick={() => handleMarkSold(ad.id, ad.status)}
+                              title={ad.status === 'sold' ? 'For Sale' : 'Sold'}
+                              className={`p-2 rounded-xl transition-colors ${ad.status !== 'sold'
+                                  ? 'text-red-500 bg-red-50'
+                                  : 'text-ink-tertiary hover:bg-surface-secondary'
+                                }`}
+                            >
+                              {ad.status === 'sold' ? <Circle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                            </button>
                           )}
                           <button
-                             onClick={() => handleToggleStatus(ad.id, ad.status, ad.category_id)}
-                             title="Toggle Reserved/Rented"
-                             className={`p-2 rounded-xl transition-colors ${
-                               (ad.status === 'reserved' || ad.status === 'rented')
-                                 ? 'text-brand-500 bg-brand-50' 
-                                 : 'text-ink-tertiary hover:text-brand-500 hover:bg-surface-secondary'
-                             }`}
+                            onClick={() => handleToggleStatus(ad.id, ad.status, ad.category_id)}
+                            title="Toggle Reserved/Rented"
+                            className={`p-2 rounded-xl transition-colors ${(ad.status === 'reserved' || ad.status === 'rented')
+                                ? 'text-brand-500 bg-brand-50'
+                                : 'text-ink-tertiary hover:text-brand-500 hover:bg-surface-secondary'
+                              }`}
                           >
-                             {ad.status === 'active' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                            {ad.status === 'active' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
                           </button>
                           <Link
                             href={`${AD_URL_PREFIX}/${ad.serial_number}/duzenle`}
