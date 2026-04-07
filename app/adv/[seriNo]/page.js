@@ -279,12 +279,18 @@ export default async function AdDetailPage({ params }) {
                       Payment Methods
                     </h4>
                     <div className="grid grid-cols-2 gap-3">
-                      {ad.payment_methods.map(method => (
-                        <div key={method} className="flex items-center gap-2 px-3 py-2 bg-surface-secondary rounded-xl border border-surface-tertiary/50">
-                          <CheckCircle2 className="w-4 h-4 text-green-500" />
-                          <span className="text-sm font-medium text-ink-secondary">{method}</span>
-                        </div>
-                      ))}
+                      {ad.payment_methods.map(method => {
+                        const isPayPal = method?.toLowerCase() === 'paypal';
+                        const isCash   = method?.toLowerCase() === 'cash';
+                        const label    = isPayPal ? 'PayPal' : (isCash ? 'Cash' : method);
+                        
+                        return (
+                          <div key={method} className="flex items-center gap-2 px-3 py-2 bg-surface-secondary rounded-xl border border-surface-tertiary/50">
+                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                            <span className="text-sm font-medium text-ink-secondary">{label}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

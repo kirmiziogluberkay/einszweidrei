@@ -128,8 +128,10 @@ export default function Navbar() {
                     className="flex items-center gap-2.5 p-1 rounded-2xl hover:bg-surface-secondary transition-all"
                  >
                     {!usernameDisplay ? (
-                       <div className="flex items-center gap-2.5 animate-pulse">
-                          <div className="w-8 h-8 rounded-full bg-surface-tertiary/40" />
+                       <div className="flex items-center gap-2.5 opacity-50">
+                          <div className="w-8 h-8 rounded-full bg-surface-tertiary/40 flex items-center justify-center">
+                             <User className="w-4 h-4 text-ink-tertiary" />
+                          </div>
                           <div className="h-4 w-12 bg-surface-tertiary/30 rounded md:block hidden" />
                        </div>
                     ) : (

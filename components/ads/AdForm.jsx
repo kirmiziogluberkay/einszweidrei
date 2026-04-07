@@ -51,7 +51,9 @@ export default function AdForm({ initialData = null }) {
     description: initialData?.description ?? '',
     price:       initialData?.price       ?? '',
     category_id: initialData?.category_id ?? '',
-    payment_methods: initialData?.payment_methods ?? [],
+    payment_methods: (initialData?.payment_methods ?? []).map(m => 
+      m?.toLowerCase() === 'paypal' ? 'PayPal' : (m?.toLowerCase() === 'cash' ? 'Cash' : m)
+    ),
   });
 
   /** Yüklenmiş fotoğrafların URL'leri (Supabase Storage) */
