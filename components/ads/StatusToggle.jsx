@@ -53,7 +53,7 @@ export default function StatusToggle({ adId, currentStatus, categoryId, categori
     <button
       onClick={handleToggle}
       disabled={loading}
-      className={`btn-owner-action
+      className={`btn-owner-action w-full
         ${isReservedOrRented 
           ? 'bg-brand-50 border-brand-100 text-brand-600 hover:bg-brand-100' 
           : 'bg-white border-surface-tertiary text-ink hover:bg-surface-secondary'

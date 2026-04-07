@@ -222,8 +222,8 @@ export default async function AdDetailPage({ params }) {
                 <h1 className="text-[14px] font-bold text-ink leading-tight mb-4">{ad.title}</h1>
                 
                 {canEdit && (
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="w-32">
+                  <div className="flex items-center gap-1 mb-6">
+                    <div className="w-28 flex-shrink-0">
                       <StatusToggle 
                         adId={ad.id} 
                         currentStatus={ad.status} 
@@ -233,13 +233,15 @@ export default async function AdDetailPage({ params }) {
                     </div>
                     <Link
                       href={`/ilan/${ad.serial_number}/duzenle`}
-                      className="btn-owner-action bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50"
+                      className="btn-owner-action w-20 flex-shrink-0 bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50"
                       title="Edit Ad"
                     >
                       <Pencil className="w-4 h-4" />
                       Edit
                     </Link>
-                    <DeleteAdButton adId={ad.id} />
+                    <div className="w-24 flex-shrink-0">
+                      <DeleteAdButton adId={ad.id} />
+                    </div>
                   </div>
                 )}
 

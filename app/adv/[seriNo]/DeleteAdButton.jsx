@@ -50,7 +50,7 @@ export default function DeleteAdButton({ adId }) {
     <button
       onClick={handleDelete}
       disabled={loading}
-      className="btn-owner-action bg-red-50 text-red-500 border-red-100 hover:bg-red-200"
+      className="btn-owner-action w-full bg-red-50 text-red-500 border-red-100 hover:bg-red-200"
       title="Delete Ad"
     >
       {loading ? (
