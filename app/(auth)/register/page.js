@@ -85,16 +85,16 @@ export default function RegisterPage() {
 
     // profiles tablosuna ekle
     if (authData.user) {
-      const { error: profileError } = await supabase.from('profiles').upsert({
+      const { error: profileError } = await supabase.from('profiles').insert({
         id:       authData.user.id,
         username: formData.username.toLowerCase(),
         role:     'user',
       });
 
       if (profileError) {
-        setError(profileError.message.includes('unique constraint') 
-          ? 'This username is already taken. Please choose another one.' 
-          : 'Database error: ' + profileError.message);
+        // Eğer veritabanı hatası alırsak kullanıcıya nedeni gösterelim
+        console.error("Profile creation error:", profileError);
+        setError("Database Error: " + (profileError.details || profileError.message));
         setLoading(false);
         return;
       }
@@ -102,8 +102,6 @@ export default function RegisterPage() {
 
     setSuccess(true);
     setLoading(false);
-
-    // E-posta doğrulama gerekiyorsa başarı mesajı göster, değilse yönlendir
     setTimeout(() => router.push('/'), 2000);
   };
 
