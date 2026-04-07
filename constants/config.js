@@ -70,7 +70,7 @@ export const PRICE_LOCALE = 'en-US';
 
 /** Mevcut ilan durumları ve etiketleri */
 export const AD_STATUSES = {
-  active:   { label: 'Active',   color: 'green' },
+  active:   { label: 'ACTIVE',   color: 'green' },
   reserved: { label: 'Reserved', color: 'amber' },
   rented:   { label: 'Rented',   color: 'blue'  },
   passive:  { label: 'Passive',  color: 'gray'  },
