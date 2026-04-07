@@ -88,6 +88,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
 
       const { error } = await query
         .eq('receiver_id', user.id) 
+        .eq('sender_id', receiverId)
         .eq('is_read', false);
       
       if (error) throw error;

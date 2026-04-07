@@ -155,21 +155,23 @@ export default function MyAdsPage() {
                     const statusInfo = AD_STATUSES[ad.status] ?? AD_STATUSES.active;
                     return (
                       <div key={ad.id} className="card p-4 flex items-center gap-4 hover:shadow-md transition-shadow group">
-                        <div className="relative w-16 h-16 rounded-xl bg-surface-secondary flex-shrink-0 overflow-hidden">
-                          {ad.images?.[0] ? (
-                            <Image 
-                              src={ad.images[0]} 
-                              alt={ad.title} 
-                              fill 
-                              sizes="64px"
-                              className="object-cover" 
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-ink-tertiary">
-                              <Plus className="w-5 h-5 opacity-20" />
-                            </div>
-                          )}
-                        </div>
+                        <Link href={`${AD_URL_PREFIX}/${ad.serial_number}`} className="flex-shrink-0">
+                          <div className="relative w-16 h-16 rounded-xl bg-surface-secondary overflow-hidden hover:opacity-80 transition-opacity">
+                            {ad.images?.[0] ? (
+                              <Image 
+                                src={ad.images[0]} 
+                                alt={ad.title} 
+                                fill 
+                                sizes="64px"
+                                className="object-cover" 
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-ink-tertiary">
+                                <Eye className="w-5 h-5 opacity-20" />
+                              </div>
+                            )}
+                          </div>
+                        </Link>
 
                         <div className="flex-1 min-w-0">
                           <Link href={`${AD_URL_PREFIX}/${ad.serial_number}`} className="text-[14px] font-bold text-ink hover:text-brand-500 transition-colors block truncate">

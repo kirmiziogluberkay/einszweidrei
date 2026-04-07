@@ -138,7 +138,7 @@ export function useAds(filters = {}) {
     setAds(sortedData);
     setTotal(count ?? 0);
     setLoading(false);
-  }, [supabase, categoryId, categoryIds?.join(','), ownerId, searchQuery, maxPrice, page]);
+  }, [supabase, categoryId, categoryIds?.join(','), ownerId, owner_id, searchQuery, maxPrice, page]);
 
   useEffect(() => {
     fetchAds();
