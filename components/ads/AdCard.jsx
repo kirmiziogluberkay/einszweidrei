@@ -85,27 +85,30 @@ export default function AdCard({ ad, layout = 'grid' }) {
               <span className="text-xs font-medium uppercase opacity-60">No Image</span>
             </div>
           )}
-          {/* Status Badge / Ribbon */}
-          <div className="absolute top-0 right-0 z-10 w-16 h-16 overflow-hidden pointer-events-none rounded-tr-xl">
-            {status === 'active' ? (
+          {/* Status Ribbon (for Active) */}
+          {status === 'active' && (
+            <div className="absolute top-0 right-0 z-10 w-16 h-16 overflow-hidden pointer-events-none rounded-tr-xl">
               <div className="absolute top-0 right-0 bg-green-500 text-white text-[9px] font-bold py-1 w-[140%] 
-                              text-center shadow-sm border-b border-green-600
+                              text-center shadow-md border-b border-green-600
                               translate-x-[28%] translate-y-[28%] rotate-45 origin-center">
-                ACTIVE
+                {statusInfo.label}
               </div>
-            ) : (
-              <div className="absolute top-3 right-3">
-                <span className={cn(
-                  "text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm border uppercase tracking-wider",
-                  status === 'reserved' ? "bg-amber-500 text-white border-amber-600" :
-                    status === 'rented' ? "bg-blue-500 text-white border-blue-600" :
-                      "bg-gray-500 text-white border-gray-600"
-                )}>
-                  {statusInfo.label}
-                </span>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
+          
+          {/* Status Badge (Text only for others) */}
+          {status !== 'active' && (
+            <div className="absolute top-3 right-3 z-10">
+              <span className={cn(
+                "text-[10px] font-bold block",
+                status === 'reserved' ? "text-amber-500" :
+                status === 'rented'   ? "text-blue-500" :
+                "text-ink-tertiary"
+              )}>
+                {statusInfo.label}
+              </span>
+            </div>
+          )}
           {status !== 'active' && <div className="absolute inset-0 bg-black/10" />}
         </div>
 
@@ -188,27 +191,31 @@ export default function AdCard({ ad, layout = 'grid' }) {
           </div>
         )}
 
-        {/* Status Badge / Ribbon */}
-        <div className="absolute top-0 right-0 z-10 w-20 h-20 overflow-hidden pointer-events-none">
-          {status === 'active' ? (
+        {/* Status Ribbon (for Active) */}
+        {status === 'active' && (
+          <div className="absolute top-0 right-0 z-10 w-20 h-20 overflow-hidden pointer-events-none">
             <div className="absolute top-0 right-0 bg-green-500 text-white text-[10px] font-bold py-1.5 w-[140%] 
-                            text-center shadow-sm border-b border-green-600
+                            text-center shadow-md border-b border-green-600
                             translate-x-[28%] translate-y-[28%] rotate-45 origin-center">
-              ACTIVE
+              {statusInfo.label}
             </div>
-          ) : (
-            <div className="absolute top-3 right-3">
-              <span className={cn(
-                "text-[10px] font-bold px-2.5 py-1.5 rounded-xl shadow-sm border uppercase tracking-wider block",
-                status === 'reserved' ? "bg-amber-500 text-white border-amber-600" :
-                  status === 'rented' ? "bg-blue-500 text-white border-blue-600" :
-                    "bg-gray-500 text-white border-gray-600"
-              )}>
-                {statusInfo.label}
-              </span>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Status Badge (Text only for others) */}
+        {status !== 'active' && (
+          <div className="absolute top-4 right-4 z-10">
+            <span className={cn(
+              "text-[10px] font-bold",
+              status === 'active'   ? "text-green-500" :
+              status === 'reserved' ? "text-amber-500" :
+              status === 'rented'   ? "text-blue-500" :
+              "text-ink-tertiary"
+            )}>
+              {statusInfo.label}
+            </span>
+          </div>
+        )}
 
         {/* Gray overlay for passive ads */}
         {status !== 'active' && (

@@ -21,6 +21,7 @@ import AdDetailClient from './AdDetailClient';
 import ContactButton from './ContactButton';
 import DeleteAdButton from './DeleteAdButton';
 import StatusToggle from '@/components/ads/StatusToggle';
+import SoldToggle from '@/components/ads/SoldToggle';
 import { Pencil, CheckCircle2 } from 'lucide-react';
 import { formatPrice, formatDate, formatUsername } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
@@ -208,12 +209,13 @@ export default async function AdDetailPage({ params }) {
 
             <aside className="lg:col-span-2 space-y-4">
               <div className="card p-6 space-y-4">
-                <span className={`badge ${ad.status === 'active' ? 'bg-green-100 text-green-600' :
-                    ad.status === 'sold' ? 'bg-red-100 text-red-600' :
-                      ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
-                        ad.status === 'rented' ? 'bg-blue-100 text-blue-600' :
-                          'bg-gray-100 text-gray-600'
-                  }`}>
+                <span className={`font-bold text-[11px] ${
+                  ad.status === 'active'   ? 'text-green-600' :
+                  ad.status === 'sold'     ? 'text-red-500' :
+                  ad.status === 'reserved' ? 'text-amber-500' :
+                  ad.status === 'rented'   ? 'text-blue-600' :
+                  'text-ink-tertiary'
+                }`}>
                   {statusInfo.label}
                 </span>
 
@@ -229,6 +231,12 @@ export default async function AdDetailPage({ params }) {
                         categories={allCats}
                       />
                     </div>
+                    
+                    {!breadcrumbs.some(bc => bc.name.toLowerCase().includes('rental')) && (
+                      <div className="w-28 flex-shrink-0">
+                        <SoldToggle adId={ad.id} currentStatus={ad.status} />
+                      </div>
+                    )}
                     <Link
                       href={`/ilan/${ad.serial_number}/duzenle`}
                       className="btn-owner-action w-20 flex-shrink-0 bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50"

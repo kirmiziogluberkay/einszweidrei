@@ -13,7 +13,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle, Lock } from 'lucide-react';
+import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle, Lock, CheckCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAds } from '@/hooks/useAds';
@@ -41,12 +41,10 @@ export default function MyAdsPage() {
     return getRootSlug(cat.parent_id);
   };
 
-  const secondHandAds = ads.filter(ad => getRootSlug(ad.category_id).includes('second-hand'));
-  const rentalAds = ads.filter(ad => getRootSlug(ad.category_id).includes('rental'));
-  const otherAds = ads.filter(ad => {
-    const slug = getRootSlug(ad.category_id);
-    return !slug.includes('second-hand') && !slug.includes('rental');
-  });
+  const soldAds = ads.filter(ad => ad.status === 'sold');
+  const rentedAds = ads.filter(ad => ad.status === 'rented');
+  const secondHandAds = ads.filter(ad => ad.status !== 'sold' && ad.status !== 'rented' && (getRootSlug(ad.category_id).includes('second-hand') || (!getRootSlug(ad.category_id).includes('second-hand') && !getRootSlug(ad.category_id).includes('rental'))));
+  const rentalAds = ads.filter(ad => ad.status !== 'sold' && ad.status !== 'rented' && getRootSlug(ad.category_id).includes('rental'));
 
   const handleDeleteAd = async (adId) => {
     if (!confirm('Are you sure you want to delete this ad?')) return;
@@ -96,6 +94,17 @@ export default function MyAdsPage() {
     }
   };
 
+  const handleMarkSold = async (adId, currentStatus) => {
+    const newStatus = currentStatus === 'sold' ? 'active' : 'sold';
+    const { error } = await supabase
+      .from('ads')
+      .update({ status: newStatus })
+      .eq('id', adId)
+      .eq('owner_id', user.id);
+
+    if (!error) refetch();
+  };
+
   if (authLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -142,11 +151,12 @@ export default function MyAdsPage() {
           {[
             { title: 'Second Hand Items', list: secondHandAds },
             { title: 'Rental Items',      list: rentalAds },
-            { title: 'Other Listings',    list: otherAds }
+            { title: 'Rented Items',      list: rentedAds },
+            { title: 'Sold Items',        list: soldAds }
           ].map((section) => (
             section.list.length > 0 && (
               <div key={section.title}>
-                <h3 className="text-[11px] font-bold text-ink-tertiary uppercase tracking-[0.1em] mb-4 flex items-center gap-2">
+                <h3 className="text-[11px] font-bold text-ink uppercase tracking-[0.1em] mb-4 flex items-center gap-2">
                   <div className="w-1 h-3 bg-brand-500 rounded-full" />
                   {section.title} ({section.list.length})
                 </h3>
@@ -182,20 +192,33 @@ export default function MyAdsPage() {
                           </p>
                         </div>
 
-                        <span className={`badge text-[10px] h-6 shrink-0 ${
-                          ad.status === 'active'   ? 'bg-green-100 text-green-600' :
-                          ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
-                          ad.status === 'rented'   ? 'bg-blue-100 text-blue-600' :
-                          ad.status === 'sold'     ? 'bg-red-100 text-red-600' :
-                          'bg-gray-100 text-gray-500'
+                        <span className={`font-bold text-[10px] shrink-0 ml-2 ${
+                          ad.status === 'active'   ? 'text-green-600' :
+                          ad.status === 'reserved' ? 'text-amber-600' :
+                          ad.status === 'rented'   ? 'text-blue-600' :
+                          ad.status === 'sold'     ? 'text-red-500' :
+                          'text-ink-tertiary'
                         }`}>
                           {statusInfo.label}
                         </span>
 
                         <div className="flex items-center gap-1 flex-shrink-0">
+                          {!getRootSlug(ad.category_id).includes('rental') && (
+                            <button
+                               onClick={() => handleMarkSold(ad.id, ad.status)}
+                               title="Mark as Sold"
+                               className={`p-2 rounded-xl transition-colors ${
+                                 ad.status === 'sold'
+                                   ? 'text-red-500 bg-red-50' 
+                                   : 'text-ink-tertiary hover:text-red-500 hover:bg-red-50'
+                               }`}
+                            >
+                               <CheckCircle className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
                              onClick={() => handleToggleStatus(ad.id, ad.status, ad.category_id)}
-                             title="Toggle Status"
+                             title="Toggle Reserved/Rented"
                              className={`p-2 rounded-xl transition-colors ${
                                (ad.status === 'reserved' || ad.status === 'rented')
                                  ? 'text-brand-500 bg-brand-50' 

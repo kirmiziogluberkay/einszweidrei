@@ -154,8 +154,8 @@ export default function ProfilimPage() {
       {/* ── Mesaj ── */}
       {msg && (
         <div className={`flex items-start gap-2 p-4 rounded-2xl text-sm mb-6 ${msgType === 'success'
-            ? 'bg-green-50 border border-green-100 text-green-600'
-            : 'bg-red-50 border border-red-100 text-red-600'
+          ? 'bg-green-50 border border-green-100 text-green-600'
+          : 'bg-red-50 border border-red-100 text-red-600'
           }`}>
           <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>{msg}</span>
@@ -283,10 +283,10 @@ export default function ProfilimPage() {
 
                           {/* Durum Badge */}
                           <span className={`badge text-[10px] shrink-0 ${ad.status === 'active' ? 'bg-green-100 text-green-600' :
-                              ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
-                                ad.status === 'rented' ? 'bg-blue-100 text-blue-600' :
-                                  ad.status === 'sold' ? 'bg-red-100 text-red-600' :
-                                    'bg-gray-100 text-gray-500'
+                            ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
+                              ad.status === 'rented' ? 'bg-blue-100 text-blue-600' :
+                                ad.status === 'sold' ? 'bg-red-100 text-red-600' :
+                                  'bg-gray-100 text-gray-500'
                             }`}>
                             {statusInfo?.label || ad.status}
                           </span>
@@ -297,8 +297,8 @@ export default function ProfilimPage() {
                               aria-label="Toggle Status"
                               title="Toggle Reserved/Rented"
                               className={`p-2 rounded-xl transition-colors ${(ad.status === 'reserved' || ad.status === 'rented')
-                                  ? 'text-brand-500 bg-brand-50'
-                                  : 'text-ink-tertiary hover:text-brand-500 hover:bg-surface-secondary'
+                                ? 'text-brand-500 bg-brand-50'
+                                : 'text-ink-tertiary hover:text-brand-500 hover:bg-surface-secondary'
                                 }`}
                             >
                               <Lock className="w-4 h-4" />

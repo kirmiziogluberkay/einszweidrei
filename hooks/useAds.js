@@ -77,9 +77,10 @@ export function useAds(filters = {}) {
     // İlan sahibi (ownerId varsa) kendi profilinde tüm durumları görür.
     const finalOwnerId = ownerId || owner_id;
     if (!finalOwnerId) {
+      // Genel ziyaretçiler SADECE 'active' olanları görür
       query = query.eq('status', 'active');
     } else {
-      // Profil sayfasında her şey görünür (aktif, rezerve, kiralandı, pasif, satıldı)
+      // İlan sahibi kendi panelinde her şeyi görür (satılanlar dahil)
       query = query.in('status', ['active', 'reserved', 'rented', 'passive', 'sold']);
     }
 
