@@ -152,14 +152,11 @@ export default function AdCard({ ad, layout = 'grid' }) {
           )}
 
           {/* Ad Info (Bottom) */}
-          <div className="flex items-center justify-between pt-4 mt-4 border-t border-surface-tertiary/50">
+          <div className="flex items-center pt-4 mt-4 border-t border-surface-tertiary/50">
             <div className="flex items-center gap-1 text-xs text-ink-tertiary">
               <Clock className="w-3.5 h-3.5" />
               <span>{timeAgo(created_at)}</span>
             </div>
-            {owner && (
-              <span className="text-xs text-ink-tertiary font-bold tracking-tight">@{formatUsername(owner.username)}</span>
-            )}
           </div>
         </div>
       </Link>
@@ -262,9 +259,6 @@ export default function AdCard({ ad, layout = 'grid' }) {
               <Clock className="w-3.5 h-3.5" />
               <span>{timeAgo(created_at)}</span>
             </div>
-            {owner && (
-              <span className="text-xs text-ink-tertiary font-bold tracking-tight">@{formatUsername(owner.username)}</span>
-            )}
           </div>
         </div>
       </div>

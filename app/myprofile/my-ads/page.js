@@ -10,7 +10,8 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle, Lock, Unlock, CheckCircle, Circle } from 'lucide-react';
@@ -23,8 +24,16 @@ import { SUCCESS_MESSAGES, ERROR_MESSAGES, AD_STATUSES, AD_URL_PREFIX } from '@/
 
 export default function MyAdsPage() {
   const supabase = createClient();
+  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { categories } = useCategories();
+
+  // ── Auth Guard ──
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   const { ads, loading: adsLoading, refetch } = useAds(
     user?.id ? { owner_id: user.id } : { skip: true }

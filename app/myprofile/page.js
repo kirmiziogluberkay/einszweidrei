@@ -8,7 +8,8 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Loader2, Edit3, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,7 +17,15 @@ import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '@/constants/config';
 
 export default function MyProfilePage() {
   const supabase          = createClient();
+  const router            = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
+
+  // ── Auth Guard ──
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   const [editMode,  setEditMode]  = useState(false);
   const [username,  setUsername]  = useState(profile?.username ?? '');
