@@ -1,8 +1,8 @@
 /**
  * app/layout.js
  * ─────────────────────────────────────────────────────
- * Root layout — tüm sayfaları sarar.
- * PWA meta etiketleri, font ve global navbar buradadır.
+ * Root layout — wraps all pages.
+ * PWA meta tags, font and global navbar are here.
  * ─────────────────────────────────────────────────────
  */
 
@@ -14,7 +14,7 @@ import Footer from '@/components/layout/Footer';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
-  // ── Temel meta ─────────────────────────────────────
+  // ── Basic meta ─────────────────────────────────────
   title: {
     default:  SITE_NAME,
     template: `%s | ${SITE_NAME}`,
@@ -22,13 +22,13 @@ export const metadata = {
   description: SITE_DESCRIPTION,
   metadataBase: new URL(SITE_URL),
 
-  // ── Open Graph (sosyal paylaşım) ────────────────────
+  // ── Open Graph (social sharing) ────────────────────
   openGraph: {
     title:       SITE_NAME,
     description: SITE_DESCRIPTION,
     url:         SITE_URL,
     siteName:    SITE_NAME,
-    locale:      'tr_TR',
+    locale:      'en_US',
     type:        'website',
   },
 
@@ -40,7 +40,7 @@ export const metadata = {
     statusBarStyle: 'default',
   },
 
-  // ── Diğer ──────────────────────────────────────────
+  // ── Other ──────────────────────────────────────────
   robots: {
     index:  true,
     follow: true,
@@ -55,34 +55,34 @@ export const viewport = {
 };
 
 /**
- * Root layout bileşeni.
- * Tüm sayfa içerikleri `children` olarak enjekte edilir.
+ * Root layout component.
+ * All page contents are injected as `children`.
  *
  * @param {{ children: React.ReactNode }} props
  */
 export default function RootLayout({ children }) {
   return (
-    <html lang="tr" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* PWA: Apple Touch Icon */}
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-        {/* Viewport: mobil optimizasyon */}
+        {/* Viewport: mobile optimization */}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body className="flex flex-col min-h-screen bg-surface-secondary">
 
-        {/* ── Üst navigasyon (Desktop & Mobile) ── */}
+        {/* ── Top navigation (Desktop & Mobile) ── */}
         <Navbar />
 
-        {/* ── Ana içerik ── */}
+        {/* ── Main content ── */}
         <main className="flex-1 pb-16 md:pb-0">
           {children}
         </main>
 
-        {/* ── Alt navigasyon (sadece mobil) ── */}
+        {/* ── Bottom navigation (mobile only) ── */}
         <MobileNav />
 
-        {/* ── Footer (sadece desktop) ── */}
+        {/* ── Footer (desktop only) ── */}
         <Footer />
 
       </body>

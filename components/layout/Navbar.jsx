@@ -3,7 +3,7 @@
 /**
  * components/layout/Navbar.jsx
  * ─────────────────────────────────────────────────────
- * Üst navigasyon çubuğu — Integrated Notification System
+ * Top navigation bar — Integrated Notification System
  * ─────────────────────────────────────────────────────
  */
 
@@ -83,12 +83,12 @@ export default function Navbar() {
     }
   }, [hasUnread]);
 
-  /** Sayfa değişince menüyü kapat */
+  /** Close menu when page changes */
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  /** Scroll efekti */
+  /** Scroll effect */
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll, { passive: true });

@@ -238,44 +238,57 @@ CREATE POLICY "storage_owner_delete"
 
 
 -- ──────────────────────────────────────────────────────────
--- 5. BAŞLANGIÇ KATEGORİLERİ (SEED)
+-- 5. INITIAL CATEGORIES (SEED)
 -- ──────────────────────────────────────────────────────────
 
--- Ana kategoriler
+-- Main categories
 INSERT INTO public.categories (name, slug, parent_id, sort_order)
 VALUES
-  ('İkinci El Eşya', 'ikinci-el-esya', NULL, 1),
-  ('Kiralık Eşya',   'kiralik-esya',   NULL, 2)
+  ('Second Hand Items', 'second-hand-items', NULL, 1),
+  ('Rental Items',      'rental-items',      NULL, 2),
+  ('Services',          'services',          NULL, 3)
 ON CONFLICT (slug) DO NOTHING;
 
--- İkinci El alt kategorileri
+-- Second Hand subcategories
 INSERT INTO public.categories (name, slug, parent_id, sort_order)
 SELECT
   sub.name,
   sub.slug,
-  (SELECT id FROM public.categories WHERE slug = 'ikinci-el-esya'),
+  (SELECT id FROM public.categories WHERE slug = 'second-hand-items'),
   sub.ord
 FROM (VALUES
-  ('Elektronik',       'ikinci-el-elektronik', 1),
-  ('Mobilya',          'ikinci-el-mobilya',    2),
-  ('Giyim & Aksesuar', 'ikinci-el-giyim',      3),
-  ('Spor & Outdoor',   'ikinci-el-spor',       4),
-  ('Kitap & Hobi',     'ikinci-el-kitap',      5),
-  ('Diğer',            'ikinci-el-diger',      6)
+  ('Electronics',       'second-hand-electronics', 1),
+  ('Furniture',         'second-hand-furniture',   2),
+  ('Clothing & Accs.',  'second-hand-clothing',    3),
+  ('Sports & Outdoor',  'second-hand-sports',      4),
+  ('Books & Hobbies',   'second-hand-books',       5),
+  ('Other',             'second-hand-other',       6)
 ) AS sub(name, slug, ord)
 ON CONFLICT (slug) DO NOTHING;
 
--- Kiralık alt kategorileri
+-- Rental subcategories
 INSERT INTO public.categories (name, slug, parent_id, sort_order)
 SELECT
   sub.name,
   sub.slug,
-  (SELECT id FROM public.categories WHERE slug = 'kiralik-esya'),
+  (SELECT id FROM public.categories WHERE slug = 'rental-items'),
   sub.ord
 FROM (VALUES
-  ('Elektronik',     'kiralik-elektronik', 1),
-  ('Kamp & Outdoor', 'kiralik-kamp',       2),
-  ('Araç & Gereç',   'kiralik-arac',       3),
-  ('Diğer',          'kiralik-diger',      4)
+  ('Electronics',     'rental-electronics', 1),
+  ('Camping & Outdoor', 'rental-camping',       2),
+  ('Tools & Eq.',    'rental-tools',       3),
+  ('Other',          'rental-other',       4)
+) AS sub(name, slug, ord)
+ON CONFLICT (slug) DO NOTHING;
+
+-- Services subcategories
+INSERT INTO public.categories (name, slug, parent_id, sort_order)
+SELECT
+  sub.name,
+  sub.slug,
+  (SELECT id FROM public.categories WHERE slug = 'services'),
+  sub.ord
+FROM (VALUES
+  ('Ironing', 'services-ironing', 1)
 ) AS sub(name, slug, ord)
 ON CONFLICT (slug) DO NOTHING;

@@ -3,72 +3,72 @@
 /**
  * constants/config.js
  * =====================================================
- * Uygulamanın tüm sabit ayarları ve yapılandırması.
- * İleride değiştirilmesi muhtemel tüm metinler ve
- * değerler buradan yönetilir.
+ * All constant settings and configuration of the application.
+ * All texts and values that are likely to be changed in the future
+ * are managed from here.
  * =====================================================
  */
 
-// ─── Site Genel Bilgileri ─────────────────────────────────────────────────────
+// ─── General Site Information ─────────────────────────────────────────────────────
 
-/** Tarayıcı sekmesinde ve SEO için kullanılan site adı */
+/** Site name used in browser tab and for SEO */
 export const SITE_NAME = 'EinsZweiDrei';
 
-/** Site açıklaması (meta description) */
+/** Site description (meta description) */
 export const SITE_DESCRIPTION =
   'Second-hand buy-sell and rental items platform. Safe, easy, and fast.';
 
-/** Anasayfada hero bölümünde gösterilen slogan */
+/** Slogan shown in the hero section on the homepage */
 export const SITE_TAGLINE = 'Second-Hand & Rental Items Platform';
 
-/** Geliştirici / şirket adı */
+/** Developer / company name */
 export const SITE_AUTHOR = 'EinsZweiDrei';
 
-// ─── URL Yapılandırması ───────────────────────────────────────────────────────
+// ─── URL Configuration ───────────────────────────────────────────────────────
 
-/** Üretim ortamındaki site URL'i (Vercel'e deploy sonrası güncelle) */
+/** Site URL in production environment (update after Vercel deployment) */
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://einszweidrei.vercel.app';
 
-/** İlan detay sayfası URL öneki */
+/** Ad detail page URL prefix */
 export const AD_URL_PREFIX = '/adv';
 
-// ─── Sayfalama ────────────────────────────────────────────────────────────────
+// ─── Pagination ────────────────────────────────────────────────────────────────
 
-/** Ana sayfada tek seferde kaç ilan gösterilir */
+/** How many ads are shown at once on the home page */
 export const ADS_PER_PAGE = 12;
 
-/** Admin panelinde tek seferde kaç kayıt gösterilir */
+/** How many records are shown at once in the admin panel */
 export const ADMIN_ITEMS_PER_PAGE = 20;
 
-// ─── Fotoğraf Yükleme ─────────────────────────────────────────────────────────
+// ─── Photo Upload ─────────────────────────────────────────────────────────
 
-/** Supabase Storage bucket adı */
+/** Supabase Storage bucket name */
 export const STORAGE_BUCKET = 'ad-images';
 
-/** Bir ilana yüklenebilecek maksimum fotoğraf sayısı */
+/** Maximum number of photos that can be uploaded to an ad */
 export const MAX_IMAGES_PER_AD = 6;
 
-/** Tek bir fotoğrafın maksimum boyutu (byte) — 5 MB */
+/** Maximum size of a single photo (byte) — 5 MB */
 export const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
-/** İzin verilen dosya formatları */
+/** Allowed file formats */
 export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
-// ─── Para Birimi ──────────────────────────────────────────────────────────────
+// ─── Currency ──────────────────────────────────────────────────────────────
 
-/** Varsayılan para birimi kodu */
+/** Default currency code */
 export const DEFAULT_CURRENCY = 'EUR';
 
-/** Para birimi sembolü */
+/** Currency symbol */
 export const CURRENCY_SYMBOL = '€';
 
-/** Fiyat formatı için locale */
+/** Locale for price format */
 export const PRICE_LOCALE = 'en-US';
 
-// ─── İlan Durumları ───────────────────────────────────────────────────────────
+// ─── Ad Statuses ───────────────────────────────────────────────────────────
 
-/** Mevcut ilan durumları ve etiketleri */
+/** Available ad statuses and labels */
 export const AD_STATUSES = {
   active:   { label: 'Active',   color: 'green' },
   reserved: { label: 'Reserved', color: 'amber' },
@@ -77,20 +77,20 @@ export const AD_STATUSES = {
   sold:     { label: 'Sold',     color: 'red'   },
 };
 
-// ─── Kullanıcı Rolleri ────────────────────────────────────────────────────────
+// ─── User Roles ────────────────────────────────────────────────────────
 
-/** Uygulama genelinde tanımlı roller */
+/** Roles defined throughout the application */
 export const USER_ROLES = {
   ADMIN: 'admin',
   USER:  'user',
 };
 
-// ─── Auth. Güvenlik ───────────────────────────────────────────────────────────
+// ─── Auth Security ───────────────────────────────────────────────────────────
 
-/** Admin paneline erişim için gereken rol */
+/** Role required to access the admin panel */
 export const ADMIN_REQUIRED_ROLE = USER_ROLES.ADMIN;
 
-/** Giriş yapılmadan erişilemeyen rotalar (middleware içinde kullanılır) */
+/** Routes that cannot be accessed without logging in (used in middleware) */
 export const PROTECTED_ROUTES = [
   '/post-ad',
   '/profile',
@@ -98,13 +98,13 @@ export const PROTECTED_ROUTES = [
   '/admin',
 ];
 
-/** Admin panelinin URL öneki */
+/** URL prefix for the admin panel */
 export const ADMIN_ROUTE_PREFIX = '/admin';
 
-// ─── Başlangıç Kategorileri ───────────────────────────────────────────────────
+// ─── Initial Categories ───────────────────────────────────────────────────
 /**
- * Veritabanı boşken seed için kullanılır.
- * Admin panelinden dinamik olarak yönetilebilir.
+ * Used for seed when the database is empty.
+ * Can be managed dynamically from the admin panel.
  */
 export const DEFAULT_CATEGORIES = [
   {
@@ -131,34 +131,42 @@ export const DEFAULT_CATEGORIES = [
       { name: 'Other',          slug: 'rental-other'       },
     ],
   },
+  {
+    name:      'Services',
+    slug:      'services',
+    parent_id: null,
+    children:  [
+      { name: 'Ironing', slug: 'services-ironing' },
+    ],
+  },
 ];
 
-// ─── Paylaşım ─────────────────────────────────────────────────────────────────
+// ─── Sharing ─────────────────────────────────────────────────────────────────
 
-/** WhatsApp paylaşım mesaj şablonu. {title} ve {url} dinamik olarak doldurulur. */
+/** WhatsApp sharing message template. {title} and {url} are filled dynamically. */
 export const WHATSAPP_SHARE_TEMPLATE =
   'Hello! I saw this ad and thought you might be interested: *{title}* — {url}';
 
-/** Telegram paylaşım başlık şablonu */
+/** Telegram sharing title template */
 export const TELEGRAM_SHARE_TEMPLATE = 'Check out this ad: {title}';
 
-// ─── Navigasyon ───────────────────────────────────────────────────────────────
+// ─── Navigation ───────────────────────────────────────────────────────────────
 
-/** Giriş gerektirmeyen statik nav linkleri */
+/** Static nav links that do not require login */
 export const STATIC_NAV_LINKS = [
   { label: 'Home', href: '/' },
 ];
 
-/** Giriş yapılmış kullanıcı için ek nav linkleri */
+/** Additional nav links for logged-in users */
 export const AUTH_NAV_LINKS = [
   { label: 'Messages',   href: '/inbox'  },
   { label: 'Ads',        href: '/myprofile/my-ads'  },
   { label: 'Profile',    href: '/myprofile'  },
 ];
 
-// ─── Hata Mesajları ───────────────────────────────────────────────────────────
+// ─── Error Messages ───────────────────────────────────────────────────────────
 
-/** Kullanıcıya gösterilecek genel hata mesajları */
+/** General error messages to be shown to the user */
 export const ERROR_MESSAGES = {
   generic:       'An error occurred. Please try again.',
   notFound:      'The page or ad you are looking for could not be found.',
@@ -167,9 +175,9 @@ export const ERROR_MESSAGES = {
   uploadFailed:  'An error occurred while uploading the photo.',
 };
 
-// ─── Başarı Mesajları ─────────────────────────────────────────────────────────
+// ─── Success Messages ─────────────────────────────────────────────────────────
 
-/** Kullanıcıya gösterilecek başarı mesajları */
+/** Success messages to be shown to the user */
 export const SUCCESS_MESSAGES = {
   adCreated:   'Your ad has been successfully published!',
   adUpdated:   'Ad updated successfully.',
@@ -180,7 +188,7 @@ export const SUCCESS_MESSAGES = {
 
 // ─── PWA ──────────────────────────────────────────────────────────────────────
 
-/** PWA manifest bilgileri */
+/** PWA manifest information */
 export const PWA_CONFIG = {
   name:             SITE_NAME,
   shortName:        '123',
