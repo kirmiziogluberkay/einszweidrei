@@ -325,12 +325,19 @@ export default async function AdDetailPage({ params }) {
                         </p>
                       </div>
                     </Link>
-                    <ContactButton
-                      adId={ad.id}
-                      adTitle={ad.title}
-                      receiverId={ad.owner?.id}
-                      receiverName={ad.owner?.username}
-                    />
+                    {user?.id !== ad.owner_id && (
+                      <ContactButton
+                        adId={ad.id}
+                        adTitle={ad.title}
+                        receiverId={ad.owner?.id}
+                        receiverName={ad.owner?.username}
+                      />
+                    )}
+                    {user?.id === ad.owner_id && (
+                       <p className="text-[11px] font-bold text-brand-500 uppercase tracking-widest text-center py-2.5 border-2 border-brand-100 rounded-xl bg-brand-50/50">
+                         YOUR ADVERTISEMENT
+                       </p>
+                    )}
                   </>
                 ) : (
                   <div className="text-center py-4 px-2 bg-surface-secondary rounded-xl border border-surface-tertiary">

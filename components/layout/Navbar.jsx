@@ -154,21 +154,16 @@ export default function Navbar() {
                        <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-[var(--shadow-xl)] border border-surface-tertiary py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
 
                           {(AUTH_NAV_LINKS || []).map((link) => (
-                            <Link 
-                              key={link.href} 
-                              href={link.href} 
-                              onClick={() => {
-                                if (link.label === 'Messages' || link.label === 'Inbox') {
-                                  setMenuOpened(true);
-                                }
-                              }}
-                              className="flex justify-between items-center px-4 py-2 text-sm text-ink-secondary hover:text-brand-500 hover:bg-surface-secondary/50 transition-colors"
-                            >
-                              <span>{link.label}</span>
-                              {(link.label === 'Messages' || link.label === 'Inbox') && hasUnread && (
-                                 <Mail className="w-4 h-4 text-green-500 fill-green-50/20" />
-                              )}
-                            </Link>
+                             <Link 
+                               key={link.href} 
+                               href={link.href} 
+                               className="flex justify-between items-center px-4 py-2 text-sm text-ink-secondary hover:text-brand-500 hover:bg-surface-secondary/50 transition-colors"
+                             >
+                               <span>{link.label}</span>
+                               {(link.label === 'Messages' || link.label === 'Inbox') && hasUnread && (
+                                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                               )}
+                             </Link>
                           ))}
                           <div className="mt-1 pt-1 border-t border-surface-tertiary/50 px-2">
                              <button onClick={() => signOut()} className="w-full flex items-center gap-2 px-2 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors text-left font-bold">
