@@ -61,7 +61,7 @@ function AraContent() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Ne arıyorsunuz?"
-            className="input pl-11 py-3.5 text-base"
+            className="input pl-12 py-3.5 text-base"
             autoFocus
           />
         </div>

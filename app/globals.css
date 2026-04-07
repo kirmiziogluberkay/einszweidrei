@@ -2,14 +2,14 @@
  * app/globals.css
  * ─────────────────────────────────────────────────────
  * Global styles and Tailwind directives.
- * Using @import for tailwind directives to maximize
- * compatibility with standard CSS linters.
+ * Optimized for standard CSS validation.
+ * @tailwind utilities is placed at the end to ensure 
+ * utility classes (like pl-11) always override base/component styles.
  * ─────────────────────────────────────────────────────
  */
 
 @import "tailwindcss/base";
 @import "tailwindcss/components";
-@import "tailwindcss/utilities";
 
 :root {
   /* Renk Token'ları */
@@ -208,3 +208,5 @@ input, textarea, select {
   padding-left: var(--btn-ad-px);
   padding-right: var(--btn-ad-px);
 }
+
+@import "tailwindcss/utilities";

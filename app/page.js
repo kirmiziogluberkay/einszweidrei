@@ -73,7 +73,7 @@ export default function HomePage() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder={`Search among ${globalTotal} advertisements...`}
-              className="input pl-11 py-3.5 text-base"
+              className="input pl-12 py-3.5 text-base"
             />
           </div>
           <button type="submit" className="btn-primary px-6 py-3.5">Search</button>
