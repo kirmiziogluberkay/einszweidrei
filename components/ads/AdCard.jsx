@@ -86,11 +86,11 @@ export default function AdCard({ ad, layout = 'grid' }) {
             </div>
           )}
           {/* Status Badge / Ribbon */}
-          <div className="absolute top-0 right-0 z-10 w-20 h-20 overflow-hidden pointer-events-none rounded-tr-xl">
+          <div className="absolute top-0 right-0 z-10 w-16 h-16 overflow-hidden pointer-events-none rounded-tr-xl">
             {status === 'active' ? (
               <div className="absolute top-0 right-0 bg-green-500 text-white text-[9px] font-bold py-1 w-[140%] 
                               text-center shadow-sm border-b border-green-600
-                              translate-x-[30%] translate-y-[15%] rotate-45 origin-center">
+                              translate-x-[28%] translate-y-[28%] rotate-45 origin-center">
                 ACTIVE
               </div>
             ) : (
@@ -197,11 +197,11 @@ export default function AdCard({ ad, layout = 'grid' }) {
         )}
 
         {/* Status Badge / Ribbon */}
-        <div className="absolute top-0 right-0 z-10 w-20 h-20 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 z-10 w-16 h-16 overflow-hidden pointer-events-none">
           {status === 'active' ? (
             <div className="absolute top-0 right-0 bg-green-500 text-white text-[9px] font-bold py-1 w-[140%] 
                             text-center shadow-sm border-b border-green-600
-                            translate-x-[30%] translate-y-[15%] rotate-45 origin-center">
+                            translate-x-[28%] translate-y-[28%] rotate-45 origin-center">
               ACTIVE
             </div>
           ) : (
