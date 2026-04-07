@@ -42,16 +42,23 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
   const fetchMessages = async () => {
     if (!user) return;
 
-    const { data } = await supabase
+    let query = supabase
       .from('messages')
       .select(`
         id, content, created_at, is_read,
         sender:profiles!sender_id(id, username),
         receiver:profiles!receiver_id(id, username)
       `)
-      .eq('ad_id', adId)
       .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
       .order('created_at', { ascending: true });
+
+    if (adId && adId !== 'null') {
+      query = query.eq('ad_id', adId);
+    } else {
+      query = query.is('ad_id', null);
+    }
+
+    const { data } = await query;
 
     setMessages(data ?? []);
     setLoading(false);
@@ -113,7 +120,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
 
     return () => { supabase.removeChannel(channel); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adId, user]);
+  }, [adId, user, receiverId]);
 
   // Mesaj listesi degisince de okundu isaretle (yeni mesaj gelirse)
   useEffect(() => {
@@ -139,6 +146,9 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
   const handleSend = async (e) => {
     e.preventDefault();
     if (!content.trim() || !user) return;
+
+    // Cevap yazarken mevcut mesajları okundu işaretle
+    markAsRead();
 
     setSending(true);
     setError(null);
