@@ -26,9 +26,9 @@ export default function MyAdsPage() {
   const { user, loading: authLoading } = useAuth();
   const { categories } = useCategories();
 
-  const { ads, loading: adsLoading, refetch } = useAds({
-    owner_id: user?.id,
-  });
+  const { ads, loading: adsLoading, refetch } = useAds(
+    user?.id ? { owner_id: user.id } : { skip: true }
+  );
 
   const [msg, setMsg] = useState(null);
   const [msgType, setMsgType] = useState('success');

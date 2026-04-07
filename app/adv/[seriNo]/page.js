@@ -209,15 +209,18 @@ export default async function AdDetailPage({ params }) {
 
             <aside className="lg:col-span-2 space-y-4">
               <div className="card p-6 space-y-4">
-                <span className={`font-bold text-[11px] ${
-                  ad.status === 'active'   ? 'text-green-600' :
-                  ad.status === 'sold'     ? 'text-red-500' :
-                  ad.status === 'reserved' ? 'text-amber-500' :
-                  ad.status === 'rented'   ? 'text-blue-600' :
-                  'text-ink-tertiary'
-                }`}>
-                  {statusInfo.label}
-                </span>
+                <div className="flex flex-col gap-0.5 mb-2">
+                  <span className="text-[9px] font-bold text-ink-tertiary uppercase tracking-wider">Status</span>
+                  <span className={`font-bold text-[11px] ${
+                    ad.status === 'active'   ? 'text-green-600' :
+                    ad.status === 'sold'     ? 'text-red-500' :
+                    ad.status === 'reserved' ? 'text-amber-500' :
+                    ad.status === 'rented'   ? 'text-blue-600' :
+                    'text-ink-tertiary'
+                  }`}>
+                    {statusInfo.label}
+                  </span>
+                </div>
 
                 <h1 className="text-[14px] font-bold text-ink leading-tight mb-4">{ad.title}</h1>
 

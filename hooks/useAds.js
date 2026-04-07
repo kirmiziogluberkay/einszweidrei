@@ -39,7 +39,7 @@ import { ADS_PER_PAGE } from '@/constants/config';
 export function useAds(filters = {}) {
   const supabase = createClient();
 
-  const { categoryId, categoryIds, ownerId, owner_id, searchQuery, maxPrice, page = 1 } = filters;
+  const { skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, maxPrice, page = 1 } = filters;
 
   const [ads, setAds] = useState([]);
   const [total, setTotal] = useState(0);
@@ -50,6 +50,10 @@ export function useAds(filters = {}) {
    * İlanları Supabase'den çeker.
    */
   const fetchAds = useCallback(async () => {
+    if (skip) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
 
