@@ -27,9 +27,9 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/constants/config';
 export default function MessageThread({ adId, receiverId, receiverName, adTitle }) {
   const supabase = createClient();
   const { user, profile } = useAuth();
-  const bottomRef = useRef(null);
-
   const [messages, setMessages] = useState([]);
+  const scrollRef = useRef(null);
+  const bottomRef = useRef(null); 
   const [content, setContent]   = useState('');
   const [loading, setLoading]   = useState(true);
   const [adInfo, setAdInfo]     = useState(null);
@@ -105,17 +105,30 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
   };
 
   useEffect(() => {
+    if (!user) return;
+    
     fetchMessages();
 
     // Realtime abonelik — yeni mesaj gelince listeyi güncelle
     const channel = supabase
-      .channel(`messages:ad_id=eq.${adId}`)
+      .channel(`thread-${user.id}-${receiverId}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'messages',
-        filter: `ad_id=eq.${adId}`,
-      }, () => fetchMessages())
+      }, (payload) => {
+        // Sadece bu görüşmeye ait bir mesaj ise listeyi tazele
+        const newM = payload.new;
+        const isRelevant = 
+          (newM.sender_id === user.id && newM.receiver_id === receiverId) ||
+          (newM.receiver_id === user.id && newM.sender_id === receiverId);
+        
+        const adCheck = (adId && adId !== 'null') ? String(newM.ad_id) === String(adId) : !newM.ad_id;
+
+        if (isRelevant && adCheck) {
+          fetchMessages();
+        }
+      })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
@@ -134,9 +147,18 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
     }
   }, [messages, user?.id, loading]);
 
-  // Yeni mesaj gelince en alta kaydır
+  // Mesaj listesi değişince (yeni mesaj gelince veya konuşma açılınca) en alta kaydır
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const scrollToBottom = () => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
+    };
+
+    scrollToBottom();
+    // DOM güncellendikten sonra bir kez daha (resim vb. yüklenmesi ihtimaline karşı)
+    const timeout = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(timeout);
   }, [messages]);
 
   /**
@@ -243,7 +265,10 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
       </div>
 
       {/* ── Mesaj listesi ── */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div 
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto p-4 space-y-3 scroll-smooth"
+      >
         {messages.length === 0 ? (
           <p className="text-center text-sm text-ink-tertiary py-8">
             No messages yet. Be the first to send a message!
@@ -255,6 +280,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
             return (
               <div
                 key={msg.id}
+                id={`msg-${msg.id}`}
                 className={`flex gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}
               >
                 <div className={`group relative max-w-[75%]`}>
