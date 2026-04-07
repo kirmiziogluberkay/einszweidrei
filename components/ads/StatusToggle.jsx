@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Lock, Loader2 } from 'lucide-react';
+import { Lock, Unlock, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -63,7 +63,7 @@ export default function StatusToggle({ adId, currentStatus, categoryId, categori
         <Loader2 className="w-4 h-4 animate-spin" />
       ) : (
         <>
-          <Lock className="w-4 h-4" />
+          {currentStatus === 'active' ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
           {currentStatus === 'active' 
             ? (findRootSlug(categoryId).includes('rental') ? 'Rented' : 'Reserved')
             : 'Activate'

@@ -13,7 +13,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle, Lock, CheckCircle } from 'lucide-react';
+import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle, Lock, Unlock, CheckCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAds } from '@/hooks/useAds';
@@ -222,7 +222,7 @@ export default function MyAdsPage() {
                                  : 'text-ink-tertiary hover:text-brand-500 hover:bg-surface-secondary'
                              }`}
                           >
-                             <Lock className="w-4 h-4" />
+                             {ad.status === 'active' ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                           </button>
                           <Link
                             href={`${AD_URL_PREFIX}/${ad.serial_number}/duzenle`}
