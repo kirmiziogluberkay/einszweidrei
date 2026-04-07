@@ -13,7 +13,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle, Lock, Unlock, CheckCircle } from 'lucide-react';
+import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle, Lock, Unlock, CheckCircle, Circle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAds } from '@/hooks/useAds';
@@ -201,7 +201,7 @@ export default function MyAdsPage() {
 
                         <div className="flex items-center gap-1 flex-shrink-0">
                           {!getRootSlug(ad.category_id).includes('rental') && (
-                            <button
+                             <button
                                onClick={() => handleMarkSold(ad.id, ad.status)}
                                title="Mark as Sold"
                                className={`p-2 rounded-xl transition-colors ${
@@ -209,9 +209,9 @@ export default function MyAdsPage() {
                                    ? 'text-red-500 bg-red-50' 
                                    : 'text-ink-tertiary hover:text-red-500 hover:bg-red-50'
                                }`}
-                            >
-                               <CheckCircle className="w-4 h-4" />
-                            </button>
+                             >
+                                {ad.status === 'sold' ? <CheckCircle className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
+                             </button>
                           )}
                           <button
                              onClick={() => handleToggleStatus(ad.id, ad.status, ad.category_id)}

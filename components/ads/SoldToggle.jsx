@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Circle, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -44,7 +44,7 @@ export default function SoldToggle({ adId, currentStatus }) {
         <Loader2 className="w-4 h-4 animate-spin" />
       ) : (
         <>
-          <CheckCircle className={`w-4 h-4 ${isSold ? 'text-red-500' : 'text-ink-tertiary group-hover:text-red-500'}`} />
+          {isSold ? <CheckCircle className="w-4 h-4 text-red-500" /> : <Circle className="w-4 h-4 text-ink-tertiary group-hover:text-red-500" />}
           <span>{isSold ? 'Sold' : 'Mark Sold'}</span>
         </>
       )}
