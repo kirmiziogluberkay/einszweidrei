@@ -208,16 +208,15 @@ export default async function AdDetailPage({ params }) {
 
             <aside className="lg:col-span-2 space-y-4">
               <div className="card p-6 space-y-4">
-                {ad.status !== 'active' && (
-                  <span className={`badge ${
-                    ad.status === 'sold'     ? 'bg-red-100 text-red-600' :
-                    ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
-                    ad.status === 'rented'   ? 'bg-blue-100 text-blue-600' :
-                    'bg-gray-100 text-gray-600'
-                  }`}>
-                    {statusInfo.label}
-                  </span>
-                )}
+                <span className={`badge ${
+                  ad.status === 'active'   ? 'bg-green-100 text-green-600' :
+                  ad.status === 'sold'     ? 'bg-red-100 text-red-600' :
+                  ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
+                  ad.status === 'rented'   ? 'bg-blue-100 text-blue-600' :
+                  'bg-gray-100 text-gray-600'
+                }`}>
+                  {statusInfo.label}
+                </span>
                 
                 <h1 className="text-[14px] font-bold text-ink leading-tight mb-4">{ad.title}</h1>
                 
