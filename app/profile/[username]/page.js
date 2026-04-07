@@ -74,10 +74,6 @@ export default async function PublicProfilePage({ params }) {
                  )}
               </div>
             </div>
-            
-            <p className="text-sm text-ink-tertiary max-w-2xl">
-               Welcome to {formatUsername(profile.username)}'s shop. Here you can find all the items they are currently selling on {process.env.NEXT_PUBLIC_SITE_NAME || 'Einszweidrei'}.
-            </p>
           </div>
         </div>
       </div>

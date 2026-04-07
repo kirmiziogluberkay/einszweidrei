@@ -323,7 +323,6 @@ export default async function AdDetailPage({ params }) {
                         <p className="font-bold text-ink text-sm group-hover:text-brand-500 transition-colors">
                           {formatUsername(ad.owner?.username)}
                         </p>
-                        <p className="text-[10px] text-ink-tertiary uppercase font-bold tracking-widest mt-0.5">Verified Seller</p>
                       </div>
                     </Link>
                     <ContactButton
