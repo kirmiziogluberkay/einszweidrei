@@ -12,7 +12,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Clock, Tag } from 'lucide-react';
-import { formatPrice, buildAdUrl, timeAgo, formatUsername } from '@/lib/helpers';
+import { formatPrice, buildAdUrl, timeAgo, formatUsername, cn } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
 
 /**
