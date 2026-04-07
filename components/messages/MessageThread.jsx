@@ -153,13 +153,15 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
       if (scrollRef.current) {
         scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       }
+      // Yedek olarak scrollIntoView (Anlık geçiş için behavior: auto)
+      bottomRef.current?.scrollIntoView({ behavior: 'auto' });
     };
 
     scrollToBottom();
-    // DOM güncellendikten sonra bir kez daha (resim vb. yüklenmesi ihtimaline karşı)
-    const timeout = setTimeout(scrollToBottom, 100);
+    // Resim veya İlan bilgisi yüklendiğinde DOM değişeceği için gecikmeli teyit
+    const timeout = setTimeout(scrollToBottom, 300); // Gecikmeyi artırdım (resimler için)
     return () => clearTimeout(timeout);
-  }, [messages]);
+  }, [messages, adInfo, user?.id]); // adInfo eklendi, çünkü ilan resmi gelince boy değişiyor
 
   /**
    * Yeni mesaj gönderir.
@@ -267,7 +269,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
       {/* ── Mesaj listesi ── */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 space-y-3 scroll-smooth"
+        className="flex-1 overflow-y-auto p-4 space-y-3"
       >
         {messages.length === 0 ? (
           <p className="text-center text-sm text-ink-tertiary py-8">

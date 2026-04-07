@@ -73,6 +73,16 @@ export default function Navbar() {
     };
   }, [user?.id]);
 
+  const [menuOpened, setMenuOpened] = useState(false);
+
+  // Integrated Notification Check
+  useEffect(() => {
+    // New unread message logic: reset acknowledgment if new ones arrive
+    if (hasUnread) {
+       setMenuOpened(false);
+    }
+  }, [hasUnread]);
+
   /** Sayfa değişince menüyü kapat */
   useEffect(() => {
     setMobileOpen(false);
@@ -114,7 +124,9 @@ export default function Navbar() {
                <Link href="/login" className="btn-primary py-2 px-6 text-sm h-10 rounded-xl">Login</Link>
             ) : (
                <div className="relative group flex items-center">
-                 <button className="flex items-center gap-2.5 p-1 rounded-2xl hover:bg-surface-secondary transition-all">
+                 <button 
+                    className="flex items-center gap-2.5 p-1 rounded-2xl hover:bg-surface-secondary transition-all"
+                 >
                     {!usernameDisplay ? (
                        <div className="flex items-center gap-2.5 animate-pulse">
                           <div className="w-8 h-8 rounded-full bg-surface-tertiary/40" />
@@ -127,7 +139,7 @@ export default function Navbar() {
                           </div>
                           <div className="flex items-center gap-1.5 md:flex hidden">
                              <span className="text-sm font-bold text-ink truncate max-w-[100px]">{usernameDisplay}</span>
-                             {hasUnread && (
+                             {hasUnread && !menuOpened && (
                                 <Mail className="w-4 h-4 text-green-500 fill-green-50/20" />
                              )}
                           </div>
@@ -139,10 +151,19 @@ export default function Navbar() {
                  <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-[var(--shadow-xl)] border border-surface-tertiary py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
 
                     {(AUTH_NAV_LINKS || []).map((link) => (
-                      <Link key={link.href} href={link.href} className="flex justify-between items-center px-4 py-2 text-sm text-ink-secondary hover:text-brand-500 hover:bg-surface-secondary/50 transition-colors">
+                      <Link 
+                        key={link.href} 
+                        href={link.href} 
+                        onClick={() => {
+                          if (link.label === 'Messages' || link.label === 'Inbox') {
+                            setMenuOpened(true);
+                          }
+                        }}
+                        className="flex justify-between items-center px-4 py-2 text-sm text-ink-secondary hover:text-brand-500 hover:bg-surface-secondary/50 transition-colors"
+                      >
                         <span>{link.label}</span>
                         {(link.label === 'Messages' || link.label === 'Inbox') && hasUnread && (
-                           <span className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
+                           <Mail className="w-4 h-4 text-green-500 fill-green-50/20" />
                         )}
                       </Link>
                     ))}
