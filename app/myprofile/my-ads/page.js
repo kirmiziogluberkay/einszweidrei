@@ -222,7 +222,7 @@ export default function MyAdsPage() {
                                  : 'text-ink-tertiary hover:text-brand-500 hover:bg-surface-secondary'
                              }`}
                           >
-                             {ad.status === 'active' ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                             {ad.status === 'active' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
                           </button>
                           <Link
                             href={`${AD_URL_PREFIX}/${ad.serial_number}/duzenle`}

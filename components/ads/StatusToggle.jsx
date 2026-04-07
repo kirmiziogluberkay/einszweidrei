@@ -63,7 +63,7 @@ export default function StatusToggle({ adId, currentStatus, categoryId, categori
         <Loader2 className="w-4 h-4 animate-spin" />
       ) : (
         <>
-          {currentStatus === 'active' ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+          {currentStatus === 'active' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
           {currentStatus === 'active' 
             ? (findRootSlug(categoryId).includes('rental') ? 'Rented' : 'Reserved')
             : 'Activate'
