@@ -117,7 +117,7 @@ export default function Navbar() {
         <div className="flex items-center gap-4 shrink-0">
             <Link href="/post-ad" className="btn-primary py-2 px-5 text-sm h-10 gap-1.5 md:flex hidden rounded-xl">
                <Plus className="w-4 h-4" />
-               <span className="font-bold">Post Ad</span>
+               <span>New Ad</span>
             </Link>
 
             {/* Auth Section */}

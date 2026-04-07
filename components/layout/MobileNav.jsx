@@ -20,7 +20,7 @@ import { createClient } from '@/lib/supabase/client';
 const NAV_ITEMS = [
   { label: 'Home', href: '/', icon: Home, authRequired: false },
   { label: 'Search', href: '/ara', icon: Search, authRequired: false },
-  { label: 'Post Ad', href: '/post-ad', icon: Plus, authRequired: true, featured: true },
+  { label: 'New Ad', href: '/post-ad', icon: Plus, authRequired: true, featured: true },
   { label: 'Inbox', href: '/inbox', icon: MessageSquare, authRequired: true },
   { label: 'Profile', href: '/myprofile', icon: User, authRequired: false },
 ];
@@ -95,7 +95,7 @@ export default function MobileNav() {
               ) : (
                  <div className="relative flex flex-col items-center">
                    <Icon className={`w-6 h-6 transition-transform ${active ? 'scale-110' : ''}`} />
-                   <span className="text-[10px] font-bold uppercase tracking-tighter mt-1">{item.label}</span>
+                   <span className="text-[10px] uppercase tracking-tighter mt-1">{item.label}</span>
                    
                    {/* Integrated Red Dot */}
                    {item.label === 'Inbox' && hasUnread && (

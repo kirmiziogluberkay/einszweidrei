@@ -115,11 +115,8 @@ export default function MyAdsPage() {
 
   return (
     <div className="container-app py-8 max-w-3xl">
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-8">
         <h1 className="text-3xl font-bold text-ink">My Ads</h1>
-        <Link href="/post-ad" className="btn-primary">
-          <Plus className="w-4 h-4" /> New Ad
-        </Link>
       </div>
 
       {msg && (
