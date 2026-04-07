@@ -98,8 +98,8 @@ export default function AdCard({ ad, layout = 'grid' }) {
                 <span className={cn(
                   "text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm border uppercase tracking-wider",
                   status === 'reserved' ? "bg-amber-500 text-white border-amber-600" :
-                  status === 'rented'   ? "bg-blue-500 text-white border-blue-600" :
-                  "bg-gray-500 text-white border-gray-600"
+                    status === 'rented' ? "bg-blue-500 text-white border-blue-600" :
+                      "bg-gray-500 text-white border-gray-600"
                 )}>
                   {statusInfo.label}
                 </span>
@@ -140,9 +140,8 @@ export default function AdCard({ ad, layout = 'grid' }) {
           {payment_methods && payment_methods.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-auto pt-3 border-t border-surface-tertiary/30">
               {payment_methods.map((m, idx) => (
-                <span key={idx} className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                  m?.toLowerCase() === 'paypal' ? 'bg-blue-50 text-blue-600' : 'bg-surface-tertiary text-ink-secondary'
-                }`}>
+                <span key={idx} className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${m?.toLowerCase() === 'paypal' ? 'bg-blue-50 text-blue-600' : 'bg-surface-tertiary text-ink-secondary'
+                  }`}>
                   {m?.toLowerCase() === 'paypal' ? 'PayPal' : (m?.toLowerCase() === 'cash' ? 'Cash' : m)}
                 </span>
               ))}
@@ -188,7 +187,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
             <span className="text-xs font-semibold uppercase tracking-wider opacity-60">No Image</span>
           </div>
         )}
-        
+
         {/* Status Badge / Ribbon */}
         <div className="absolute top-0 right-0 z-10 w-20 h-20 overflow-hidden pointer-events-none">
           {status === 'active' ? (
@@ -202,8 +201,8 @@ export default function AdCard({ ad, layout = 'grid' }) {
               <span className={cn(
                 "text-[10px] font-bold px-2.5 py-1.5 rounded-xl shadow-sm border uppercase tracking-wider block",
                 status === 'reserved' ? "bg-amber-500 text-white border-amber-600" :
-                status === 'rented'   ? "bg-blue-500 text-white border-blue-600" :
-                "bg-gray-500 text-white border-gray-600"
+                  status === 'rented' ? "bg-blue-500 text-white border-blue-600" :
+                    "bg-gray-500 text-white border-gray-600"
               )}>
                 {statusInfo.label}
               </span>
@@ -242,9 +241,8 @@ export default function AdCard({ ad, layout = 'grid' }) {
           {payment_methods && payment_methods.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-auto pt-3 border-t border-surface-tertiary/30">
               {payment_methods.map((m, idx) => (
-                <span key={idx} className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                  m?.toLowerCase() === 'paypal' ? 'bg-blue-50 text-blue-600' : 'bg-surface-tertiary text-ink-secondary'
-                }`}>
+                <span key={idx} className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${m?.toLowerCase() === 'paypal' ? 'bg-blue-50 text-blue-600' : 'bg-surface-tertiary text-ink-secondary'
+                  }`}>
                   {m?.toLowerCase() === 'paypal' ? 'PayPal' : (m?.toLowerCase() === 'cash' ? 'Cash' : m)}
                 </span>
               ))}

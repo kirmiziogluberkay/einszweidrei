@@ -25,7 +25,7 @@ import { SUCCESS_MESSAGES, ERROR_MESSAGES, AD_STATUSES, AD_URL_PREFIX } from '@/
 
 
 export default function ProfilimPage() {
-  const supabase          = createClient();
+  const supabase = createClient();
   const { user, profile, loading: authLoading } = useAuth();
 
   const { ads, loading: adsLoading, refetch } = useAds({
@@ -48,12 +48,12 @@ export default function ProfilimPage() {
     return !slug.includes('second-hand') && !slug.includes('rental');
   });
 
-  const [editMode,  setEditMode]  = useState(false);
-  const [username,  setUsername]  = useState(profile?.username ?? '');
-  const [phone,     setPhone]     = useState(profile?.phone ?? '');
-  const [saving,    setSaving]    = useState(false);
-  const [msg,       setMsg]       = useState(null);
-  const [msgType,   setMsgType]   = useState('success');
+  const [editMode, setEditMode] = useState(false);
+  const [username, setUsername] = useState(profile?.username ?? '');
+  const [phone, setPhone] = useState(profile?.phone ?? '');
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const [msgType, setMsgType] = useState('success');
 
   /**
    * Profil bilgilerini kaydeder.
@@ -118,14 +118,14 @@ export default function ProfilimPage() {
     };
 
     const rootSlug = findRootSlug(categoryId).toLowerCase();
-    
+
     // Kök kategoriye Göre Ayrım:
     let targetStatus = 'passive';
     if (rootSlug.includes('rental')) targetStatus = 'rented';
     else if (rootSlug.includes('second-hand')) targetStatus = 'reserved';
-    
+
     const newStatus = currentStatus === 'active' ? targetStatus : 'active';
-    
+
     const { error } = await supabase
       .from('ads')
       .update({ status: newStatus })
@@ -153,11 +153,10 @@ export default function ProfilimPage() {
 
       {/* ── Mesaj ── */}
       {msg && (
-        <div className={`flex items-start gap-2 p-4 rounded-2xl text-sm mb-6 ${
-          msgType === 'success'
+        <div className={`flex items-start gap-2 p-4 rounded-2xl text-sm mb-6 ${msgType === 'success'
             ? 'bg-green-50 border border-green-100 text-green-600'
             : 'bg-red-50 border border-red-100 text-red-600'
-        }`}>
+          }`}>
           <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>{msg}</span>
         </div>
@@ -253,8 +252,8 @@ export default function ProfilimPage() {
             {/* ── Helpers to render grouped list ── */}
             {[
               { title: 'Second Hand Items', list: secondHandAds },
-              { title: 'Rental Items',      list: rentalAds },
-              { title: 'Other Listings',    list: otherAds }
+              { title: 'Rental Items', list: rentalAds },
+              { title: 'Other Listings', list: otherAds }
             ].map((section) => (
               section.list.length > 0 && (
                 <div key={section.title}>
@@ -283,28 +282,26 @@ export default function ProfilimPage() {
                           </div>
 
                           {/* Durum Badge */}
-                          <span className={`badge text-[10px] shrink-0 ${
-                            ad.status === 'active'   ? 'bg-green-100 text-green-600' :
-                            ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
-                            ad.status === 'rented'   ? 'bg-blue-100 text-blue-600' :
-                            ad.status === 'sold'     ? 'bg-red-100 text-red-600' :
-                            'bg-gray-100 text-gray-500'
-                          }`}>
+                          <span className={`badge text-[10px] shrink-0 ${ad.status === 'active' ? 'bg-green-100 text-green-600' :
+                              ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
+                                ad.status === 'rented' ? 'bg-blue-100 text-blue-600' :
+                                  ad.status === 'sold' ? 'bg-red-100 text-red-600' :
+                                    'bg-gray-100 text-gray-500'
+                            }`}>
                             {statusInfo?.label || ad.status}
                           </span>
 
                           <div className="flex items-center gap-1 flex-shrink-0">
                             <button
-                               onClick={() => handleToggleStatus(ad.id, ad.status, ad.category_id)}
-                               aria-label="Toggle Status"
-                               title="Toggle Reserved/Rented"
-                               className={`p-2 rounded-xl transition-colors ${
-                                 (ad.status === 'reserved' || ad.status === 'rented')
-                                   ? 'text-brand-500 bg-brand-50' 
-                                   : 'text-ink-tertiary hover:text-brand-500 hover:bg-surface-secondary'
-                               }`}
+                              onClick={() => handleToggleStatus(ad.id, ad.status, ad.category_id)}
+                              aria-label="Toggle Status"
+                              title="Toggle Reserved/Rented"
+                              className={`p-2 rounded-xl transition-colors ${(ad.status === 'reserved' || ad.status === 'rented')
+                                  ? 'text-brand-500 bg-brand-50'
+                                  : 'text-ink-tertiary hover:text-brand-500 hover:bg-surface-secondary'
+                                }`}
                             >
-                               <Lock className="w-4 h-4" />
+                              <Lock className="w-4 h-4" />
                             </button>
                             <Link
                               href={`${AD_URL_PREFIX}/${ad.serial_number}`}

@@ -38,10 +38,10 @@ export async function generateMetadata({ params }) {
   if (!ad) return { title: 'Ad Not Found' };
 
   return {
-    title:       ad.title,
+    title: ad.title,
     description: ad.description?.slice(0, 155),
     openGraph: {
-      title:  ad.title,
+      title: ad.title,
       description: ad.description?.slice(0, 155),
       images: ad.images?.[0] ? [{ url: ad.images[0] }] : [],
     },
@@ -79,7 +79,7 @@ export default async function AdDetailPage({ params }) {
   // Aktif oturum ve yetkileri kontrol et
   const { data: { user } } = await supabase.auth.getUser();
   let isAdmin = false;
-  
+
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -98,10 +98,10 @@ export default async function AdDetailPage({ params }) {
 
   // CORRECT HIERARCHY FIX: Breadcrumb structure: Home / [Parent] / [Sub] / [Title]
   const breadcrumbs = [];
-  
+
   // Find current subcategory (e.g., Furniture)
   const currentCategory = allCats?.find(c => c.id === ad.category?.id);
-  
+
   if (currentCategory) {
     // Check if it has a direct parent link in the DB
     let parent = allCats?.find(pc => pc.id === currentCategory.parent_id);
@@ -110,7 +110,7 @@ export default async function AdDetailPage({ params }) {
     // If the database has no parent linked, we manually determine it based on keywords.
     if (!parent) {
       const catName = currentCategory.name.toLowerCase();
-      
+
       // Keywords that typically belong to "Second Hand Items"
       const secondHandKeywords = ['furniture', 'electronics', 'clothing', 'baby', 'sports', 'home'];
       // Keywords that typically belong to "Rental Items"
@@ -127,7 +127,7 @@ export default async function AdDetailPage({ params }) {
     if (parent) {
       breadcrumbs.push({ name: parent.name, slug: parent.slug });
     }
-    
+
     // Add current subcategory to list
     breadcrumbs.push({ name: currentCategory.name, slug: currentCategory.slug });
   }
@@ -208,25 +208,24 @@ export default async function AdDetailPage({ params }) {
 
             <aside className="lg:col-span-2 space-y-4">
               <div className="card p-6 space-y-4">
-                <span className={`badge ${
-                  ad.status === 'active'   ? 'bg-green-100 text-green-600' :
-                  ad.status === 'sold'     ? 'bg-red-100 text-red-600' :
-                  ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
-                  ad.status === 'rented'   ? 'bg-blue-100 text-blue-600' :
-                  'bg-gray-100 text-gray-600'
-                }`}>
+                <span className={`badge ${ad.status === 'active' ? 'bg-green-100 text-green-600' :
+                    ad.status === 'sold' ? 'bg-red-100 text-red-600' :
+                      ad.status === 'reserved' ? 'bg-amber-100 text-amber-600' :
+                        ad.status === 'rented' ? 'bg-blue-100 text-blue-600' :
+                          'bg-gray-100 text-gray-600'
+                  }`}>
                   {statusInfo.label}
                 </span>
-                
+
                 <h1 className="text-[14px] font-bold text-ink leading-tight mb-4">{ad.title}</h1>
-                
+
                 {canEdit && (
                   <div className="flex items-center gap-1 mb-6">
                     <div className="w-28 flex-shrink-0">
-                      <StatusToggle 
-                        adId={ad.id} 
-                        currentStatus={ad.status} 
-                        categoryId={ad.category_id} 
+                      <StatusToggle
+                        adId={ad.id}
+                        currentStatus={ad.status}
+                        categoryId={ad.category_id}
                         categories={allCats}
                       />
                     </div>
@@ -281,9 +280,9 @@ export default async function AdDetailPage({ params }) {
                     <div className="grid grid-cols-2 gap-3">
                       {ad.payment_methods.map(method => {
                         const isPayPal = method?.toLowerCase() === 'paypal';
-                        const isCash   = method?.toLowerCase() === 'cash';
-                        const label    = isPayPal ? 'PayPal' : (isCash ? 'Cash' : method);
-                        
+                        const isCash = method?.toLowerCase() === 'cash';
+                        const label = isPayPal ? 'PayPal' : (isCash ? 'Cash' : method);
+
                         return (
                           <div key={method} className="flex items-center gap-2 px-3 py-2 bg-surface-secondary rounded-xl border border-surface-tertiary/50">
                             <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -300,7 +299,7 @@ export default async function AdDetailPage({ params }) {
                 <h3 className="text-base font-semibold text-ink mb-4">Advertiser</h3>
                 {user ? (
                   <>
-                    <Link 
+                    <Link
                       href={`/profile/${ad.owner?.username}`}
                       className="flex items-center gap-3 mb-4 group cursor-pointer"
                     >
