@@ -108,7 +108,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
             </div>
             <div className="flex-shrink-0 text-right">
               {(!price || price === 0) ? (
-                <span className="font-bold text-green-500 text-2xl leading-none">Free</span>
+                <span className="font-bold text-green-500 text-[10px] leading-none uppercase tracking-wider">Free</span>
               ) : (
                 <span className="font-bold text-ink text-2xl leading-none">{formatPrice(price, currency)}</span>
               )}
@@ -206,7 +206,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
           {/* Fiyat ve Zaman */}
           <div className="flex items-center justify-between pt-1">
             {(!price || price === 0) ? (
-              <span className="font-bold text-green-500 text-lg">Free</span>
+              <span className="font-bold text-green-500 text-[9px] uppercase tracking-tighter">Free</span>
             ) : (
               <span className="font-bold text-ink text-lg">
                 {formatPrice(price, currency)}
