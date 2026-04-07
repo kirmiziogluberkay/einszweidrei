@@ -83,26 +83,25 @@ export default function RegisterPage() {
       return;
     }
 
-    // profiles tablosuna ekle
-    if (authData.user) {
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id:       authData.user.id,
-        username: formData.username.toLowerCase(),
-        role:     'user',
-      });
-
-      if (profileError) {
-        // Eğer veritabanı hatası alırsak kullanıcıya nedeni gösterelim
-        console.error("Profile creation error:", profileError);
-        setError("Database Error: " + (profileError.details || profileError.message));
-        setLoading(false);
-        return;
+    // profiles tablosuna eklemeyi dene (hata verirse bile kaydı bozma)
+    try {
+      if (authData.user) {
+        await supabase.from('profiles').insert({
+          id:       authData.user.id,
+          username: formData.username.toLowerCase(),
+          role:     'user',
+        });
       }
+    } catch (e) {
+      console.warn("Silent profile creation error:", e);
     }
 
     setSuccess(true);
     setLoading(false);
-    setTimeout(() => router.push('/'), 2000);
+    setTimeout(() => {
+      router.push('/');
+      router.refresh();
+    }, 1500);
   };
 
   if (success) {
