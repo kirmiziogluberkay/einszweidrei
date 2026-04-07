@@ -14,7 +14,6 @@ import { Search, ChevronDown, ChevronRight } from 'lucide-react';
 import { useAds } from '@/hooks/useAds';
 import { useCategories } from '@/hooks/useCategories';
 import AdGrid from '@/components/ads/AdGrid';
-import { SITE_TAGLINE } from '@/constants/config';
 import { cn } from '@/lib/helpers';
 
 export default function HomePage() {
@@ -60,12 +59,6 @@ export default function HomePage() {
   return (
     <div className="container-app py-8">
 
-      {/* ── Hero ── */}
-      <section className="text-center mb-10">
-        <h1 className="text-4xl sm:text-5xl font-bold gradient-text mb-3">
-          {SITE_TAGLINE}
-        </h1>
-      </section>
 
       {/* ── Search bar ── */}
       <section className="mb-8">
