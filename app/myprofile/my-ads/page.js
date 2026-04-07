@@ -150,12 +150,13 @@ export default function MyAdsPage() {
             { title: 'Rented Items', list: rentedAds },
             { title: 'Sold Items', list: soldAds }
           ].map((section) => (
-            section.list.length > 0 && (
-              <div key={section.title}>
-                <h3 className="text-[11px] font-bold text-ink uppercase tracking-[0.1em] mb-4 flex items-center gap-2">
-                  <div className="w-1 h-3 bg-brand-500 rounded-full" />
-                  {section.title} ({section.list.length})
-                </h3>
+            <div key={section.title}>
+              <h3 className="text-[11px] font-bold text-ink uppercase tracking-[0.1em] mb-4 flex items-center gap-2">
+                <div className="w-1 h-3 bg-brand-500 rounded-full" />
+                {section.title} ({section.list.length})
+              </h3>
+
+              {section.list.length > 0 ? (
                 <div className="space-y-3">
                   {section.list.map((ad) => {
                     const statusInfo = AD_STATUSES[ad.status] ?? AD_STATUSES.active;
@@ -237,8 +238,8 @@ export default function MyAdsPage() {
                     );
                   })}
                 </div>
-              </div>
-            )
+              ) : null}
+            </div>
           ))}
         </div>
       )}
