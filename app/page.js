@@ -72,7 +72,7 @@ export default function HomePage() {
               type="search"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder={`Search among ${globalTotal} ads...`}
+              placeholder={`Search among ${globalTotal} advertisements...`}
               className="input pl-11 py-3.5 text-base"
             />
           </div>
