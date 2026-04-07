@@ -212,10 +212,10 @@ export default async function AdDetailPage({ params }) {
                 <div className="flex flex-col gap-0.5 mb-2">
                   <span className="text-[9px] font-bold text-ink-tertiary uppercase tracking-wider">Status</span>
                   <span className={`font-bold text-[11px] ${ad.status === 'active' ? 'text-green-600' :
-                      ad.status === 'sold' ? 'text-red-500' :
-                        ad.status === 'reserved' ? 'text-amber-500' :
-                          ad.status === 'rented' ? 'text-blue-600' :
-                            'text-ink-tertiary'
+                    ad.status === 'sold' ? 'text-red-500' :
+                      ad.status === 'reserved' ? 'text-amber-500' :
+                        ad.status === 'rented' ? 'text-blue-600' :
+                          'text-ink-tertiary'
                     }`}>
                     {statusInfo.label}
                   </span>
