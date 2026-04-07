@@ -211,13 +211,12 @@ export default async function AdDetailPage({ params }) {
               <div className="card p-6 space-y-4">
                 <div className="flex flex-col gap-0.5 mb-2">
                   <span className="text-[9px] font-bold text-ink-tertiary uppercase tracking-wider">Status</span>
-                  <span className={`font-bold text-[11px] ${
-                    ad.status === 'active'   ? 'text-green-600' :
-                    ad.status === 'sold'     ? 'text-red-500' :
-                    ad.status === 'reserved' ? 'text-amber-500' :
-                    ad.status === 'rented'   ? 'text-blue-600' :
-                    'text-ink-tertiary'
-                  }`}>
+                  <span className={`font-bold text-[11px] ${ad.status === 'active' ? 'text-green-600' :
+                      ad.status === 'sold' ? 'text-red-500' :
+                        ad.status === 'reserved' ? 'text-amber-500' :
+                          ad.status === 'rented' ? 'text-blue-600' :
+                            'text-ink-tertiary'
+                    }`}>
                     {statusInfo.label}
                   </span>
                 </div>
@@ -234,7 +233,7 @@ export default async function AdDetailPage({ params }) {
                         categories={allCats}
                       />
                     </div>
-                    
+
                     {!breadcrumbs.some(bc => bc.name.toLowerCase().includes('rental')) && (
                       <div className="w-28 flex-shrink-0">
                         <SoldToggle adId={ad.id} currentStatus={ad.status} />
@@ -334,9 +333,9 @@ export default async function AdDetailPage({ params }) {
                       />
                     )}
                     {user?.id === ad.owner_id && (
-                       <p className="text-[11px] font-bold text-brand-500 uppercase tracking-widest text-center py-2.5 border-2 border-brand-100 rounded-xl bg-brand-50/50">
-                         YOUR ADVERTISEMENT
-                       </p>
+                      <p className="text-[11px] font-bold text-brand-500 uppercase tracking-widest text-center py-2.5 border-2 border-brand-100 rounded-xl bg-brand-50/50">
+                        YOUR ADVERTISEMENT
+                      </p>
                     )}
                   </>
                 ) : (
