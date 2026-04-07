@@ -83,13 +83,21 @@ export default function RegisterPage() {
       return;
     }
 
-    // profiles tablosuna ekle (trigger da ekleyebilir ama burada fallback)
+    // profiles tablosuna ekle
     if (authData.user) {
-      await supabase.from('profiles').upsert({
+      const { error: profileError } = await supabase.from('profiles').upsert({
         id:       authData.user.id,
-        username: formData.username,
+        username: formData.username.toLowerCase(),
         role:     'user',
       });
+
+      if (profileError) {
+        setError(profileError.message.includes('unique constraint') 
+          ? 'This username is already taken. Please choose another one.' 
+          : 'Database error: ' + profileError.message);
+        setLoading(false);
+        return;
+      }
     }
 
     setSuccess(true);
