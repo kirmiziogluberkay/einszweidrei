@@ -24,7 +24,9 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const [expandedRoots, setExpandedRoots] = useState({});
   const [maxPriceApplied, setMaxPriceApplied] = useState(null);
-  const [maxPriceLocal, setMaxPriceLocal] = useState(6000);
+  const [maxPriceLocal, setMaxPriceLocal] = useState(3000);
+  const [minPriceApplied, setMinPriceApplied] = useState(null);
+  const [minPriceLocal, setMinPriceLocal] = useState(0);
   const [selectedPaymentMethods, setSelectedPaymentMethods] = useState(['Cash', 'PayPal', 'Free']);
 
   const { categoryTree } = useCategories();
@@ -35,6 +37,7 @@ export default function HomePage() {
     categoryId: selectedCategoryIds ? null : selectedCategory,
     categoryIds: selectedCategoryIds ?? undefined,
     searchQuery,
+    minPrice: minPriceApplied,
     maxPrice: maxPriceApplied,
     paymentMethods: selectedPaymentMethods,
     page,
@@ -192,49 +195,80 @@ export default function HomePage() {
             </ul>
             
             {/* ── Price Filter ── */}
-            <div className="mt-8 border-t border-surface-tertiary pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-ink-secondary">Max Price</h3>
-                <div className="flex items-center gap-1">
+            <div className="mt-8 border-t border-surface-tertiary pt-6 text-ink">
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-ink-secondary mb-3">Price Range</h3>
+                
+                <div className="flex items-center gap-1.5 mb-5 px-0.5">
+                  <div className="flex items-center gap-1 flex-1">
+                    <input
+                      type="number"
+                      min="0"
+                      max={maxPriceLocal}
+                      value={minPriceLocal}
+                      onChange={(e) => {
+                        const val = Math.min(Number(e.target.value), maxPriceLocal);
+                        setMinPriceLocal(val);
+                      }}
+                      className="w-full h-8 px-2 text-xs border border-surface-tertiary rounded-lg focus:outline-none focus:border-brand-500 font-normal text-ink bg-white"
+                    />
+                    <span className="text-[14px] text-ink-tertiary font-bold">€</span>
+                  </div>
+                  
+                  <span className="text-ink-tertiary text-xs">—</span>
+                  
+                  <div className="flex items-center gap-1 flex-1">
+                    <input
+                      type="number"
+                      min={minPriceLocal}
+                      max="3000"
+                      value={maxPriceLocal}
+                      onChange={(e) => {
+                        const val = Math.max(Number(e.target.value), minPriceLocal);
+                        setMaxPriceLocal(val > 3000 ? 3000 : val);
+                      }}
+                      className="w-full h-8 px-2 text-xs border border-surface-tertiary rounded-lg focus:outline-none focus:border-brand-500 font-normal text-ink bg-white"
+                    />
+                    <span className="text-[14px] text-ink-tertiary font-bold">€</span>
+                  </div>
+                </div>
+
+                <div className="relative h-6 flex items-center px-1">
+                  <div className="absolute left-1 right-1 h-1.5 bg-surface-tertiary rounded-lg" />
                   <input
-                    type="number"
+                    type="range"
                     min="0"
-                    value={maxPriceLocal === 6000 ? '' : maxPriceLocal}
-                    placeholder="6000+"
-                    onChange={(e) => {
-                      const val = e.target.value ? Number(e.target.value) : 6000;
-                      setMaxPriceLocal(val);
-                    }}
-                    className="w-16 px-1.5 py-1 text-xs border border-surface-tertiary rounded focus:outline-none focus:border-brand-500 text-right font-medium text-ink"
+                    max="3000"
+                    step="10"
+                    value={minPriceLocal}
+                    onChange={(e) => setMinPriceLocal(Math.min(Number(e.target.value), maxPriceLocal))}
+                    className="absolute left-0 right-0 w-full h-1.5 appearance-none bg-transparent pointer-events-none cursor-pointer accent-brand-500 [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto"
                   />
-                  <span className="text-xs text-ink-secondary font-medium">€</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="3000"
+                    step="10"
+                    value={maxPriceLocal}
+                    onChange={(e) => setMaxPriceLocal(Math.max(Number(e.target.value), minPriceLocal))}
+                    className="absolute left-0 right-0 w-full h-1.5 appearance-none bg-transparent pointer-events-none cursor-pointer accent-brand-500 [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto"
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] text-ink-tertiary mt-1">
+                  <span>0€</span>
+                  <span>3000€+</span>
                 </div>
               </div>
-              <div className="relative pt-1">
-                <input
-                  type="range"
-                  min="0"
-                  max="6000"
-                  step="50"
-                  value={maxPriceLocal > 6000 ? 6000 : maxPriceLocal}
-                  onChange={(e) => {
-                    setMaxPriceLocal(Number(e.target.value));
-                  }}
-                  className="w-full h-1.5 bg-surface-tertiary rounded-lg appearance-none cursor-pointer accent-brand-500"
-                />
-                <div className="flex justify-between text-xs text-ink-tertiary mt-2">
-                  <span>Free</span>
-                  <span>6000€+</span>
-                </div>
-              </div>
+
               <button
                 onClick={() => {
-                  setMaxPriceApplied(maxPriceLocal);
+                  setMinPriceApplied(minPriceLocal);
+                  setMaxPriceApplied(maxPriceLocal === 3000 ? null : maxPriceLocal);
                   setPage(1);
                 }}
-                className="w-full mt-4 btn-primary text-xs py-2"
+                className="w-full btn-primary text-xs py-2.5 rounded-xl shadow-sm"
               >
-                Search
+                Apply Range
               </button>
             </div>
 

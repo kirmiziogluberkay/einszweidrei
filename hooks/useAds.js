@@ -39,7 +39,7 @@ import { ADS_PER_PAGE } from '@/constants/config';
 export function useAds(filters = {}) {
   const supabase = createClient();
 
-  const { skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, maxPrice, paymentMethods, page = 1 } = filters;
+  const { skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods, page = 1 } = filters;
 
   const [ads, setAds] = useState([]);
   const [total, setTotal] = useState(0);
@@ -110,9 +110,15 @@ export function useAds(filters = {}) {
       );
     }
 
-    // Price filter (upper limit and free/NULL ads)
-    if (maxPrice !== undefined && maxPrice !== null) {
-      query = query.or(`price.lte.${maxPrice},price.is.null`);
+    // Price filter (min, max and free/NULL ads logic)
+    if ((minPrice !== undefined && minPrice !== null) || (maxPrice !== undefined && maxPrice !== null)) {
+      if (minPrice && maxPrice) {
+        query = query.or(`and(price.gte.${minPrice},price.lte.${maxPrice}),price.is.null`);
+      } else if (minPrice) {
+        query = query.or(`price.gte.${minPrice},price.is.null`);
+      } else {
+        query = query.or(`price.lte.${maxPrice},price.is.null`);
+      }
     }
 
     // Payment method filter
