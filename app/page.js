@@ -24,7 +24,7 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const [expandedRoots, setExpandedRoots] = useState({});
   const [maxPriceApplied, setMaxPriceApplied] = useState(null);
-  const [maxPriceLocal, setMaxPriceLocal] = useState(3000);
+  const [maxPriceLocal, setMaxPriceLocal] = useState(6000);
   const [minPriceApplied, setMinPriceApplied] = useState(null);
   const [minPriceLocal, setMinPriceLocal] = useState(0);
   const [selectedPaymentMethods, setSelectedPaymentMethods] = useState(['Cash', 'PayPal', 'Free']);
@@ -221,11 +221,11 @@ export default function HomePage() {
                     <input
                       type="number"
                       min={minPriceLocal}
-                      max="3000"
+                      max="6000"
                       value={maxPriceLocal}
                       onChange={(e) => {
                         const val = Math.max(Number(e.target.value), minPriceLocal);
-                        setMaxPriceLocal(val > 3000 ? 3000 : val);
+                        setMaxPriceLocal(val > 6000 ? 6000 : val);
                       }}
                       className="w-full h-8 px-2 text-xs border border-surface-tertiary rounded-lg focus:outline-none focus:border-brand-500 font-normal text-ink bg-white"
                     />
@@ -238,7 +238,7 @@ export default function HomePage() {
                   <input
                     type="range"
                     min="0"
-                    max="3000"
+                    max="6000"
                     step="10"
                     value={minPriceLocal}
                     onChange={(e) => setMinPriceLocal(Math.min(Number(e.target.value), maxPriceLocal))}
@@ -247,7 +247,7 @@ export default function HomePage() {
                   <input
                     type="range"
                     min="0"
-                    max="3000"
+                    max="6000"
                     step="10"
                     value={maxPriceLocal}
                     onChange={(e) => setMaxPriceLocal(Math.max(Number(e.target.value), minPriceLocal))}
@@ -256,14 +256,14 @@ export default function HomePage() {
                 </div>
                 <div className="flex justify-between text-[10px] text-ink-tertiary mt-1">
                   <span>0€</span>
-                  <span>3000€+</span>
+                  <span>6000€</span>
                 </div>
               </div>
 
               <button
                 onClick={() => {
                   setMinPriceApplied(minPriceLocal);
-                  setMaxPriceApplied(maxPriceLocal === 3000 ? null : maxPriceLocal);
+                  setMaxPriceApplied(maxPriceLocal === 6000 ? null : maxPriceLocal);
                   setPage(1);
                 }}
                 className="w-full btn-primary text-xs py-2.5 rounded-xl shadow-sm"
