@@ -26,8 +26,13 @@ function AraContent() {
   const [inputValue, setInputValue] = useState(urlQuery);
   const [searchQuery, setSearchQuery] = useState(urlQuery);
   const [page, setPage] = useState(1);
+  const [selectedPaymentMethods, setSelectedPaymentMethods] = useState([]);
 
-  const { ads, loading, error, total, totalPages } = useAds({ searchQuery, page });
+  const { ads, loading, error, total, totalPages } = useAds({ 
+    searchQuery, 
+    page, 
+    paymentMethods: selectedPaymentMethods 
+  });
 
   // URL değiştiğinde state'i güncelle
   useEffect(() => {
@@ -45,6 +50,19 @@ function AraContent() {
     setSearchQuery(inputValue);
     setPage(1);
     router.push(`/ara?q=${encodeURIComponent(inputValue)}`);
+  };
+
+  /**
+   * Ödeme yöntemi seçimini yönetir.
+   */
+  const handlePaymentMethodChange = (method) => {
+    setSelectedPaymentMethods((prev) => {
+      const next = prev.includes(method)
+        ? prev.filter((m) => m !== method)
+        : [...prev, method];
+      setPage(1); // Filtre değişince başa dön
+      return next;
+    });
   };
 
   return (
@@ -68,33 +86,62 @@ function AraContent() {
         <button type="submit" className="btn-primary px-6">Ara</button>
       </form>
 
-      {/* Sonuç sayısı */}
-      {searchQuery && !loading && (
-        <p className="text-sm text-ink-secondary mb-5">
-          "<span className="font-medium text-ink">{searchQuery}</span>" için{' '}
-          <span className="font-medium">{total}</span> sonuç bulundu.
-        </p>
-      )}
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Sol Menü / Filtreler */}
+        <aside className="w-full lg:w-64 flex-shrink-0">
+          <div className="bg-surface p-6 rounded-2xl border border-surface-secondary sticky top-24">
+            <h2 className="text-sm font-semibold text-ink uppercase tracking-wider mb-4">Ödeme Yöntemi</h2>
+            <div className="space-y-3">
+              {['Cash', 'PayPal'].map((method) => (
+                <label key={method} className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedPaymentMethods.includes(method)}
+                      onChange={() => handlePaymentMethodChange(method)}
+                      className="w-5 h-5 rounded border-surface-tertiary text-brand-500 focus:ring-brand-500 transition-colors"
+                    />
+                  </div>
+                  <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors font-medium">
+                    {method}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </aside>
 
-      <AdGrid
-        ads={ads}
-        loading={loading}
-        error={error}
-        emptyMessage={
-          searchQuery
-            ? `"${searchQuery}" ile ilgili ilan bulunamadı.`
-            : 'Aramak için yukarıdaki alana yazın.'
-        }
-      />
+        {/* Ana İçerik */}
+        <div className="flex-1 min-w-0">
+          {/* Sonuç sayısı */}
+          {searchQuery && !loading && (
+            <p className="text-sm text-ink-secondary mb-5">
+              "<span className="font-medium text-ink">{searchQuery}</span>" için{' '}
+              <span className="font-medium">{total}</span> sonuç bulundu.
+            </p>
+          )}
 
-      {/* Sayfalama */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-10">
-          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary px-4 py-2 disabled:opacity-40">← Önceki</button>
-          <span className="text-sm text-ink-secondary px-4">{page} / {totalPages}</span>
-          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="btn-secondary px-4 py-2 disabled:opacity-40">Sonraki →</button>
+          <AdGrid
+            ads={ads}
+            loading={loading}
+            error={error}
+            emptyMessage={
+              searchQuery
+                ? `"${searchQuery}" ile ilgili ilan bulunamadı.`
+                : 'Aramak için yukarıdaki alana yazın.'
+            }
+          />
+
+          {/* Sayfalama */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-10">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary px-4 py-2 disabled:opacity-40">← Önceki</button>
+              <span className="text-sm text-ink-secondary px-4">{page} / {totalPages}</span>
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="btn-secondary px-4 py-2 disabled:opacity-40">Sonraki →</button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

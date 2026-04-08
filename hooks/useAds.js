@@ -39,7 +39,7 @@ import { ADS_PER_PAGE } from '@/constants/config';
 export function useAds(filters = {}) {
   const supabase = createClient();
 
-  const { skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, maxPrice, page = 1 } = filters;
+  const { skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, maxPrice, paymentMethods, page = 1 } = filters;
 
   const [ads, setAds] = useState([]);
   const [total, setTotal] = useState(0);
@@ -115,6 +115,11 @@ export function useAds(filters = {}) {
       query = query.or(`price.lte.${maxPrice},price.is.null`);
     }
 
+    // Ödeme yöntemi filtresi
+    if (paymentMethods && paymentMethods.length > 0) {
+      query = query.overlaps('payment_methods', paymentMethods);
+    }
+
     // Sayfalama
     const from = (page - 1) * ADS_PER_PAGE;
     const to = from + ADS_PER_PAGE - 1;
@@ -143,7 +148,7 @@ export function useAds(filters = {}) {
     setAds(sortedData);
     setTotal(count ?? 0);
     setLoading(false);
-  }, [supabase, categoryId, categoryIds?.join(','), ownerId, owner_id, searchQuery, maxPrice, page]);
+  }, [supabase, categoryId, categoryIds?.join(','), ownerId, owner_id, searchQuery, maxPrice, paymentMethods?.join(','), page]);
 
   useEffect(() => {
     fetchAds();
