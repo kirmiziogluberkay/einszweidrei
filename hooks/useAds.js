@@ -9,8 +9,8 @@
 /**
  * hooks/useAds.js
  * ─────────────────────────────────────────────────────
- * İlan listeleme, filtreleme ve sayfalama işlemlerini
- * yöneten custom React hook.
+ * Custom React hook managing ad listing, filtering,
+ * and pagination logic.
  * ─────────────────────────────────────────────────────
  */
 
@@ -19,7 +19,7 @@ import { createClient } from '@/lib/supabase/client';
 import { ADS_PER_PAGE } from '@/constants/config';
 
 /**
- * İlan listesini döndüren hook.
+ * Hook that returns the list of ads.
  *
  * @param {{
  *   categoryId?: string,
@@ -47,7 +47,7 @@ export function useAds(filters = {}) {
   const [error, setError] = useState(null);
 
   /**
-   * İlanları Supabase'den çeker.
+   * Fetches ads from Supabase.
    */
   const fetchAds = useCallback(async () => {
     if (skip) {
@@ -57,7 +57,7 @@ export function useAds(filters = {}) {
     setLoading(true);
     setError(null);
 
-    // Temel sorgu — ilgili profilini ve kategoriyi birleştir
+    // Base query — join corresponding profile and category
     let query = supabase
       .from('ads')
       .select(`
@@ -77,50 +77,67 @@ export function useAds(filters = {}) {
         category:categories(id, name, slug)
       `, { count: 'exact' });
 
-    // Durum filtresi - Genel ziyaretçiler sadece 'active' ilanları görür.
-    // İlan sahibi (ownerId varsa) kendi profilinde tüm durumları görür.
+    // Status filter - Public visitors only see 'active' ads.
+    // Ad owner (if ownerId is present) sees all statuses in their profile.
     const finalOwnerId = ownerId || owner_id;
     if (!finalOwnerId) {
-      // Genel ziyaretçiler SADECE 'active' olanları görür
+      // General visitors ONLY see 'active' ones
       query = query.eq('status', 'active');
     } else {
-      // İlan sahibi kendi panelinde her şeyi görür (satılanlar dahil)
+      // Ad owner sees everything in their panel (including sold)
       query = query.in('status', ['active', 'reserved', 'rented', 'passive', 'sold']);
     }
 
     query = query.order('created_at', { ascending: false });
 
-    // Kategori filtresi — tek id veya çoklu id listesi desteklenir
+    // Category filter — single id or multiple id list supported
     if (categoryIds && categoryIds.length > 0) {
-      // Birden fazla kategori: "in" operatörü ile filtrele
+      // Multiple categories: filter with "in" operator
       query = query.in('category_id', categoryIds);
     } else if (categoryId) {
       query = query.eq('category_id', categoryId);
     }
 
-    // İlan sahibi filtresi (profil sayfasında kendi ilanları)
+    // Ad owner filter (their own ads on profile page)
     if (finalOwnerId) {
       query = query.eq('owner_id', finalOwnerId);
     }
 
-    // Metin araması (başlık ve açıklama içinde)
+    // Text search (within title and description)
     if (searchQuery) {
       query = query.or(
         `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`
       );
     }
 
-    // Fiyat filtresi (üst limit ve ücretsiz/NULL ilanlar)
+    // Price filter (upper limit and free/NULL ads)
     if (maxPrice !== undefined && maxPrice !== null) {
       query = query.or(`price.lte.${maxPrice},price.is.null`);
     }
 
-    // Ödeme yöntemi filtresi
-    if (paymentMethods && paymentMethods.length > 0) {
-      query = query.overlaps('payment_methods', paymentMethods);
+    // Payment method filter
+    if (paymentMethods) {
+      if (paymentMethods.length > 0) {
+        const hasFree = paymentMethods.includes('Free');
+        const actualMethods = paymentMethods.filter(m => m !== 'Free');
+
+        if (hasFree && actualMethods.length > 0) {
+          // Both specific methods AND 'Free' are selected
+          query = query.or(`payment_methods.ov.{${actualMethods.join(',')}},payment_methods.is.null,payment_methods.eq.{},price.eq.0,price.is.null`);
+        } else if (hasFree) {
+          // ONLY 'Free' is selected
+          query = query.or('payment_methods.is.null,payment_methods.eq.{}' + (',price.eq.0,price.is.null'));
+        } else {
+          // ONLY specific methods are selected
+          query = query.overlaps('payment_methods', actualMethods);
+        }
+      } else {
+        // NONE of the methods are selected -> returns zero results
+        query = query.eq('id', '00000000-0000-0000-0000-000000000000');
+      }
     }
 
-    // Sayfalama
+    // Pagination
     const from = (page - 1) * ADS_PER_PAGE;
     const to = from + ADS_PER_PAGE - 1;
     query = query.range(from, to);
@@ -133,7 +150,7 @@ export function useAds(filters = {}) {
       return;
     }
 
-    // Sayfa içinde görselli ilanları öne, görselsizleri arkaya al, kendi içlerinde tarihe göre sırala
+    // Sort ads with images to the front, then by date (newest first)
     const sortedData = (data ?? []).sort((a, b) => {
       const aHasImg = a.images && a.images.length > 0;
       const bHasImg = b.images && b.images.length > 0;
@@ -141,7 +158,7 @@ export function useAds(filters = {}) {
       if (aHasImg && !bHasImg) return -1;
       if (!aHasImg && bHasImg) return 1;
       
-      // İkisi de görselli ya da görselsiz ise tarihe göre (yeni en üstte)
+      // If both have or don't have images, sort by date
       return new Date(b.created_at) - new Date(a.created_at);
     });
 
@@ -157,7 +174,7 @@ export function useAds(filters = {}) {
   return {
     ads,
     total,
-    /** Toplam sayfa sayısı */
+    /** Total number of pages */
     totalPages: Math.ceil(total / ADS_PER_PAGE),
     loading,
     error,

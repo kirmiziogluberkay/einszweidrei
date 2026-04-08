@@ -25,6 +25,7 @@ export default function HomePage() {
   const [expandedRoots, setExpandedRoots] = useState({});
   const [maxPriceApplied, setMaxPriceApplied] = useState(null);
   const [maxPriceLocal, setMaxPriceLocal] = useState(6000);
+  const [selectedPaymentMethods, setSelectedPaymentMethods] = useState(['Cash', 'PayPal', 'Free']);
 
   const { categoryTree } = useCategories();
 
@@ -35,6 +36,7 @@ export default function HomePage() {
     categoryIds: selectedCategoryIds ?? undefined,
     searchQuery,
     maxPrice: maxPriceApplied,
+    paymentMethods: selectedPaymentMethods,
     page,
   });
 
@@ -56,6 +58,16 @@ export default function HomePage() {
     e.preventDefault();
     setSearchQuery(searchInput);
     setPage(1);
+  };
+
+  const handlePaymentMethodChange = (method) => {
+    setSelectedPaymentMethods((prev) => {
+      const next = prev.includes(method)
+        ? prev.filter((m) => m !== method)
+        : [...prev, method];
+      setPage(1);
+      return next;
+    });
   };
 
   return (
@@ -224,6 +236,26 @@ export default function HomePage() {
               >
                 Search
               </button>
+            </div>
+
+            {/* ── Payment Method ── */}
+            <div className="mt-8 border-t border-surface-tertiary pt-6">
+              <h3 className="text-sm font-semibold text-ink-secondary mb-4">Payment Method</h3>
+              <div className="space-y-3">
+                {['Cash', 'PayPal', 'Free'].map((method) => (
+                  <label key={method} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={selectedPaymentMethods.includes(method)}
+                      onChange={() => handlePaymentMethodChange(method)}
+                      className="w-4 h-4 rounded border-surface-tertiary text-brand-500 focus:ring-brand-500 transition-colors"
+                    />
+                    <span className="text-xs text-ink-secondary group-hover:text-ink transition-colors font-medium">
+                      {method}
+                    </span>
+                  </label>
+                ))}
+              </div>
             </div>
 
           </div>

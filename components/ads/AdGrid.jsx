@@ -1,8 +1,8 @@
 /**
  * components/ads/AdGrid.jsx
  * ─────────────────────────────────────────────────────
- * İlan kartlarını ızgara düzeninde gösteren bileşen.
- * Yükleme, boş durum ve hata halleri dahildir.
+ * Component that displays ad cards in a grid layout.
+ * Includes loading, empty, and error states.
  * ─────────────────────────────────────────────────────
  */
 
@@ -22,11 +22,11 @@ export default function AdGrid({
   ads = [],
   loading = false,
   error = null,
-  emptyMessage = 'Henüz ilan bulunmuyor.',
+  emptyMessage = 'No ads found yet.',
   layout = 'grid',
 }) {
 
-  // ── Yükleme durumu ── skeleton kartlar
+  // ── Loading state ── skeleton cards
   if (loading) {
     return (
       <div className={layout === 'grid' 
@@ -51,7 +51,7 @@ export default function AdGrid({
     );
   }
 
-  // ── Hata durumu ──
+  // ── Error state ──
   if (error) {
     return (
       <div className="text-center py-16">
@@ -61,7 +61,7 @@ export default function AdGrid({
     );
   }
 
-  // ── Boş liste durumu ──
+  // ── Empty list state ──
   if (ads.length === 0) {
     return (
       <div className="text-center py-16">
@@ -77,7 +77,7 @@ export default function AdGrid({
     );
   }
 
-  // ── Normal durum ──
+  // ── Normal state ──
   return (
     <div className={layout === 'grid' 
       ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"

@@ -3,12 +3,12 @@
 /**
  * components/ads/AdForm.jsx
  * ─────────────────────────────────────────────────────
- * Hem yeni ilan oluşturma hem de mevcut ilan düzenleme
- * için kullanılan form bileşeni.
+ * Form component used for both creating new ads and
+ * editing existing ones.
  *
- * - Fotoğraf yükleme (Supabase Storage)
- * - Kategori seçimi (hiyerarşik)
- * - Taslak kaydetme ve yayına alma
+ * - Photo upload (Supabase Storage)
+ * - Category selection (hierarchical)
+ * - Draft saving and publishing
  * ─────────────────────────────────────────────────────
  */
 
@@ -35,7 +35,7 @@ import { buildAdUrl, cn } from '@/lib/helpers';
 
 /**
  * @param {{
- *   initialData?: object  // Düzenleme modunda mevcut ilan verisi
+ *   initialData?: object  // Existing ad data in edit mode
  * }} props
  */
 export default function AdForm({ initialData = null }) {
@@ -45,7 +45,7 @@ export default function AdForm({ initialData = null }) {
   const { categories } = useCategories();
   const fileInputRef = useRef(null);
 
-  /** Form alanı değerleri */
+  /** Form field values */
   const [formData, setFormData] = useState({
     title:       initialData?.title       ?? '',
     description: initialData?.description ?? '',
@@ -56,10 +56,10 @@ export default function AdForm({ initialData = null }) {
     ),
   });
 
-  /** Yüklenmiş fotoğrafların URL'leri (Supabase Storage) */
+  /** URLs of uploaded photos (Supabase Storage) */
   const [uploadedImages, setUploadedImages] = useState(initialData?.images ?? []);
 
-  /** Yükleme sürecindeki yerel önizleme nesneleri */
+  /** Local preview objects during upload process */
   const [previews, setPreviews] = useState([]);
 
   const [uploading, setUploading] = useState(false);
@@ -68,7 +68,7 @@ export default function AdForm({ initialData = null }) {
   const [successMsg, setSuccessMsg] = useState(null);
 
   /**
-   * Tek bir form alanını günceller.
+   * Updates a single form field.
    *
    * @param {React.ChangeEvent} e
    */
@@ -93,7 +93,7 @@ export default function AdForm({ initialData = null }) {
       setFormData((prev) => ({ 
         ...prev, 
         [name]: value,
-        // Eger fiyat yoksa veya 0 ise odeme yontemlerini temizle
+        // If price is missing or 0, clear payment methods
         payment_methods: isFree ? [] : prev.payment_methods 
       }));
     } else {
@@ -102,7 +102,7 @@ export default function AdForm({ initialData = null }) {
   };
 
   /**
-   * Kullanıcının seçtiği dosyaları Supabase Storage'a yükler.
+   * Uploads files selected by the user to Supabase Storage.
    *
    * @param {React.ChangeEvent<HTMLInputElement>} e
    */
@@ -135,7 +135,7 @@ export default function AdForm({ initialData = null }) {
         continue;
       }
 
-      // Benzersiz dosya yolu: owner_id/timestamp_randomsuffix.ext
+      // Unique file path: owner_id/timestamp_randomsuffix.ext
       const ext      = file.name.split('.').pop();
       const filePath = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 
@@ -148,7 +148,7 @@ export default function AdForm({ initialData = null }) {
         continue;
       }
 
-      // Public URL al
+      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from(STORAGE_BUCKET)
         .getPublicUrl(filePath);
@@ -159,13 +159,13 @@ export default function AdForm({ initialData = null }) {
     setUploadedImages((prev) => [...prev, ...newUrls]);
     setUploading(false);
 
-    // Input'u sıfırla (aynı dosya tekrar seçilebilsin)
+    // Reset input (same file can be selected again)
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   /**
-   * Belirtilen indeksteki fotoğrafı listeden kaldırır.
-   * (Supabase Storage'daki dosya silinmez, sadece referans kaldırılır)
+   * Removes the photo at the specified index from the list.
+   * (File in Supabase Storage is not deleted, only the reference is removed)
    *
    * @param {number} index
    */
@@ -174,7 +174,7 @@ export default function AdForm({ initialData = null }) {
   };
 
   /**
-   * Formu submit eder; yeni ilan oluşturur veya mevcutu günceller.
+   * Submits the form; creates a new ad or updates existing one.
    *
    * @param {React.FormEvent} e
    */
@@ -184,7 +184,7 @@ export default function AdForm({ initialData = null }) {
     setSuccessMsg(null);
     setSubmitting(true);
 
-    // Temel doğrulama
+    // Basic validation
     if (!formData.title.trim()) {
       setError('Title is required.');
       setSubmitting(false);
@@ -212,27 +212,27 @@ export default function AdForm({ initialData = null }) {
       category_id: formData.category_id || null,
       images:      uploadedImages,
       payment_methods: formData.payment_methods,
-      // Admin başkasının ilanını güncellerken ilan sahibini değiştirmemek için:
+      // To avoid changing the ad owner when an admin updates someone else's ad:
       owner_id:    initialData?.owner_id || user.id,
     };
 
     let result;
 
     if (initialData?.id) {
-      // ── Güncelleme modu ──
+      // ── Update mode ──
       let query = supabase
         .from('ads')
         .update({ ...payload, updated_at: new Date().toISOString() })
         .eq('id', initialData.id);
 
-      // Sadece admin DEĞİLSE kendi ilanını değiştirme şartı koş
+      // If NOT admin, require owning the ad to update
       if (!isAdmin) {
         query = query.eq('owner_id', user.id);
       }
 
       result = await query.select('serial_number').single();
     } else {
-      // ── Oluşturma modu (serial_number trigger ile atanır) ──
+      // ── Creation mode (serial_number assigned via trigger) ──
       result = await supabase
         .from('ads')
         .insert(payload)
@@ -251,7 +251,7 @@ export default function AdForm({ initialData = null }) {
     setSuccessMsg(initialData ? SUCCESS_MESSAGES.adUpdated : SUCCESS_MESSAGES.adCreated);
     setSubmitting(false);
 
-    // İlan detay sayfasına yönlendir
+    // Redirect to ad detail page
     setTimeout(() => {
       router.push(buildAdUrl(data.serial_number));
       router.refresh();
@@ -261,7 +261,7 @@ export default function AdForm({ initialData = null }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-8" noValidate>
 
-      {/* ── Hata / Başarı mesajları ── */}
+      {/* ── Error / Success messages ── */}
       {error && (
         <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm">
           <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -275,12 +275,12 @@ export default function AdForm({ initialData = null }) {
         </div>
       )}
 
-      {/* ── Fotoğraf yükleme ── */}
+      {/* ── Photo upload ── */}
       <div>
         <label className="label">Photos <span className="text-ink-tertiary font-normal">({uploadedImages.length}/{MAX_IMAGES_PER_AD})</span></label>
 
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-2">
-          {/* Yüklenmiş fotoğraflar */}
+          {/* Uploaded photos */}
           {uploadedImages.map((url, index) => (
             <div key={url} className="relative aspect-square rounded-2xl overflow-hidden group">
               <Image src={url} alt={`Photo ${index + 1}`} fill className="object-cover" />
@@ -296,7 +296,7 @@ export default function AdForm({ initialData = null }) {
             </div>
           ))}
 
-          {/* Yükleme butonu */}
+          {/* Upload button */}
           {uploadedImages.length < MAX_IMAGES_PER_AD && (
             <button
               type="button"
@@ -319,7 +319,7 @@ export default function AdForm({ initialData = null }) {
           )}
         </div>
 
-        {/* Gizli dosya input'u */}
+        {/* Hidden file input */}
         <input
           ref={fileInputRef}
           type="file"
@@ -334,7 +334,7 @@ export default function AdForm({ initialData = null }) {
         </p>
       </div>
 
-      {/* ── Başlık ── */}
+      {/* ── Title ── */}
       <div>
         <label htmlFor="ad-title" className="label">Ad Title *</label>
         <input
@@ -350,7 +350,7 @@ export default function AdForm({ initialData = null }) {
         />
       </div>
 
-      {/* ── Açıklama ── */}
+      {/* ── Description ── */}
       <div>
         <label htmlFor="ad-description" className="label">Description</label>
         <textarea
@@ -364,10 +364,10 @@ export default function AdForm({ initialData = null }) {
         />
       </div>
 
-      {/* ── Fiyat ve Kategori (yan yana) ── */}
+      {/* ── Price and Category (side by side) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-        {/* Fiyat */}
+        {/* Price */}
         <div>
           <label htmlFor="ad-price" className="label">Price ({CURRENCY_SYMBOL})</label>
           <input
@@ -384,7 +384,7 @@ export default function AdForm({ initialData = null }) {
           <p className="text-xs text-ink-tertiary mt-1">Leave empty or write 0 → "Free"</p>
         </div>
 
-        {/* Kategori */}
+        {/* Category */}
         <div>
           <label htmlFor="ad-category" className="label">Category *</label>
           <select
@@ -397,11 +397,11 @@ export default function AdForm({ initialData = null }) {
           >
             <option value="" disabled>Select Category</option>
             {categories
-              // Önce üst kategoriler
+              // First root categories
               .filter((c) => !c.parent_id)
               .map((parent) => (
                 <optgroup key={parent.id} label={parent.name}>
-                  {/* Alt kategoriler */}
+                  {/* Child categories */}
                   {categories
                     .filter((c) => c.parent_id === parent.id)
                     .map((child) => (
@@ -413,7 +413,7 @@ export default function AdForm({ initialData = null }) {
         </div>
       </div>
 
-      {/* ── Ödeme Yöntemleri ── */}
+      {/* ── Payment Methods ── */}
       <div>
         <label className="label">Payment Methods {(!formData.price || parseFloat(formData.price) === 0) ? '(Disabled for Free ads)' : '*'}</label>
         <div className="flex flex-wrap gap-4 mt-2">

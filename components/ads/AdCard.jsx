@@ -2,8 +2,8 @@
 /**
  * components/ads/AdCard.jsx
  * ─────────────────────────────────────────────────────
- * Tek bir ilanı kart formatında gösteren bileşen.
- * Ana sayfada grid içinde kullanılır.
+ * Component that displays a single ad in a card format.
+ * Used within a grid on the homepage and search pages.
  * ─────────────────────────────────────────────────────
  */
 
@@ -52,13 +52,13 @@ export default function AdCard({ ad, layout = 'grid' }) {
     payment_methods = [],
   } = ad;
 
-  /** İlanın detail sayfası linki */
+  /** Link to the ad detail page */
   const adUrl = buildAdUrl(serial_number);
 
-  /** Gösterilecek kapak fotoğrafı (varsa) */
+  /** Cover image to display (if any) */
   const coverImage = images?.[0] ?? null;
 
-  /** İlan durum bilgisi */
+  /** Ad status info */
   const statusInfo = AD_STATUSES[status] ?? AD_STATUSES.active;
 
   if (layout === 'list') {
@@ -66,7 +66,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
       <Link
         href={adUrl}
         className="card group flex flex-col md:flex-row gap-6 p-4 hover:shadow-md transition-shadow"
-        aria-label={`${title} ilanına git`}
+        aria-label={`Go to ${title}`}
       >
         {/* ── Left: Image ── */}
         <div className="relative w-full md:w-64 h-48 md:h-auto bg-surface-secondary rounded-xl overflow-hidden flex-shrink-0">
@@ -168,7 +168,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
     <Link
       href={adUrl}
       className="group card flex flex-col h-full hover:shadow-md transition-shadow relative overflow-hidden"
-      aria-label={`${title} ilanına git`}
+      aria-label={`Go to ${title}`}
     >
       {/* Aspect Ratio 4:3 Image Container */}
       <div className="relative aspect-[4/3] bg-surface-secondary overflow-hidden shrink-0">
