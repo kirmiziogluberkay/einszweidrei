@@ -52,18 +52,23 @@ export function useAuth() {
 
   useEffect(() => {
     // Current user
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       setUser(user ?? null);
-      if (user) fetchProfile(user.id);
+      if (user) {
+        await fetchProfile(user.id);
+      }
       setLoading(false);
     });
 
     // Auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const u = session?.user ?? null;
       setUser(u);
-      if (u) fetchProfile(u.id);
-      else setProfile(null);
+      if (u) {
+        await fetchProfile(u.id);
+      } else {
+        setProfile(null);
+      }
       setLoading(false);
     });
 
