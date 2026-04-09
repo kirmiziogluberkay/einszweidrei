@@ -62,6 +62,7 @@ export default async function AdDetailPage({ params }) {
       description,
       price,
       currency,
+      area,
       images,
       status,
       payment_methods,
@@ -253,14 +254,19 @@ export default async function AdDetailPage({ params }) {
                   </div>
                 )}
 
-                {/* Free in green if no price given */}
-                {(!ad.price || ad.price === 0) ? (
-                  <p className="text-3xl font-bold text-green-500">Free</p>
-                ) : (
-                  <p className="text-3xl font-bold text-brand-500">
-                    {formatPrice(ad.price, ad.currency)}
-                  </p>
-                )}
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[10px] font-bold text-ink-tertiary uppercase tracking-wider">
+                    {ad.category?.slug?.startsWith('accommodation') ? 'Rent' : 'Price'}
+                  </span>
+                  {/* Free in green if no price given */}
+                  {(!ad.price || ad.price === 0) ? (
+                    <p className="text-3xl font-bold text-green-500">Free</p>
+                  ) : (
+                    <p className="text-3xl font-bold text-brand-500">
+                      {formatPrice(ad.price, ad.currency)}
+                    </p>
+                  )}
+                </div>
 
                 <div className="divider" />
                 <dl className="space-y-3 text-sm">
@@ -272,6 +278,12 @@ export default async function AdDetailPage({ params }) {
                     <div className="flex justify-between">
                       <dt className="text-ink-secondary">Category</dt>
                       <dd className="text-ink">{ad.category.name}</dd>
+                    </div>
+                  )}
+                  {ad.area && (
+                    <div className="flex justify-between">
+                      <dt className="text-ink-secondary">Area</dt>
+                      <dd className="text-ink font-medium">{ad.area} m²</dd>
                     </div>
                   )}
                   <div className="flex justify-between">

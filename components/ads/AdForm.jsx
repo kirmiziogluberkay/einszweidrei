@@ -51,6 +51,7 @@ export default function AdForm({ initialData = null }) {
     description: initialData?.description ?? '',
     price:       initialData?.price       ?? '',
     category_id: initialData?.category_id ?? '',
+    area:        initialData?.area        ?? '',
     payment_methods: (initialData?.payment_methods ?? []).map(m => 
       m?.toLowerCase() === 'paypal' ? 'PayPal' : (m?.toLowerCase() === 'cash' ? 'Cash' : m)
     ),
@@ -197,8 +198,12 @@ export default function AdForm({ initialData = null }) {
       return;
     }
 
+    const selectedCategoryObj = categories.find(c => c.id === formData.category_id);
+    const isAccommodation = selectedCategoryObj?.slug === 'accommodation-apartment' || 
+                           selectedCategoryObj?.slug === 'accommodation-room';
+
     const priceNum = formData.price ? parseFloat(formData.price) : 0;
-    if (priceNum > 0 && (!formData.payment_methods || formData.payment_methods.length === 0)) {
+    if (priceNum > 0 && !isAccommodation && (!formData.payment_methods || formData.payment_methods.length === 0)) {
       setError('Please select at least one payment method for paid ads.');
       setSubmitting(false);
       return;
@@ -210,6 +215,7 @@ export default function AdForm({ initialData = null }) {
       price:       formData.price ? parseFloat(formData.price) : null,
       currency:    DEFAULT_CURRENCY,
       category_id: formData.category_id || null,
+      area:        isAccommodation ? (parseFloat(formData.area) || null) : null,
       images:      uploadedImages,
       payment_methods: formData.payment_methods,
       // To avoid changing the ad owner when an admin updates someone else's ad:
@@ -258,7 +264,9 @@ export default function AdForm({ initialData = null }) {
     }, 800);
   };
 
-  return (
+    const isAccommodation = categories.find(c => c.id === formData.category_id)?.slug?.startsWith('accommodation');
+
+    return (
     <form onSubmit={handleSubmit} className="space-y-8" noValidate>
 
       {/* ── Error / Success messages ── */}
@@ -272,6 +280,150 @@ export default function AdForm({ initialData = null }) {
       {successMsg && (
         <div className="p-4 bg-green-50 border border-green-100 rounded-2xl text-green-600 text-sm">
           {successMsg}
+        </div>
+      )}
+
+
+
+      {/* ── Category ── */}
+      <div>
+        <label htmlFor="ad-category" className="label">Category *</label>
+        <select
+          id="ad-category"
+          name="category_id"
+          value={formData.category_id}
+          onChange={handleChange}
+          className="input"
+          required
+        >
+          <option value="" disabled>Select Category</option>
+          {categories
+            // First root categories
+            .filter((c) => !c.parent_id)
+            .map((parent) => (
+              <optgroup key={parent.id} label={parent.name}>
+                {/* Child categories */}
+                {categories
+                  .filter((c) => c.parent_id === parent.id)
+                  .map((child) => (
+                    <option key={child.id} value={child.id}>{child.name}</option>
+                  ))}
+              </optgroup>
+            ))}
+        </select>
+      </div>
+
+      {/* ── Title ── */}
+      <div>
+        <label htmlFor="ad-title" className="label">Ad Title *</label>
+        <input
+          id="ad-title"
+          type="text"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          placeholder={isAccommodation ? "Write a short title describing your place" : "Write a short title describing your item"}
+          maxLength={100}
+          required
+          className="input"
+        />
+      </div>
+
+      {/* ── Description ── */}
+      <div>
+        <label htmlFor="ad-description" className="label">Description</label>
+        <textarea
+          id="ad-description"
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          rows={5}
+          placeholder={isAccommodation 
+            ? "Provide detailed information about the place (condition, features, etc.)" 
+            : "Provide detailed information about the item (condition, features, etc.)"}
+          className="input resize-none"
+        />
+      </div>
+
+      {/* ── Price and Area (side by side) ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+        {/* Price / Rent */}
+        <div>
+          <label htmlFor="ad-price" className="label">
+            {isAccommodation ? 'Rent' : 'Price'} ({CURRENCY_SYMBOL})
+          </label>
+          <input
+            id="ad-price"
+            type="number"
+            name="price"
+            value={formData.price}
+            onChange={handleChange}
+            placeholder="0,00"
+            min="0"
+            step="0.01"
+            className="input"
+          />
+          <p className="text-xs text-ink-tertiary mt-1">
+            Leave empty or write 0 → "Free"
+          </p>
+        </div>
+
+        {/* Area (m²) - Conditional */}
+        {isAccommodation && (
+          <div>
+            <label htmlFor="ad-area" className="label">Area (m²) *</label>
+            <input
+              id="ad-area"
+              type="number"
+              name="area"
+              value={formData.area}
+              onChange={handleChange}
+              placeholder="e.g. 85"
+              min="1"
+              required
+              className="input"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* ── Payment Methods ── */}
+      {!isAccommodation && (
+        <div>
+          <label className="label">Payment Methods {(!formData.price || parseFloat(formData.price) === 0) ? '(Disabled for Free ads)' : '*'}</label>
+          <div className="flex flex-wrap gap-4 mt-2">
+            <label className={cn(
+              "flex items-center gap-2 cursor-pointer group",
+              (!formData.price || parseFloat(formData.price) === 0) && "opacity-50 cursor-not-allowed"
+            )}>
+              <input
+                type="checkbox"
+                name="payment_methods"
+                value="Cash"
+                disabled={!formData.price || parseFloat(formData.price) === 0}
+                checked={formData.payment_methods.includes('Cash')}
+                onChange={handleChange}
+                className="w-5 h-5 rounded border-surface-tertiary text-brand-500 focus:ring-brand-500"
+              />
+              <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors">Cash</span>
+            </label>
+            <label className={cn(
+              "flex items-center gap-2 cursor-pointer group",
+              (!formData.price || parseFloat(formData.price) === 0) && "opacity-50 cursor-not-allowed"
+            )}>
+              <input
+                type="checkbox"
+                name="payment_methods"
+                value="PayPal"
+                disabled={!formData.price || parseFloat(formData.price) === 0}
+                checked={formData.payment_methods.includes('PayPal')}
+                onChange={handleChange}
+                className="w-5 h-5 rounded border-surface-tertiary text-brand-500 focus:ring-brand-500"
+              />
+              <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors">PayPal</span>
+            </label>
+          </div>
         </div>
       )}
 
@@ -332,122 +484,6 @@ export default function AdForm({ initialData = null }) {
         <p className="text-xs text-ink-tertiary mt-2">
           PNG, JPG or WebP — max {MAX_IMAGE_SIZE_BYTES / 1024 / 1024} MB
         </p>
-      </div>
-
-      {/* ── Title ── */}
-      <div>
-        <label htmlFor="ad-title" className="label">Ad Title *</label>
-        <input
-          id="ad-title"
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="Write a short title describing your item"
-          maxLength={100}
-          required
-          className="input"
-        />
-      </div>
-
-      {/* ── Description ── */}
-      <div>
-        <label htmlFor="ad-description" className="label">Description</label>
-        <textarea
-          id="ad-description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          rows={5}
-          placeholder="Provide detailed information about the item (condition, features, etc.)"
-          className="input resize-none"
-        />
-      </div>
-
-      {/* ── Price and Category (side by side) ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-        {/* Price */}
-        <div>
-          <label htmlFor="ad-price" className="label">Price ({CURRENCY_SYMBOL})</label>
-          <input
-            id="ad-price"
-            type="number"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            placeholder="0,00"
-            min="0"
-            step="0.01"
-            className="input"
-          />
-          <p className="text-xs text-ink-tertiary mt-1">Leave empty or write 0 → "Free"</p>
-        </div>
-
-        {/* Category */}
-        <div>
-          <label htmlFor="ad-category" className="label">Category *</label>
-          <select
-            id="ad-category"
-            name="category_id"
-            value={formData.category_id}
-            onChange={handleChange}
-            className="input"
-            required
-          >
-            <option value="" disabled>Select Category</option>
-            {categories
-              // First root categories
-              .filter((c) => !c.parent_id)
-              .map((parent) => (
-                <optgroup key={parent.id} label={parent.name}>
-                  {/* Child categories */}
-                  {categories
-                    .filter((c) => c.parent_id === parent.id)
-                    .map((child) => (
-                      <option key={child.id} value={child.id}>{child.name}</option>
-                    ))}
-                </optgroup>
-              ))}
-          </select>
-        </div>
-      </div>
-
-      {/* ── Payment Methods ── */}
-      <div>
-        <label className="label">Payment Methods {(!formData.price || parseFloat(formData.price) === 0) ? '(Disabled for Free ads)' : '*'}</label>
-        <div className="flex flex-wrap gap-4 mt-2">
-          <label className={cn(
-            "flex items-center gap-2 cursor-pointer group",
-            (!formData.price || parseFloat(formData.price) === 0) && "opacity-50 cursor-not-allowed"
-          )}>
-            <input
-              type="checkbox"
-              name="payment_methods"
-              value="Cash"
-              disabled={!formData.price || parseFloat(formData.price) === 0}
-              checked={formData.payment_methods.includes('Cash')}
-              onChange={handleChange}
-              className="w-5 h-5 rounded border-surface-tertiary text-brand-500 focus:ring-brand-500"
-            />
-            <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors">Cash</span>
-          </label>
-          <label className={cn(
-            "flex items-center gap-2 cursor-pointer group",
-            (!formData.price || parseFloat(formData.price) === 0) && "opacity-50 cursor-not-allowed"
-          )}>
-            <input
-              type="checkbox"
-              name="payment_methods"
-              value="PayPal"
-              disabled={!formData.price || parseFloat(formData.price) === 0}
-              checked={formData.payment_methods.includes('PayPal')}
-              onChange={handleChange}
-              className="w-5 h-5 rounded border-surface-tertiary text-brand-500 focus:ring-brand-500"
-            />
-            <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors">PayPal</span>
-          </label>
-        </div>
       </div>
 
       {/* ── Submit ── */}
