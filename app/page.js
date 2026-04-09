@@ -32,8 +32,6 @@ export default function HomePage() {
 
   const { categoryTree } = useCategories();
 
-  const { total: globalTotal } = useAds();
-
   const { ads, loading, error, total, totalPages } = useAds({
     categoryId: selectedCategoryIds ? null : selectedCategory,
     categoryIds: selectedCategoryIds ?? undefined,
@@ -88,7 +86,7 @@ export default function HomePage() {
               type="search"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder={`Search among ${globalTotal} advertisements...`}
+              placeholder={`Search among our advertisements...`}
               className="input pl-12 py-3.5 text-base"
             />
           </div>

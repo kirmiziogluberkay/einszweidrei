@@ -77,70 +77,54 @@ export function useAds(filters = {}) {
         category:categories(id, name, slug)
       `, { count: 'exact' });
 
-    // Status filter - Public visitors only see 'active' ads.
-    // Ad owner (if ownerId is present) sees all statuses in their profile.
+    // Status filter - General visitors see Active/Reserved/Rented. Owners see everything.
     const finalOwnerId = ownerId || owner_id;
     if (!finalOwnerId) {
-      // General visitors ONLY see 'active' ones
-      query = query.eq('status', 'active');
+      query = query.in('status', ['active', 'reserved', 'rented']);
     } else {
-      // Ad owner sees everything in their panel (including sold)
       query = query.in('status', ['active', 'reserved', 'rented', 'passive', 'sold']);
+      query = query.eq('owner_id', finalOwnerId);
     }
 
     query = query.order('created_at', { ascending: false });
 
-    // Category filter — single id or multiple id list supported
+    // Category filter
     if (categoryIds && categoryIds.length > 0) {
-      // Multiple categories: filter with "in" operator
       query = query.in('category_id', categoryIds);
     } else if (categoryId) {
       query = query.eq('category_id', categoryId);
     }
 
-    // Ad owner filter (their own ads on profile page)
-    if (finalOwnerId) {
-      query = query.eq('owner_id', finalOwnerId);
-    }
-
-    // Text search (within title and description)
+    // Text search
     if (searchQuery) {
-      query = query.or(
-        `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`
-      );
+      query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
     }
 
-    // Price filter (min, max and free/NULL ads logic)
-    if ((minPrice !== undefined && minPrice !== null) || (maxPrice !== undefined && maxPrice !== null)) {
-      if (minPrice && maxPrice) {
+    // Price filter
+    if (minPrice !== null && minPrice !== undefined || maxPrice !== null && maxPrice !== undefined) {
+      if (minPrice !== null && minPrice !== undefined && maxPrice !== null && maxPrice !== undefined) {
         query = query.or(`and(price.gte.${minPrice},price.lte.${maxPrice}),price.is.null`);
-      } else if (minPrice) {
+      } else if (minPrice !== null && minPrice !== undefined) {
         query = query.or(`price.gte.${minPrice},price.is.null`);
-      } else {
+      } else if (maxPrice !== null && maxPrice !== undefined) {
         query = query.or(`price.lte.${maxPrice},price.is.null`);
       }
     }
 
     // Payment method filter
-    if (paymentMethods) {
-      if (paymentMethods.length > 0) {
-        const hasFree = paymentMethods.includes('Free');
-        const actualMethods = paymentMethods.filter(m => m !== 'Free');
+    if (paymentMethods && paymentMethods.length > 0) {
+      const hasFree = paymentMethods.includes('Free');
+      const actualMethods = paymentMethods.filter(m => m !== 'Free');
 
-        if (hasFree && actualMethods.length > 0) {
-          // Both specific methods AND 'Free' are selected
-          query = query.or(`payment_methods.ov.{${actualMethods.join(',')}},payment_methods.is.null,payment_methods.eq.{},price.eq.0,price.is.null`);
-        } else if (hasFree) {
-          // ONLY 'Free' is selected
-          query = query.or('payment_methods.is.null,payment_methods.eq.{}' + (',price.eq.0,price.is.null'));
-        } else {
-          // ONLY specific methods are selected
-          query = query.overlaps('payment_methods', actualMethods);
-        }
+      if (hasFree && actualMethods.length > 0) {
+        query = query.or(`payment_methods.ov.{${actualMethods.join(',')}},price.eq.0,price.is.null,payment_methods.is.null`);
+      } else if (hasFree) {
+        query = query.or(`price.eq.0,price.is.null,payment_methods.is.null`);
       } else {
-        // NONE of the methods are selected -> returns zero results
-        query = query.eq('id', '00000000-0000-0000-0000-000000000000');
+        query = query.overlaps('payment_methods', actualMethods);
       }
+    } else if (paymentMethods) {
+      query = query.eq('id', '00000000-0000-0000-0000-000000000000');
     }
 
     // Pagination
