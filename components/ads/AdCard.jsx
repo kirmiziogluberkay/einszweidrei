@@ -65,6 +65,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
     return (
       <Link
         href={adUrl}
+        prefetch={false}
         className="card group flex flex-col md:flex-row gap-6 p-4 hover:shadow-md transition-shadow"
         aria-label={`Go to ${title}`}
       >
@@ -167,6 +168,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
   return (
     <Link
       href={adUrl}
+      prefetch={false}
       className="group card flex flex-col h-full hover:shadow-md transition-shadow relative overflow-hidden"
       aria-label={`Go to ${title}`}
     >

@@ -51,42 +51,24 @@ export function useAuth() {
   }, [supabase]);
 
   useEffect(() => {
-    // Mevcut oturumu al
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      try {
-        setUser(user ?? null);
-        if (user) {
-          await fetchProfile(user.id);
-        }
-      } catch (e) {
-        console.error("Auth init error:", e);
-      } finally {
-        setLoading(false);
-      }
+    // Current user
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user ?? null);
+      if (user) fetchProfile(user.id);
+      setLoading(false);
     });
 
-    // Auth durum değişikliklerini dinle
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        try {
-          const currentUser = session?.user ?? null;
-          setUser(currentUser);
-          if (currentUser) {
-            await fetchProfile(currentUser.id);
-          } else {
-            setProfile(null);
-          }
-        } catch (e) {
-          console.error("Auth change error:", e);
-        } finally {
-          setLoading(false);
-        }
-      }
-    );
+    // Auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) fetchProfile(u.id);
+      else setProfile(null);
+      setLoading(false);
+    });
 
-    // Cleanup
     return () => subscription.unsubscribe();
-  }, [fetchProfile, supabase.auth]);
+  }, [supabase, fetchProfile]);
 
   /**
    * Kullanıcının oturumunu kapatır.
