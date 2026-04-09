@@ -160,10 +160,10 @@ export function useAds(filters = {}) {
     const sortedData = (data ?? []).sort((a, b) => {
       const aHasImg = a.images && a.images.length > 0;
       const bHasImg = b.images && b.images.length > 0;
-      
+
       if (aHasImg && !bHasImg) return -1;
       if (!aHasImg && bHasImg) return 1;
-      
+
       // If both have or don't have images, sort by date
       return new Date(b.created_at) - new Date(a.created_at);
     });
@@ -171,7 +171,7 @@ export function useAds(filters = {}) {
     setAds(sortedData);
     setTotal(count ?? 0);
     setLoading(false);
-  }, [supabase, categoryId, categoryIds?.join(','), ownerId, owner_id, searchQuery, maxPrice, paymentMethods?.join(','), page]);
+  }, [supabase, categoryId, categoryIds?.join(','), ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods?.join(','), page]);
 
   useEffect(() => {
     fetchAds();
