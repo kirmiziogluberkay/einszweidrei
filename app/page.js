@@ -14,6 +14,7 @@ import { Search, ChevronDown, ChevronRight } from 'lucide-react';
 import { useAds } from '@/hooks/useAds';
 import { useCategories } from '@/hooks/useCategories';
 import AdGrid from '@/components/ads/AdGrid';
+import FeedbackBox from '@/components/FeedbackBox';
 import { cn } from '@/lib/helpers';
 
 export default function HomePage() {
@@ -292,6 +293,7 @@ export default function HomePage() {
               </div>
             </div>
 
+            <FeedbackBox />
           </div>
         </aside>
 
