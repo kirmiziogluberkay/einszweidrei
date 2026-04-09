@@ -132,6 +132,15 @@ export const DEFAULT_CATEGORIES = [
     ],
   },
   {
+    name:      'Accommodation',
+    slug:      'accommodation',
+    parent_id: null,
+    children:  [
+      { name: 'Apartment', slug: 'accommodation-apartment' },
+      { name: 'Room',      slug: 'accommodation-room'      },
+    ],
+  },
+  {
     name:      'Services',
     slug:      'services',
     parent_id: null,

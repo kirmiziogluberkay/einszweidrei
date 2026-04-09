@@ -16,7 +16,7 @@ import Footer from '@/components/layout/Footer';
 export const metadata = {
   // ── Basic meta ─────────────────────────────────────
   title: {
-    default:  SITE_NAME,
+    default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -24,25 +24,25 @@ export const metadata = {
 
   // ── Open Graph (social sharing) ────────────────────
   openGraph: {
-    title:       SITE_NAME,
+    title: SITE_NAME,
     description: SITE_DESCRIPTION,
-    url:         SITE_URL,
-    siteName:    SITE_NAME,
-    locale:      'en_US',
-    type:        'website',
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    locale: 'en_US',
+    type: 'website',
   },
 
   // ── PWA ────────────────────────────────────────────
   manifest: '/manifest.json',
   appleWebApp: {
-    capable:    true,
-    title:      SITE_NAME,
+    capable: true,
+    title: SITE_NAME,
     statusBarStyle: 'default',
   },
 
   // ── Other ──────────────────────────────────────────
   robots: {
-    index:  true,
+    index: true,
     follow: true,
   },
 };
