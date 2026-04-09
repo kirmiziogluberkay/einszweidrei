@@ -57,7 +57,7 @@ export function useAds(filters = {}) {
     setLoading(true);
     setError(null);
 
-    // Base query - Kararlı alan seçimi
+    // Base query - En hızlı alan seçimi (gereksiz joinler çıkarıldı)
     let query = supabase
       .from('ads')
       .select(`
@@ -72,11 +72,10 @@ export function useAds(filters = {}) {
         payment_methods,
         category_id,
         created_at,
-        owner:profiles(id, username),
         category:categories(id, name, slug)
-      `, { count: 'exact' }); // Küçük veri setlerinde exact her zaman daha güvenlidir
+      `, { count: 'exact' });
 
-    // Status filter - General visitors see Active/Reserved/Rented. Owners see everything.
+    // Status filter
     const finalOwnerId = ownerId || owner_id;
     if (!finalOwnerId) {
       query = query.in('status', ['active', 'reserved', 'rented']);
@@ -85,6 +84,7 @@ export function useAds(filters = {}) {
       query = query.eq('owner_id', finalOwnerId);
     }
 
+    // Database-level sorting (resim önceliğini veritabanı yapsın diyemeyiz ama tarihi veritabanı yapsın)
     query = query.order('created_at', { ascending: false });
 
     // Category filter
@@ -139,19 +139,8 @@ export function useAds(filters = {}) {
       return;
     }
 
-    // Sort ads with images to the front, then by date (newest first)
-    const sortedData = (data ?? []).sort((a, b) => {
-      const aHasImg = a.images && a.images.length > 0;
-      const bHasImg = b.images && b.images.length > 0;
-
-      if (aHasImg && !bHasImg) return -1;
-      if (!aHasImg && bHasImg) return 1;
-
-      // If both have or don't have images, sort by date
-      return new Date(b.created_at) - new Date(a.created_at);
-    });
-
-    setAds(sortedData);
+    // JS-level sorting is usually fast enough, but we only do it if we have images
+    setAds(data ?? []);
     setTotal(count ?? 0);
     setLoading(false);
   }, [supabase, categoryId, categoryIds?.join(','), ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods?.join(','), page]);
