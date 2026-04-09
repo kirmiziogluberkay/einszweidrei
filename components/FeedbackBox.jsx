@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lightbulb, Send, CheckCircle2, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,24 +13,52 @@ export default function FeedbackBox() {
   const [submitted, setSubmitted] = useState(false);
   const { user } = useAuth();
   const supabase = createClient();
+  const [adminId, setAdminId] = useState(null);
+
+  // Fetch a valid admin ID once when the component is ready
+  useEffect(() => {
+    async function fetchAdmin() {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin')
+        .limit(1)
+        .single();
+      
+      if (data) setAdminId(data.id);
+      if (error) console.error('FeedbackBox: Could not find admin', error);
+    }
+    fetchAdmin();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
 
+    if (!user) {
+      alert('Please login to send a suggestion.');
+      return;
+    }
+
     setLoading(true);
     
-    // We can store feedback in a dedicated table or just send as a system message
-    // For now, let's assume there is a 'feedback' table. 
-    // If not, we could send it to a specific admin user ID.
+    // Attempt to send the message to the first found admin
+    // Fallback ID if none found (will likely fail but better than hardcoded wrong ID)
+    const targetId = adminId || '00000000-0000-0000-0000-000000000000';
+
     const { error } = await supabase.from('messages').insert({
       content: `[FEEDBACK]: ${text}`,
-      receiver_id: 'cb6b5f4c-7e6e-4c7b-8e8e-8e8e8e8e8e8e', // Placeholder for admin ID or handled by RLS/Trigger
-      sender_id: user?.id || null, // Allow anonymous or logged-in
+      receiver_id: targetId,
+      sender_id: user.id,
     });
 
-    setLoading(false);
-    if (!error) {
+    setLoading(true);
+    if (error) {
+      console.error('FeedbackBox Error:', error);
+      alert('Failed to send: ' + error.message);
+      setLoading(false);
+    } else {
+      setLoading(false);
       setSubmitted(true);
       setText('');
       setTimeout(() => {
