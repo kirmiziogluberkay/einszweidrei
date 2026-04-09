@@ -39,20 +39,20 @@ import { buildAdUrl, cn } from '@/lib/helpers';
  * }} props
  */
 export default function AdForm({ initialData = null }) {
-  const supabase  = createClient();
-  const router    = useRouter();
+  const supabase = createClient();
+  const router = useRouter();
   const { user, isAdmin } = useAuth();
   const { categories } = useCategories();
   const fileInputRef = useRef(null);
 
   /** Form field values */
   const [formData, setFormData] = useState({
-    title:       initialData?.title       ?? '',
+    title: initialData?.title ?? '',
     description: initialData?.description ?? '',
-    price:       initialData?.price       ?? '',
+    price: initialData?.price ?? '',
     category_id: initialData?.category_id ?? '',
-    area:        initialData?.area        ?? '',
-    payment_methods: (initialData?.payment_methods ?? []).map(m => 
+    area: initialData?.area ?? '',
+    payment_methods: (initialData?.payment_methods ?? []).map(m =>
       m?.toLowerCase() === 'paypal' ? 'PayPal' : (m?.toLowerCase() === 'cash' ? 'Cash' : m)
     ),
   });
@@ -90,12 +90,12 @@ export default function AdForm({ initialData = null }) {
     } else if (name === 'price') {
       const numValue = parseFloat(value);
       const isFree = !value || numValue === 0;
-      
-      setFormData((prev) => ({ 
-        ...prev, 
+
+      setFormData((prev) => ({
+        ...prev,
         [name]: value,
         // If price is missing or 0, clear payment methods
-        payment_methods: isFree ? [] : prev.payment_methods 
+        payment_methods: isFree ? [] : prev.payment_methods
       }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -137,7 +137,7 @@ export default function AdForm({ initialData = null }) {
       }
 
       // Unique file path: owner_id/timestamp_randomsuffix.ext
-      const ext      = file.name.split('.').pop();
+      const ext = file.name.split('.').pop();
       const filePath = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
@@ -199,8 +199,14 @@ export default function AdForm({ initialData = null }) {
     }
 
     const selectedCategoryObj = categories.find(c => c.id === formData.category_id);
-    const isAccommodation = selectedCategoryObj?.slug === 'accommodation-apartment' || 
-                           selectedCategoryObj?.slug === 'accommodation-room';
+    const isAccommodation = selectedCategoryObj?.slug === 'accommodation-apartment' ||
+      selectedCategoryObj?.slug === 'accommodation-room';
+
+    if (isAccommodation && (!formData.price || parseFloat(formData.price) <= 0)) {
+      setError('Rent is required for Accommodation ads.');
+      setSubmitting(false);
+      return;
+    }
 
     const priceNum = formData.price ? parseFloat(formData.price) : 0;
     if (priceNum > 0 && !isAccommodation && (!formData.payment_methods || formData.payment_methods.length === 0)) {
@@ -210,16 +216,16 @@ export default function AdForm({ initialData = null }) {
     }
 
     const payload = {
-      title:       formData.title.trim(),
+      title: formData.title.trim(),
       description: formData.description.trim(),
-      price:       formData.price ? parseFloat(formData.price) : null,
-      currency:    DEFAULT_CURRENCY,
+      price: formData.price ? parseFloat(formData.price) : null,
+      currency: DEFAULT_CURRENCY,
       category_id: formData.category_id || null,
-      area:        isAccommodation ? (parseFloat(formData.area) || null) : null,
-      images:      uploadedImages,
+      area: isAccommodation ? (parseFloat(formData.area) || null) : null,
+      images: uploadedImages,
       payment_methods: formData.payment_methods,
       // To avoid changing the ad owner when an admin updates someone else's ad:
-      owner_id:    initialData?.owner_id || user.id,
+      owner_id: initialData?.owner_id || user.id,
     };
 
     let result;
@@ -264,9 +270,9 @@ export default function AdForm({ initialData = null }) {
     }, 800);
   };
 
-    const isAccommodation = categories.find(c => c.id === formData.category_id)?.slug?.startsWith('accommodation');
+  const isAccommodation = categories.find(c => c.id === formData.category_id)?.slug?.startsWith('accommodation');
 
-    return (
+  return (
     <form onSubmit={handleSubmit} className="space-y-8" noValidate>
 
       {/* ── Error / Success messages ── */}
@@ -315,7 +321,7 @@ export default function AdForm({ initialData = null }) {
 
       {/* ── Title ── */}
       <div>
-        <label htmlFor="ad-title" className="label">Ad Title *</label>
+        <label htmlFor="ad-title" className="label">Title *</label>
         <input
           id="ad-title"
           type="text"
@@ -338,8 +344,8 @@ export default function AdForm({ initialData = null }) {
           value={formData.description}
           onChange={handleChange}
           rows={5}
-          placeholder={isAccommodation 
-            ? "Provide detailed information about the place (condition, features, etc.)" 
+          placeholder={isAccommodation
+            ? "Provide detailed information about the place (condition, features, etc.)"
             : "Provide detailed information about the item (condition, features, etc.)"}
           className="input resize-none"
         />
@@ -351,7 +357,7 @@ export default function AdForm({ initialData = null }) {
         {/* Price / Rent */}
         <div>
           <label htmlFor="ad-price" className="label">
-            {isAccommodation ? 'Rent' : 'Price'} ({CURRENCY_SYMBOL})
+            {isAccommodation ? 'Rent' : 'Price'} ({CURRENCY_SYMBOL}) {'*'}
           </label>
           <input
             id="ad-price"
