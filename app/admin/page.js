@@ -1,7 +1,7 @@
 /**
  * app/admin/page.js
  * ─────────────────────────────────────────────────────
- * Admin dashboard — özet istatistikler.
+ * Admin dashboard — summary statistics.
  * ─────────────────────────────────────────────────────
  */
 
@@ -12,7 +12,7 @@ import { Megaphone, Users, MessageSquare, FolderTree } from 'lucide-react';
 export const metadata = { title: 'Admin | Dashboard' };
 
 /**
- * İstatistik kartı bileşeni.
+ * Statistics card component.
  */
 function StatCard({ label, value, icon: Icon, href, color = 'blue' }) {
   const colors = {
@@ -40,7 +40,7 @@ function StatCard({ label, value, icon: Icon, href, color = 'blue' }) {
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
 
-  // Paralel sayım sorguları
+  // Parallel count queries
   const [
     { count: adsCount },
     { count: usersCount },
@@ -53,7 +53,7 @@ export default async function AdminDashboardPage() {
     supabase.from('categories').select('*', { count: 'exact', head: true }),
   ]);
 
-  // Son 5 ilan
+  // Last 5 ads
   const { data: recentAds } = await supabase
     .from('ads')
     .select('id, serial_number, title, status, created_at, owner:profiles!owner_id(username)')
@@ -62,21 +62,21 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-ink mb-8">Genel Bakış</h1>
+      <h1 className="text-2xl font-bold text-ink mb-8">Overview</h1>
 
-      {/* ── İstatistikler ── */}
+      {/* ── Statistics ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
-        <StatCard label="Toplam İlan"     value={adsCount}        icon={Megaphone}     href="/admin/ilanlar"     color="brand" />
-        <StatCard label="Kullanıcı"       value={usersCount}      icon={Users}         href="/admin"             color="green" />
+        <StatCard label="Total Ads"       value={adsCount}        icon={Megaphone}     href="/admin/ilanlar"     color="brand" />
+        <StatCard label="Total Users"     value={usersCount}      icon={Users}         href="/admin"             color="green" />
         <StatCard label="Inboxes"         value={messagesCount}   icon={MessageSquare} href="/admin/inbox"       color="amber" />
-        <StatCard label="Kategori"        value={categoriesCount} icon={FolderTree}    href="/admin/kategoriler" color="blue"  />
+        <StatCard label="Categories"      value={categoriesCount} icon={FolderTree}    href="/admin/kategoriler" color="blue"  />
       </div>
 
-      {/* ── Son ilanlar ── */}
+      {/* ── Recent ads ── */}
       <div className="card overflow-hidden">
         <div className="px-6 py-4 border-b border-surface-tertiary flex items-center justify-between">
-          <h2 className="font-semibold text-ink">Son İlanlar</h2>
-          <Link href="/admin/ilanlar" className="text-sm text-brand-500 hover:underline">Tümünü gör</Link>
+          <h2 className="font-semibold text-ink">Recent Ads</h2>
+          <Link href="/admin/ilanlar" className="text-sm text-brand-500 hover:underline">See all</Link>
         </div>
         <div className="divide-y divide-surface-tertiary">
           {recentAds?.map((ad) => (
@@ -87,12 +87,12 @@ export default async function AdminDashboardPage() {
                   {ad.owner?.username} · #{ad.serial_number}
                 </p>
               </div>
-              <span className={`badge text-xs ${
+              <span className={`badge text-xs px-2 py-1 rounded-lg ${
                 ad.status === 'active' ? 'bg-green-100 text-green-600' :
                 ad.status === 'sold'   ? 'bg-red-100 text-red-600' :
                 'bg-gray-100 text-gray-500'
               }`}>
-                {ad.status === 'active' ? 'Aktif' : ad.status === 'sold' ? 'Satıldı' : 'Pasif'}
+                {ad.status === 'active' ? 'Active' : ad.status === 'sold' ? 'Sold' : 'Passive'}
               </span>
             </div>
           ))}

@@ -1,7 +1,7 @@
 /**
  * app/admin/ilanlar/page.js
  * ─────────────────────────────────────────────────────
- * Admin — tüm ilanları yönet (listele, sil, durum değiştir).
+ * Admin — manage all ads (list, delete, change status).
  * ─────────────────────────────────────────────────────
  */
 
@@ -24,7 +24,7 @@ export default function AdminIlanlarPage() {
   const [total,   setTotal]   = useState(0);
 
   /**
-   * Tüm ilanları (tüm durumlar dahil) çeker.
+   * Fetches all ads (including all statuses).
    */
   const fetchAds = useCallback(async () => {
     setLoading(true);
@@ -56,7 +56,7 @@ export default function AdminIlanlarPage() {
   useEffect(() => { fetchAds(); }, [fetchAds]);
 
   /**
-   * İlanın durumunu değiştirir (active / passive / sold).
+   * Changes the status of the ad (active / passive / sold).
    * @param {string} adId
    * @param {string} newStatus
    */
@@ -66,7 +66,7 @@ export default function AdminIlanlarPage() {
   };
 
   /**
-   * İlanı kalıcı olarak siler.
+   * Permanently deletes the ad.
    * @param {string} adId
    */
   const handleDelete = async (adId) => {
@@ -81,36 +81,36 @@ export default function AdminIlanlarPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-ink">İlan Yönetimi <span className="text-ink-tertiary font-normal text-lg">({total})</span></h1>
+        <h1 className="text-2xl font-bold text-ink">Ads Management <span className="text-ink-tertiary font-normal text-lg">({total})</span></h1>
         <button onClick={fetchAds} className="btn-secondary py-2">
-          <RefreshCw className="w-4 h-4" /> Yenile
+          <RefreshCw className="w-4 h-4" /> Refresh
         </button>
       </div>
 
-      {/* Arama */}
+      {/* Search */}
       <div className="relative mb-5 max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-tertiary" />
         <input
           type="search"
-          placeholder="Başlık veya seri no ara..."
+          placeholder="Search title or serial no..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           className="input pl-9"
         />
       </div>
 
-      {/* Tablo */}
+      {/* Table */}
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-surface-secondary text-ink-secondary">
-                <th className="text-left px-5 py-3 font-medium">İlan</th>
-                <th className="text-left px-5 py-3 font-medium">Sahip</th>
-                <th className="text-left px-5 py-3 font-medium">Fiyat</th>
-                <th className="text-left px-5 py-3 font-medium">Durum</th>
-                <th className="text-left px-5 py-3 font-medium">Tarih</th>
-                <th className="text-right px-5 py-3 font-medium">İşlem</th>
+                <th className="text-left px-5 py-3 font-medium">Ad</th>
+                <th className="text-left px-5 py-3 font-medium">Owner</th>
+                <th className="text-left px-5 py-3 font-medium">Price</th>
+                <th className="text-left px-5 py-3 font-medium">Status</th>
+                <th className="text-left px-5 py-3 font-medium">Date</th>
+                <th className="text-right px-5 py-3 font-medium">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-tertiary">
@@ -148,14 +148,14 @@ export default function AdminIlanlarPage() {
                     <div className="flex items-center gap-1 justify-end">
                       <Link href={buildAdUrl(ad.serial_number)} target="_blank"
                         className="p-2 rounded-lg hover:bg-surface-secondary text-ink-tertiary hover:text-ink transition-colors"
-                        aria-label="İlanı görüntüle"
+                        aria-label="View ad"
                       >
                         <Eye className="w-4 h-4" />
                       </Link>
                       <button
                         onClick={() => handleDelete(ad.id)}
                         className="p-2 rounded-lg hover:bg-red-50 text-ink-tertiary hover:text-red-500 transition-colors"
-                        aria-label="İlanı sil"
+                        aria-label="Delete ad"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -167,14 +167,14 @@ export default function AdminIlanlarPage() {
           </table>
         </div>
 
-        {/* Sayfalama */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-4 border-t border-surface-tertiary">
-            <p className="text-sm text-ink-secondary">{total} ilan</p>
+            <p className="text-sm text-ink-secondary">{total} ads</p>
             <div className="flex gap-2">
-              <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="btn-secondary py-1.5 px-3 text-xs disabled:opacity-40">← Önceki</button>
+              <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="btn-secondary py-1.5 px-3 text-xs disabled:opacity-40">← Previous</button>
               <span className="text-sm text-ink-secondary px-3 py-1.5">{page}/{totalPages}</span>
-              <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="btn-secondary py-1.5 px-3 text-xs disabled:opacity-40">Sonraki →</button>
+              <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="btn-secondary py-1.5 px-3 text-xs disabled:opacity-40">Next →</button>
             </div>
           </div>
         )}

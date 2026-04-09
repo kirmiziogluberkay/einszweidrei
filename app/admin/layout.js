@@ -1,16 +1,16 @@
 /**
  * app/admin/layout.js
  * ─────────────────────────────────────────────────────
- * Admin paneli layout — sol kenar çubuklu.
- * Sadece admin rolündeki kullanıcılar erişebilir
- * (middleware tarafından korunur).
+ * Admin panel layout — with sidebar.
+ * Only users with 'admin' role can access.
+ * (Protected by middleware).
  * ─────────────────────────────────────────────────────
  */
 
 import Link from 'next/link';
 import { LayoutDashboard, Megaphone, FolderTree, MessageSquare, ArrowLeft } from 'lucide-react';
 
-/** Admin yan menü linkleri */
+/** Admin sidebar links */
 const ADMIN_NAV = [
   { label: 'Overview',           href: '/admin',            icon: LayoutDashboard   },
   { label: 'Ads Management',     href: '/admin/ilanlar',    icon: Megaphone         },
@@ -23,10 +23,10 @@ export default function AdminLayout({ children }) {
   return (
     <div className="flex min-h-[calc(100vh-56px)]">
 
-      {/* ── Kenar çubuğu ── */}
+      {/* ── Sidebar ── */}
       <aside className="hidden md:flex flex-col w-64 bg-ink text-white flex-shrink-0">
         <div className="p-5 border-b border-white/10">
-          <p className="font-bold text-sm uppercase tracking-widest text-white/60">Admin Paneli</p>
+          <p className="font-bold text-sm uppercase tracking-widest text-white/60">Admin Panel</p>
         </div>
 
         <nav className="flex-1 p-3 space-y-1">
@@ -48,12 +48,12 @@ export default function AdminLayout({ children }) {
             href="/"
             className="flex items-center gap-2 px-3 py-2.5 text-sm text-white/50 hover:text-white/80 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" /> Siteye Dön
+            <ArrowLeft className="w-4 h-4" /> Back to Site
           </Link>
         </div>
       </aside>
 
-      {/* ── İçerik ── */}
+      {/* ── Content ── */}
       <main className="flex-1 bg-surface-secondary p-6 overflow-auto">
         {children}
       </main>
