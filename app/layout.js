@@ -11,6 +11,7 @@ import { SITE_NAME, SITE_DESCRIPTION, PWA_CONFIG, SITE_URL } from '@/constants/c
 import Navbar from '@/components/layout/Navbar';
 import MobileNav from '@/components/layout/MobileNav';
 import Footer from '@/components/layout/Footer';
+import Marquee from '@/components/layout/Marquee';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
@@ -70,6 +71,8 @@ export default function RootLayout({ children }) {
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body className="flex flex-col min-h-screen bg-surface-secondary">
+
+        <Marquee />
 
         {/* ── Top navigation (Desktop & Mobile) ── */}
         <Navbar />

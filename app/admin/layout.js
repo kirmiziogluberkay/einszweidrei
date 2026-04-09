@@ -16,6 +16,7 @@ const ADMIN_NAV = [
   { label: 'Ads Management',     href: '/admin/ilanlar',    icon: Megaphone         },
   { label: 'Category Management',href: '/admin/kategoriler',icon: FolderTree        },
   { label: 'Inboxes',            href: '/admin/inbox',      icon: MessageSquare     },
+  { label: 'Site Settings',      href: '/admin/settings',   icon: LayoutDashboard   },
 ];
 
 export default function AdminLayout({ children }) {
