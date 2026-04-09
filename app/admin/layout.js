@@ -21,17 +21,25 @@ export default function AdminLayout({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Sadece her şey kesinleştiğinde (loading:false ve profile çekilmişken) karar ver
-    if (!loading && user) {
-      if (profile && profile.role !== 'admin') {
-        router.replace('/');
+    // Sadece her şey kesinleştiğinde karar ver
+    if (!loading) {
+      if (!user || (profile && profile.role !== 'admin')) {
+         // Küçük bir gecikme ekleyerek sayfa geçişinin tamamlanmasına izin ver
+         setTimeout(() => router.replace('/'), 100);
       }
-    } else if (!loading && !user) {
-      router.replace('/');
     }
   }, [user, profile, loading, router]);
 
-  if (loading || (user && !profile)) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)] bg-surface-secondary">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+      </div>
+    );
+  }
+
+  // Eğer profil henüz gelmemişse ama kullanıcı admindese beklemeye devam et
+  if (user && !profile) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-56px)] bg-surface-secondary">
         <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
