@@ -57,7 +57,7 @@ export function useAds(filters = {}) {
     setLoading(true);
     setError(null);
 
-    // Base query - Optimize edilmiş alan seçimi
+    // Base query - Kararlı alan seçimi
     let query = supabase
       .from('ads')
       .select(`
@@ -74,7 +74,7 @@ export function useAds(filters = {}) {
         created_at,
         owner:profiles(id, username),
         category:categories(id, name, slug)
-      `, { count: 'estimated' });
+      `, { count: 'exact' }); // Küçük veri setlerinde exact her zaman daha güvenlidir
 
     // Status filter - General visitors see Active/Reserved/Rented. Owners see everything.
     const finalOwnerId = ownerId || owner_id;
