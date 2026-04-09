@@ -57,7 +57,7 @@ export function useAds(filters = {}) {
     setLoading(true);
     setError(null);
 
-    // Base query — join corresponding profile and category
+    // Base query - Optimize edilmiş alan seçimi
     let query = supabase
       .from('ads')
       .select(`
@@ -71,11 +71,10 @@ export function useAds(filters = {}) {
         status,
         payment_methods,
         category_id,
-        owner_id,
         created_at,
         owner:profiles(id, username),
         category:categories(id, name, slug)
-      `, { count: 'exact' });
+      `, { count: 'estimated' });
 
     // Status filter - General visitors see Active/Reserved/Rented. Owners see everything.
     const finalOwnerId = ownerId || owner_id;
