@@ -53,24 +53,34 @@ export function useAuth() {
   useEffect(() => {
     // Mevcut oturumu al
     supabase.auth.getUser().then(async ({ data: { user } }) => {
-      setUser(user ?? null);
-      if (user) {
-        await fetchProfile(user.id);
+      try {
+        setUser(user ?? null);
+        if (user) {
+          await fetchProfile(user.id);
+        }
+      } catch (e) {
+        console.error("Auth init error:", e);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     // Auth durum değişikliklerini dinle
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
-        if (currentUser) {
-          await fetchProfile(currentUser.id);
-        } else {
-          setProfile(null);
+        try {
+          const currentUser = session?.user ?? null;
+          setUser(currentUser);
+          if (currentUser) {
+            await fetchProfile(currentUser.id);
+          } else {
+            setProfile(null);
+          }
+        } catch (e) {
+          console.error("Auth change error:", e);
+        } finally {
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 

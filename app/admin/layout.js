@@ -21,13 +21,16 @@ export default function AdminLayout({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Sadece yükleme TAMAMLANDIĞINDA ve veriler KESİNLEŞTİĞİNDE kontrol et
+    // Sadece yükleme TAMAMLANDIĞINDA kontrol et
     if (loading) return;
+
+    // Eğer kullanıcı var ama profil henüz gelmemişse (nadir bir durum), biraz bekle
+    if (user && !profile) return;
 
     const isAuthorized = user && profile?.role === 'admin';
 
+    // Eğer yetki yoksa ana sayfaya gönder
     if (!isAuthorized) {
-      console.log('Access denied, redirecting...', { user: !!user, role: profile?.role });
       router.replace('/');
     }
   }, [user, profile, loading, router]);

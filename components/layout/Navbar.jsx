@@ -116,13 +116,6 @@ export default function Navbar() {
 
             {/* Right side */}
             <div className="flex items-center gap-4 shrink-0">
-               {profile?.role === 'admin' && (
-                  <Link href="/admin" className="btn-secondary py-2 px-4 text-sm h-10 gap-1.5 md:flex hidden rounded-xl border-brand-200 text-brand-700 bg-brand-50 hover:bg-brand-100">
-                     <ShieldCheck className="w-4 h-4" />
-                     <span>Admin</span>
-                  </Link>
-               )}
-
                <Link href="/post-ad" className="btn-primary py-2 px-5 text-sm h-10 gap-1.5 md:flex hidden rounded-xl">
                   <Plus className="w-4 h-4" />
                   <span>New Ad</span>
@@ -134,52 +127,64 @@ export default function Navbar() {
                      {!user ? (
                         <Link href="/login" className="btn-primary py-2 px-6 text-sm h-10 rounded-xl">Login</Link>
                      ) : (
-                        <div className="relative group flex items-center">
-                           <button
-                              className="flex items-center gap-2.5 p-1 rounded-2xl hover:bg-surface-secondary transition-all"
-                           >
-                              {!usernameDisplay ? (
-                                 <div className="flex items-center gap-2.5 opacity-0">
-                                    <div className="w-8 h-8 rounded-full bg-surface-tertiary/40" />
-                                    <div className="h-4 w-12 bg-surface-tertiary/30 rounded md:block hidden" />
-                                 </div>
-                              ) : (
-                                 <>
-                                    <div className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs border border-brand-100 shadow-sm relative shrink-0">
-                                       {usernameDisplay.charAt(0).toUpperCase()}
+                        <div className="flex items-center gap-3">
+                           <div className="relative group flex items-center">
+                              <button
+                                 className="flex items-center gap-2.5 p-1 rounded-2xl hover:bg-surface-secondary transition-all"
+                              >
+                                 {!usernameDisplay ? (
+                                    <div className="flex items-center gap-2.5 opacity-0">
+                                       <div className="w-8 h-8 rounded-full bg-surface-tertiary/40" />
+                                       <div className="h-4 w-12 bg-surface-tertiary/30 rounded md:block hidden" />
                                     </div>
-                                    <div className="flex items-center gap-1.5 md:flex hidden">
-                                       <span className="text-sm font-bold text-ink truncate max-w-[100px]">{usernameDisplay}</span>
-                                       {hasUnread && !menuOpened && (
-                                          <Mail className="w-4 h-4 text-green-500 fill-green-50/20" />
+                                 ) : (
+                                    <>
+                                       <div className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs border border-brand-100 shadow-sm relative shrink-0">
+                                          {usernameDisplay.charAt(0).toUpperCase()}
+                                       </div>
+                                       <div className="flex items-center gap-1.5 md:flex hidden">
+                                          <span className="text-sm font-bold text-ink truncate max-w-[100px]">{usernameDisplay}</span>
+                                          {hasUnread && !menuOpened && (
+                                             <Mail className="w-4 h-4 text-green-500 fill-green-50/20" />
+                                          )}
+                                       </div>
+                                    </>
+                                 )}
+                              </button>
+
+                              {/* User Dropdown */}
+                              <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-[var(--shadow-xl)] border border-surface-tertiary py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
+                                 {(AUTH_NAV_LINKS || []).map((link) => (
+                                    <Link
+                                       key={link.href}
+                                       href={link.href}
+                                       className="flex justify-between items-center px-4 py-2 text-sm text-ink-secondary hover:text-brand-500 hover:bg-surface-secondary/50 transition-colors"
+                                    >
+                                       <span>{link.label}</span>
+                                       {(link.label === 'Messages' || link.label === 'Inbox') && hasUnread && (
+                                          <div className="w-2 h-2 bg-green-500 rounded-full" />
                                        )}
-                                    </div>
-                                 </>
-                              )}
-                           </button>
-
-                           {/* User Dropdown */}
-                           <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-[var(--shadow-xl)] border border-surface-tertiary py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
-
-                              {(AUTH_NAV_LINKS || []).map((link) => (
-                                 <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    className="flex justify-between items-center px-4 py-2 text-sm text-ink-secondary hover:text-brand-500 hover:bg-surface-secondary/50 transition-colors"
-                                 >
-                                    <span>{link.label}</span>
-                                    {(link.label === 'Messages' || link.label === 'Inbox') && hasUnread && (
-                                       <div className="w-2 h-2 bg-green-500 rounded-full" />
-                                    )}
-                                 </Link>
-                              ))}
-                              <div className="mt-1 pt-1 border-t border-surface-tertiary/50 px-2">
-                                 <button onClick={() => signOut()} className="w-full flex items-center gap-2 px-2 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors text-left font-bold">
-                                    <LogOut className="w-3.5 h-3.5" />
-                                    <span>Log Out</span>
-                                 </button>
+                                    </Link>
+                                 ))}
+                                 <div className="mt-1 pt-1 border-t border-surface-tertiary/50 px-2">
+                                    <button onClick={() => signOut()} className="w-full flex items-center gap-2 px-2 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors text-left font-bold">
+                                       <LogOut className="w-3.5 h-3.5" />
+                                       <span>Log Out</span>
+                                    </button>
+                                 </div>
                               </div>
                            </div>
+
+                           {/* Admin Shortcut Button - Next to Profile */}
+                           {profile?.role === 'admin' && (
+                              <Link
+                                 href="/admin"
+                                 className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-100 rounded-xl transition-all shadow-sm"
+                              >
+                                 <ShieldCheck className="w-3.5 h-3.5" />
+                                 <span className="md:inline hidden text-xs">Admin</span>
+                              </Link>
+                           )}
                         </div>
                      )}
                   </>
