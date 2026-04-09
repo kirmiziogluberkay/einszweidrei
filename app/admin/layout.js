@@ -9,8 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 /** Admin sidebar links */
 const ADMIN_NAV = [
   { label: 'Overview',           href: '/admin',            icon: LayoutDashboard   },
-  { label: 'Ads Management',     href: '/admin/ilanlar',    icon: Megaphone         },
-  { label: 'Category Management',href: '/admin/kategoriler',icon: FolderTree        },
+  { label: 'Ads Management',     href: '/admin/ads',        icon: Megaphone         },
+  { label: 'Category Management',href: '/admin/categories', icon: FolderTree        },
   { label: 'User Management',    href: '/admin/users',      icon: Users             },
   { label: 'Feedbacks',          href: '/admin/feedback',   icon: Lightbulb         },
   { label: 'Site Settings',      href: '/admin/settings',   icon: Settings          },

@@ -66,17 +66,17 @@ export default async function AdminDashboardPage() {
 
       {/* ── Statistics ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
-        <StatCard label="Total Ads"       value={adsCount}        icon={Megaphone}     href="/admin/ilanlar"     color="brand" />
-        <StatCard label="Total Users"     value={usersCount}      icon={Users}         href="/admin"             color="green" />
+        <StatCard label="Total Ads"       value={adsCount}        icon={Megaphone}     href="/admin/ads"        color="brand" />
+        <StatCard label="Total Users"     value={usersCount}      icon={Users}         href="/admin/users"      color="green" />
         <StatCard label="Inboxes"         value={messagesCount}   icon={MessageSquare} href="/admin/inbox"       color="amber" />
-        <StatCard label="Categories"      value={categoriesCount} icon={FolderTree}    href="/admin/kategoriler" color="blue"  />
+        <StatCard label="Categories"      value={categoriesCount} icon={FolderTree}    href="/admin/categories" color="blue"  />
       </div>
 
       {/* ── Recent ads ── */}
       <div className="card overflow-hidden">
         <div className="px-6 py-4 border-b border-surface-tertiary flex items-center justify-between">
           <h2 className="font-semibold text-ink">Recent Ads</h2>
-          <Link href="/admin/ilanlar" className="text-sm text-brand-500 hover:underline">See all</Link>
+          <Link href="/admin/ads" className="text-sm text-brand-500 hover:underline">See all</Link>
         </div>
         <div className="divide-y divide-surface-tertiary">
           {recentAds?.map((ad) => (
