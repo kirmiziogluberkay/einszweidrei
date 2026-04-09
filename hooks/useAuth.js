@@ -52,19 +52,21 @@ export function useAuth() {
 
   useEffect(() => {
     // Mevcut oturumu al
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       setUser(user ?? null);
-      if (user) fetchProfile(user.id);
+      if (user) {
+        await fetchProfile(user.id);
+      }
       setLoading(false);
     });
 
     // Auth durum değişikliklerini dinle
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         if (currentUser) {
-          fetchProfile(currentUser.id);
+          await fetchProfile(currentUser.id);
         } else {
           setProfile(null);
         }

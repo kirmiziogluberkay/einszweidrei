@@ -54,13 +54,6 @@ export default function Marquee() {
         <span className="text-sm font-bold tracking-wide uppercase px-4">
           {settings.text}
         </span>
-        {/* Repeat text for continuous effect */}
-        <span className="text-sm font-bold tracking-wide uppercase px-4">
-          {settings.text}
-        </span>
-        <span className="text-sm font-bold tracking-wide uppercase px-4">
-          {settings.text}
-        </span>
       </div>
 
       <style jsx>{`

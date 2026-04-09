@@ -1,25 +1,48 @@
-/**
- * app/admin/layout.js
- * ─────────────────────────────────────────────────────
- * Admin panel layout — with sidebar.
- * Only users with 'admin' role can access.
- * (Protected by middleware).
- * ─────────────────────────────────────────────────────
- */
+'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Megaphone, FolderTree, MessageSquare, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Megaphone, FolderTree, MessageSquare, ArrowLeft, Users, Lightbulb, Settings, Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 /** Admin sidebar links */
 const ADMIN_NAV = [
   { label: 'Overview',           href: '/admin',            icon: LayoutDashboard   },
   { label: 'Ads Management',     href: '/admin/ilanlar',    icon: Megaphone         },
   { label: 'Category Management',href: '/admin/kategoriler',icon: FolderTree        },
-  { label: 'Inboxes',            href: '/admin/inbox',      icon: MessageSquare     },
-  { label: 'Site Settings',      href: '/admin/settings',   icon: LayoutDashboard   },
+  { label: 'User Management',    href: '/admin/users',      icon: Users             },
+  { label: 'Feedbacks',          href: '/admin/feedback',   icon: Lightbulb         },
+  { label: 'Site Settings',      href: '/admin/settings',   icon: Settings          },
 ];
 
 export default function AdminLayout({ children }) {
+  const { user, profile, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Sadece yükleme TAMAMLANDIĞINDA ve veriler KESİNLEŞTİĞİNDE kontrol et
+    if (loading) return;
+
+    const isAuthorized = user && profile?.role === 'admin';
+
+    if (!isAuthorized) {
+      console.log('Access denied, redirecting...', { user: !!user, role: profile?.role });
+      router.replace('/');
+    }
+  }, [user, profile, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)] bg-surface-secondary">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+      </div>
+    );
+  }
+
+  if (!user || profile?.role !== 'admin') {
+    return null;
+  }
   return (
     <div className="flex min-h-[calc(100vh-56px)]">
 
