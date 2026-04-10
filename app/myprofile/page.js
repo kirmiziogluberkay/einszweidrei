@@ -21,8 +21,9 @@ export default function MyProfilePage() {
   const { user, profile, loading: authLoading, refreshProfile, signOut } = useAuth();
 
   const handleSignOut = async () => {
-    await signOut();
+    // Navigate away first to prevent Auth Guard from sending us to /login
     router.push('/');
+    await signOut();
   };
 
   // ── Auth Guard ──
@@ -245,7 +246,7 @@ export default function MyProfilePage() {
           className="w-full flex justify-center items-center gap-2 px-4 py-3 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
         >
           <LogOut className="w-4 h-4" />
-          Log Out (Ana Sayfaya Dön)
+          Log Out
         </button>
       </div>
     </div>
