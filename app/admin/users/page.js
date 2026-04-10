@@ -35,13 +35,16 @@ export default function AdminUsersPage() {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ role: newRole })
-      .eq('id', userId);
+    // Use RPC to bypass RLS limitations on profile table updates
+    const { error } = await supabase.rpc('toggle_user_role', { 
+      target_user_id: userId, 
+      target_role: newRole 
+    });
 
     if (!error) {
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    } else {
+      alert("Failed to change role: " + error.message);
     }
   };
 

@@ -173,7 +173,7 @@ export default function Navbar() {
                                     </Link>
                                  ))}
                                  <div className="mt-1 pt-1 border-t border-surface-tertiary/50 px-2">
-                                    <button onClick={() => signOut()} className="w-full flex items-center gap-2 px-2 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors text-left font-bold">
+                                    <button onClick={handleSignOut} className="w-full flex items-center gap-2 px-2 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors text-left font-bold">
                                        <LogOut className="w-3.5 h-3.5" />
                                        <span>Log Out</span>
                                     </button>

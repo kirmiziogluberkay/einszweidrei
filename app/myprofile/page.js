@@ -10,7 +10,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Edit3, AlertCircle } from 'lucide-react';
+import { Loader2, Edit3, AlertCircle, LogOut } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '@/constants/config';
@@ -18,7 +18,12 @@ import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '@/constants/config';
 export default function MyProfilePage() {
   const supabase          = createClient();
   const router            = useRouter();
-  const { user, profile, loading: authLoading, refreshProfile } = useAuth();
+  const { user, profile, loading: authLoading, refreshProfile, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push('/');
+  };
 
   // ── Auth Guard ──
   useEffect(() => {
@@ -33,6 +38,13 @@ export default function MyProfilePage() {
   const [saving,    setSaving]    = useState(false);
   const [msg,       setMsg]       = useState(null);
   const [msgType,   setMsgType]   = useState('success');
+
+  // Password state
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwdMsg, setPwdMsg] = useState(null);
+  const [pwdMsgType, setPwdMsgType] = useState('success');
+  const [changingPwd, setChangingPwd] = useState(false);
 
   // Sync state when profile loads
   useEffect(() => {
@@ -64,6 +76,35 @@ export default function MyProfilePage() {
     }
 
     setSaving(false);
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setPwdMsg(null);
+    if (!newPassword || newPassword.length < 6) {
+      setPwdMsg('Password must be at least 6 characters.');
+      setPwdMsgType('error');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPwdMsg('Passwords do not match.');
+      setPwdMsgType('error');
+      return;
+    }
+
+    setChangingPwd(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setChangingPwd(false);
+
+    if (error) {
+      setPwdMsg(error.message);
+      setPwdMsgType('error');
+    } else {
+      setPwdMsg('Password updated successfully.');
+      setPwdMsgType('success');
+      setNewPassword('');
+      setConfirmPassword('');
+    }
   };
 
   if (authLoading) {
@@ -152,6 +193,60 @@ export default function MyProfilePage() {
             </div>
           </dl>
         )}
+      </div>
+
+      {/* Password Change Card */}
+      <div className="card p-6 mb-8">
+        <h2 className="text-lg font-semibold text-ink mb-5">Change Password</h2>
+        
+        {pwdMsg && (
+          <div className={`flex items-start gap-2 p-4 rounded-2xl text-sm mb-6 ${
+            pwdMsgType === 'success'
+              ? 'bg-green-50 border border-green-100 text-green-600'
+              : 'bg-red-50 border border-red-100 text-red-600'
+          }`}>
+            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            <span>{pwdMsg}</span>
+          </div>
+        )}
+
+        <form onSubmit={handlePasswordChange} className="space-y-4">
+          <div>
+            <label className="label">New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="input"
+              placeholder="Minimum 6 characters"
+            />
+          </div>
+          <div>
+            <label className="label">Confirm New Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="input"
+              placeholder="Confirm new password"
+            />
+          </div>
+          <button type="submit" disabled={changingPwd} className="btn-primary w-auto inline-flex px-6 items-center gap-2 mt-2">
+            {changingPwd ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            Update Password
+          </button>
+        </form>
+      </div>
+
+      {/* Logout Button for Mobile/Profile Context */}
+      <div className="card p-6 border border-red-100/50">
+        <button
+          onClick={handleSignOut}
+          className="w-full flex justify-center items-center gap-2 px-4 py-3 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          Log Out (Ana Sayfaya Dön)
+        </button>
       </div>
     </div>
   );

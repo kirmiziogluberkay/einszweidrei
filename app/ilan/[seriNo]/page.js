@@ -44,6 +44,12 @@ export async function generateMetadata({ params }) {
       description: ad.description?.slice(0, 155),
       images: ad.images?.[0] ? [{ url: ad.images[0] }] : [],
     },
+    twitter: {
+      card: 'summary_large_image',
+      title: ad.title,
+      description: ad.description?.slice(0, 155),
+      images: ad.images?.[0] ? [ad.images[0]] : [],
+    },
   };
 }
 

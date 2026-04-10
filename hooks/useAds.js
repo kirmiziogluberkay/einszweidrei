@@ -111,14 +111,20 @@ export function useAds(filters = {}) {
 
       if (hasFree && otherMethods.length === 0) {
         // Only free ads (price is empty/0 or no payment method)
-        query = query.or('price.is.null,price.eq.0,payment_methods.is.null,payment_methods.eq.{}');
+        query = query.or('price.is.null,price.eq.0');
       } else if (!hasFree && otherMethods.length > 0) {
         // Only specific paid methods
         query = query.overlaps('payment_methods', otherMethods);
       } else if (hasFree && otherMethods.length > 0) {
-        // Free OR some paid methods
-        const otherMethodsList = otherMethods.join(',');
-        query = query.or(`price.is.null,price.eq.0,payment_methods.ov.{${otherMethodsList}}`);
+        // Free OR some paid methods - Using a safer PostgREST syntax
+        // Instead of complex OR with arrays, we check them sequentially or use overlaps
+        const orQuery = [];
+        orQuery.push('price.is.null');
+        orQuery.push('price.eq.0');
+        otherMethods.forEach(m => {
+          orQuery.push(`payment_methods.cs.{${m}}`); 
+        });
+        query = query.or(orQuery.join(','));
       }
     }
 
