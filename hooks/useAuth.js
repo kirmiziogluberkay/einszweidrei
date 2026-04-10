@@ -82,6 +82,13 @@ export function useAuth() {
     await supabase.auth.signOut();
   }, [supabase.auth]);
 
+  /**
+   * Profil bilgilerini manuel olarak yeniler.
+   */
+  const refreshProfile = useCallback(async () => {
+    if (user) await fetchProfile(user.id);
+  }, [user, fetchProfile]);
+
   return {
     user,
     profile,
@@ -89,5 +96,6 @@ export function useAuth() {
     isAdmin: profile?.role === USER_ROLES.ADMIN,
     loading,
     signOut,
+    refreshProfile,
   };
 }

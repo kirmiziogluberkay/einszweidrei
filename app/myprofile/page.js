@@ -18,7 +18,7 @@ import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '@/constants/config';
 export default function MyProfilePage() {
   const supabase          = createClient();
   const router            = useRouter();
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading, refreshProfile } = useAuth();
 
   // ── Auth Guard ──
   useEffect(() => {
@@ -28,11 +28,19 @@ export default function MyProfilePage() {
   }, [user, authLoading, router]);
 
   const [editMode,  setEditMode]  = useState(false);
-  const [username,  setUsername]  = useState(profile?.username ?? '');
-  const [phone,     setPhone]     = useState(profile?.phone ?? '');
+  const [username,  setUsername]  = useState('');
+  const [phone,     setPhone]     = useState('');
   const [saving,    setSaving]    = useState(false);
   const [msg,       setMsg]       = useState(null);
   const [msgType,   setMsgType]   = useState('success');
+
+  // Sync state when profile loads
+  useEffect(() => {
+    if (profile) {
+      setUsername(profile.username || '');
+      setPhone(profile.phone || '');
+    }
+  }, [profile]);
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
@@ -48,9 +56,11 @@ export default function MyProfilePage() {
       setMsg(ERROR_MESSAGES.generic);
       setMsgType('error');
     } else {
+      await refreshProfile();
       setMsg(SUCCESS_MESSAGES.profileSaved);
       setMsgType('success');
       setEditMode(false);
+      router.refresh();
     }
 
     setSaving(false);
