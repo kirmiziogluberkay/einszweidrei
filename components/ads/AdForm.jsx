@@ -78,6 +78,45 @@ export default function AdForm({ initialData = null }) {
   const [preferredGender, setPreferredGender] = useState((getTagValue('ROOM_TARGET') || 'ANY').toUpperCase());
   const [rentType, setRentType] = useState((getTagValue('RENT_TYPE') || 'warm').toLowerCase());
 
+  const [propertyFeatures, setPropertyFeatures] = useState(() => {
+    return (initialData?.tags || [])
+      .filter(t => typeof t === 'string' && t.startsWith('FEATURE:'))
+      .map(t => t.split(':')[1]);
+  });
+
+  const AVAILABLE_FEATURES = [
+    { id: 'UNDERFLOOR_HEATING', label: 'Underfloor Heating', icon: '♨️' },
+    { id: 'CENTRAL_HEATING', label: 'Central Heating', icon: '🌡️' },
+    { id: 'ELEVATOR', label: 'Elevator / Lift', icon: '🛗' },
+    { id: 'FIBER_INTERNET', label: 'High-Speed Fiber Internet', icon: '⚡' },
+    { id: 'WHEELCHAIR_ACCESSIBLE', label: 'Wheelchair Accessible', icon: '♿' },
+    { id: 'FITTED_KITCHEN', label: 'Fitted Kitchen', icon: '🍳' },
+    { id: 'DISHWASHER', label: 'Dishwasher', icon: '🍽️' },
+    { id: 'OVEN_STOVE', label: 'Oven & Stove', icon: '🍲' },
+    { id: 'FRIDGE_FREEZER', label: 'Fridge & Freezer', icon: '🧊' },
+    { id: 'MICROWAVE', label: 'Microwave', icon: '🍱' },
+    { id: 'WASHING_MACHINE', label: 'In-unit Washing Machine', icon: '🌀' },
+    { id: 'SHARED_LAUNDRY', label: 'Shared Laundry Room', icon: '👚' },
+    { id: 'TUMBLE_DRYER', label: 'Tumble Dryer', icon: '🌬️' },
+    { id: 'BATHTUB', label: 'Bathtub', icon: '🛁' },
+    { id: 'WALKIN_SHOWER', label: 'Walk-in Shower', icon: '🚿' },
+    { id: 'BALCONY', label: 'Balcony', icon: '☀️' },
+    { id: 'TERRACE', label: 'Terrace / Deck', icon: '🪴' },
+    { id: 'GARDEN', label: 'Private Garden', icon: '🌳' },
+    { id: 'UNDERGROUND_PARKING', label: 'Underground Parking', icon: '🅿️' },
+    { id: 'OUTDOOR_PARKING', label: 'Outdoor Parking Space', icon: '🚗' },
+    { id: 'BICYCLE_STORAGE', label: 'Bicycle Storage', icon: '🚲' },
+    { id: 'BASEMENT_STORAGE', label: 'Basement Storage Unit', icon: '📦' },
+    { id: 'AIR_CONDITIONING', label: 'Air Conditioning', icon: '❄️' },
+    { id: 'ANMELDUNG', label: 'Anmeldung Possible', icon: '📝' },
+    { id: 'FURNISHED', label: 'Furnished', icon: '🛋️' },
+    { id: 'SEMI_FURNISHED', label: 'Semi-furnished', icon: '🪑' },
+    { id: 'UNFURNISHED', label: 'Unfurnished', icon: '🏠' },
+    { id: 'NON_SMOKING', label: 'Non-smoking Household', icon: '🚭' },
+    { id: 'PET_FRIENDLY', label: 'Pet Friendly', icon: '🐾' },
+    { id: 'ENERGY_EFFICIENT', label: 'Energy Efficiency Rating', icon: '🌱' }
+  ];
+
   /**
    * Updates a single form field.
    *
@@ -228,6 +267,11 @@ export default function AdForm({ initialData = null }) {
     let computedTags = [];
     if (isAccommodation) {
       computedTags.push(`RENT_TYPE:${rentType.toUpperCase()}`);
+      
+      propertyFeatures.forEach(feature => {
+         computedTags.push(`FEATURE:${feature}`);
+      });
+
       if (selectedCategoryObj?.slug?.includes('room')) {
         computedTags.push(`ROOM_TYPE:${roomType}`);
         computedTags.push(`ROOM_TOTAL:${totalRooms}`);
@@ -434,6 +478,45 @@ export default function AdForm({ initialData = null }) {
                 </label>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Accomodation Features (Universal for apartments & rooms) ── */}
+      {isAccommodation && (
+        <div className="border border-brand-100 bg-brand-50/10 rounded-3xl p-5 sm:p-7 space-y-4 shadow-sm">
+           <h3 className="font-bold text-ink flex items-center gap-2 border-b border-surface-tertiary pb-4">
+             <span className="text-2xl">✨</span> Property Features
+           </h3>
+           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 pt-2">
+             {AVAILABLE_FEATURES.map(feature => {
+               const isSelected = propertyFeatures.includes(feature.id);
+               return (
+                 <label 
+                   key={feature.id}
+                   className={`cursor-pointer p-3 rounded-2xl flex flex-col items-center justify-center gap-2 text-center transition-all border-2
+                     ${isSelected 
+                        ? 'border-brand-500 bg-brand-50/50 shadow-sm text-brand-700' 
+                        : 'border-surface-tertiary bg-white hover:border-brand-300 text-ink-secondary hover:text-ink'
+                     }`}
+                 >
+                   <input 
+                     type="checkbox" 
+                     className="hidden"
+                     checked={isSelected}
+                     onChange={(e) => {
+                       if (e.target.checked) {
+                         setPropertyFeatures([...propertyFeatures, feature.id]);
+                       } else {
+                         setPropertyFeatures(propertyFeatures.filter(f => f !== feature.id));
+                       }
+                     }}
+                   />
+                   <span className="text-2xl">{feature.icon}</span>
+                   <span className="text-xs font-semibold">{feature.label}</span>
+                 </label>
+               );
+             })}
+           </div>
         </div>
       )}
 

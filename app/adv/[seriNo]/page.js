@@ -167,6 +167,41 @@ export default async function AdDetailPage({ params }) {
   const rentTypeTag = rawTags.find(t => typeof t === 'string' && t.startsWith('RENT_TYPE:'));
   const rentType = rentTypeTag ? rentTypeTag.split(':')[1] : null;
 
+  const propertyFeatures = rawTags.filter(t => typeof t === 'string' && t.startsWith('FEATURE:')).map(t => t.split(':')[1]);
+  
+  const AVAILABLE_FEATURES = [
+    { id: 'UNDERFLOOR_HEATING', label: 'Underfloor Heating', icon: '♨️' },
+    { id: 'CENTRAL_HEATING', label: 'Central Heating', icon: '🌡️' },
+    { id: 'ELEVATOR', label: 'Elevator / Lift', icon: '🛗' },
+    { id: 'FIBER_INTERNET', label: 'High-Speed Fiber Internet', icon: '⚡' },
+    { id: 'WHEELCHAIR_ACCESSIBLE', label: 'Wheelchair Accessible', icon: '♿' },
+    { id: 'FITTED_KITCHEN', label: 'Fitted Kitchen', icon: '🍳' },
+    { id: 'DISHWASHER', label: 'Dishwasher', icon: '🍽️' },
+    { id: 'OVEN_STOVE', label: 'Oven & Stove', icon: '🍲' },
+    { id: 'FRIDGE_FREEZER', label: 'Fridge & Freezer', icon: '🧊' },
+    { id: 'MICROWAVE', label: 'Microwave', icon: '🍱' },
+    { id: 'WASHING_MACHINE', label: 'In-unit Washing Machine', icon: '🌀' },
+    { id: 'SHARED_LAUNDRY', label: 'Shared Laundry Room', icon: '👚' },
+    { id: 'TUMBLE_DRYER', label: 'Tumble Dryer', icon: '🌬️' },
+    { id: 'BATHTUB', label: 'Bathtub', icon: '🛁' },
+    { id: 'WALKIN_SHOWER', label: 'Walk-in Shower', icon: '🚿' },
+    { id: 'BALCONY', label: 'Balcony', icon: '☀️' },
+    { id: 'TERRACE', label: 'Terrace / Deck', icon: '🪴' },
+    { id: 'GARDEN', label: 'Private Garden', icon: '🌳' },
+    { id: 'UNDERGROUND_PARKING', label: 'Underground Parking', icon: '🅿️' },
+    { id: 'OUTDOOR_PARKING', label: 'Outdoor Parking Space', icon: '🚗' },
+    { id: 'BICYCLE_STORAGE', label: 'Bicycle Storage', icon: '🚲' },
+    { id: 'BASEMENT_STORAGE', label: 'Basement Storage Unit', icon: '📦' },
+    { id: 'AIR_CONDITIONING', label: 'Air Conditioning', icon: '❄️' },
+    { id: 'ANMELDUNG', label: 'Anmeldung Possible', icon: '📝' },
+    { id: 'FURNISHED', label: 'Furnished', icon: '🛋️' },
+    { id: 'SEMI_FURNISHED', label: 'Semi-furnished', icon: '🪑' },
+    { id: 'UNFURNISHED', label: 'Unfurnished', icon: '🏠' },
+    { id: 'NON_SMOKING', label: 'Non-smoking Household', icon: '🚭' },
+    { id: 'PET_FRIENDLY', label: 'Pet Friendly', icon: '🐾' },
+    { id: 'ENERGY_EFFICIENT', label: 'Energy Efficiency Rating', icon: '🌱' }
+  ];
+
   return (
     <div className="container-app py-8">
 
@@ -249,8 +284,7 @@ export default async function AdDetailPage({ params }) {
                              ✅
                            </div>
                            <div>
-                             <div className="font-semibold text-sm text-ink">{roomType === '2' || roomType === '3' ? 'Private Bath (En-suite)' : 'Shared Bathroom'}</div>
-                             <div className="text-xs text-ink-secondary">Bathroom access</div>
+                             <div className="font-semibold text-sm text-ink">{roomType === '2' || roomType === '3' ? 'Private Bath' : 'Shared Bath'}</div>
                            </div>
                          </div>
                          <div className="bg-white border border-surface-tertiary rounded-2xl p-4 flex items-center gap-4">
@@ -259,7 +293,6 @@ export default async function AdDetailPage({ params }) {
                            </div>
                            <div>
                              <div className="font-semibold text-sm text-ink">{roomType === '3' ? 'Private Kitchen' : 'Shared Kitchen'}</div>
-                             <div className="text-xs text-ink-secondary">Kitchen access</div>
                            </div>
                          </div>
                        </div>
@@ -316,6 +349,27 @@ export default async function AdDetailPage({ params }) {
                 <div className="card p-6 bg-orange-50 border-orange-100">
                    <h2 className="text-sm font-bold text-orange-700 mb-2">Notice for Visitors</h2>
                    <p className="text-xs text-orange-600">The homeowner hasn't updated the detailed room, flatmate and privacy preferences for this room yet.</p>
+                </div>
+              )}
+
+              {/* Property Features (Universal for all Accommodations) */}
+              {propertyFeatures.length > 0 && (
+                <div className="card p-6 bg-brand-50/10 border-brand-100">
+                   <h2 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
+                     <span>✨</span> Property Features
+                   </h2>
+                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {propertyFeatures.map(feat => {
+                        const def = AVAILABLE_FEATURES.find(f => f.id === feat);
+                        if (!def) return null;
+                        return (
+                          <div key={feat} className="flex flex-col items-center justify-center p-4 bg-white border border-brand-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow gap-2">
+                            <span className="text-3xl">{def.icon}</span>
+                            <span className="text-xs font-semibold text-ink text-center leading-tight">{def.label}</span>
+                          </div>
+                        );
+                      })}
+                   </div>
                 </div>
               )}
 
