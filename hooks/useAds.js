@@ -75,10 +75,10 @@ export function useAds(filters = {}) {
         category:categories(id, name, slug)
       `, { count: 'exact' });
 
-    // Status filter - Public visitors only see 'active' ads.
+    // Status filter - Public visitors see 'active', 'reserved', and 'rented' ads.
     const finalOwnerId = ownerId || owner_id;
     if (!finalOwnerId) {
-      query = query.eq('status', 'active');
+      query = query.in('status', ['active', 'reserved', 'rented']);
     } else {
       query = query.eq('owner_id', finalOwnerId);
     }
@@ -103,11 +103,22 @@ export function useAds(filters = {}) {
       if (maxPrice) query = query.lte('price', maxPrice);
     }
 
-    // Payment method filter
-    if (paymentMethods && paymentMethods.length > 0) {
-      const actualMethods = paymentMethods.filter(m => m !== 'Free');
-      if (actualMethods.length > 0) {
-        query = query.overlaps('payment_methods', actualMethods);
+    // Payment method filter: Only apply if NOT all methods are selected
+    // Default is ['Cash', 'PayPal', 'Free']
+    if (paymentMethods && paymentMethods.length > 0 && paymentMethods.length < 3) {
+      const hasFree = paymentMethods.includes('Free');
+      const otherMethods = paymentMethods.filter(m => m !== 'Free');
+
+      if (hasFree && otherMethods.length === 0) {
+        // Only free ads (price is empty/0 or no payment method)
+        query = query.or('price.is.null,price.eq.0,payment_methods.is.null,payment_methods.eq.{}');
+      } else if (!hasFree && otherMethods.length > 0) {
+        // Only specific paid methods
+        query = query.overlaps('payment_methods', otherMethods);
+      } else if (hasFree && otherMethods.length > 0) {
+        // Free OR some paid methods
+        const otherMethodsList = otherMethods.join(',');
+        query = query.or(`price.is.null,price.eq.0,payment_methods.ov.{${otherMethodsList}}`);
       }
     }
 
