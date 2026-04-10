@@ -9,7 +9,8 @@
  * ─────────────────────────────────────────────────────
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { ADS_PER_PAGE } from '@/constants/config';
 
@@ -21,18 +22,24 @@ export function useAds(filters = {}) {
 
   const { skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods, page = 1 } = filters;
 
-  const [ads, setAds] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const queryKey = useMemo(() => [
+    'ads',
+    skip,
+    categoryId,
+    categoryIds?.join(','),
+    ownerId || owner_id,
+    searchQuery,
+    minPrice,
+    maxPrice,
+    paymentMethods?.join(','),
+    page
+  ], [skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods, page]);
 
   const fetchAds = useCallback(async () => {
+    console.log('fetchAds called with filters:', { skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods, page });
     if (skip) {
-      setLoading(false);
-      return;
+      return { ads: [], total: 0 };
     }
-    setLoading(true);
-    setError(null);
 
     const finalOwnerId = ownerId || owner_id;
 
@@ -99,12 +106,7 @@ export function useAds(filters = {}) {
     const { data, error: fetchError, count } = await query;
 
     if (fetchError) {
-      console.error('Supabase fetch error:', fetchError);
-      setError(fetchError.message);
-      setAds([]);
-      setTotal(0);
-      setLoading(false);
-      return;
+      throw new Error(fetchError.message);
     }
 
     const resultData = data || [];
@@ -116,22 +118,22 @@ export function useAds(filters = {}) {
       return new Date(b.created_at) - new Date(a.created_at);
     });
 
-    setAds(sortedData);
-    setTotal(count ?? 0);
-    setLoading(false);
-  }, [supabase, skip, categoryId, categoryIds?.join(','), ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods?.join(','), page]);
+    return { ads: sortedData, total: count ?? 0 };
+  }, [supabase, skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods, page]);
 
-  useEffect(() => {
-    fetchAds();
-  }, [fetchAds]);
+  const { data, isLoading, error } = useQuery({
+    queryKey,
+    queryFn: fetchAds,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
 
   return {
-    ads,
-    total,
-    /** Total number of pages */
-    totalPages: Math.ceil(total / ADS_PER_PAGE),
-    loading,
-    error,
-    refetch: fetchAds,
+    ads: data?.ads || [],
+    total: data?.total || 0,
+    totalPages: Math.ceil((data?.total || 0) / ADS_PER_PAGE),
+    loading: isLoading,
+    error: error?.message || null,
+    refetch: () => {}, // React Query handles refetch
   };
 }

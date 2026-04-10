@@ -8,7 +8,8 @@
  * ─────────────────────────────────────────────────────
  */
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { buildCategoryTree } from '@/lib/helpers';
 
@@ -24,24 +25,10 @@ import { buildCategoryTree } from '@/lib/helpers';
  * }}
  */
 export function useCategories() {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
-  /** Veritabanından gelen düz kategori listesi */
-  const [categories, setCategories] = useState([]);
-
-  /** Ağaç yapısına dönüştürülmüş kategoriler */
-  const [categoryTree, setCategoryTree] = useState([]);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  /**
-   * Kategorileri Supabase'den çeker.
-   */
   const fetchCategories = async () => {
-    setLoading(true);
-    setError(null);
-
+    console.log('fetchCategories called');
     const { data, error: fetchError } = await supabase
       .from('categories')
       .select('id, name, slug, parent_id, sort_order')
@@ -49,27 +36,27 @@ export function useCategories() {
       .order('name', { ascending: true });
 
     if (fetchError) {
-      setError(fetchError.message);
-      setLoading(false);
-      return;
+      throw new Error(fetchError.message);
     }
 
-    setCategories(data ?? []);
-    setCategoryTree(buildCategoryTree(data ?? []));
-    setLoading(false);
+    const categories = data ?? [];
+    const categoryTree = buildCategoryTree(categories);
+
+    return { categories, categoryTree };
   };
 
-  useEffect(() => {
-    fetchCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+  });
 
   return {
-    categories,
-    categoryTree,
-    loading,
-    error,
-    /** Kategorileri yeniden yükle */
-    refetch: fetchCategories,
+    categories: data?.categories || [],
+    categoryTree: data?.categoryTree || [],
+    loading: isLoading,
+    error: error?.message || null,
+    refetch: () => {}, // React Query handles refetch
   };
 }
