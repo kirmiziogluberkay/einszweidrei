@@ -85,6 +85,8 @@ export default function AdForm({ initialData = null }) {
   });
 
   const AVAILABLE_FEATURES = [
+    { id: 'ANMELDUNG', label: 'Anmeldung Possible', icon: '📝' },
+    { id: 'NO_ANMELDUNG', label: 'Anmeldung Not Possible', icon: '🚫' },
     { id: 'UNDERFLOOR_HEATING', label: 'Underfloor Heating', icon: '♨️' },
     { id: 'CENTRAL_HEATING', label: 'Central Heating', icon: '🌡️' },
     { id: 'ELEVATOR', label: 'Elevator / Lift', icon: '🛗' },
@@ -108,7 +110,6 @@ export default function AdForm({ initialData = null }) {
     { id: 'BICYCLE_STORAGE', label: 'Bicycle Storage', icon: '🚲' },
     { id: 'BASEMENT_STORAGE', label: 'Basement Storage Unit', icon: '📦' },
     { id: 'AIR_CONDITIONING', label: 'Air Conditioning', icon: '❄️' },
-    { id: 'ANMELDUNG', label: 'Anmeldung Possible', icon: '📝' },
     { id: 'FURNISHED', label: 'Furnished', icon: '🛋️' },
     { id: 'SEMI_FURNISHED', label: 'Semi-furnished', icon: '🪑' },
     { id: 'UNFURNISHED', label: 'Unfurnished', icon: '🏠' },
@@ -490,6 +491,33 @@ export default function AdForm({ initialData = null }) {
            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 pt-2">
              {AVAILABLE_FEATURES.map(feature => {
                const isSelected = propertyFeatures.includes(feature.id);
+               
+               const handleFeatureToggle = (featureId, checked) => {
+                  let nextFeatures = [...propertyFeatures];
+                  if (checked) {
+                     // Exclusivity Constraints
+                     if (featureId === 'UNDERFLOOR_HEATING') {
+                        nextFeatures = nextFeatures.filter(id => id !== 'CENTRAL_HEATING');
+                     } else if (featureId === 'CENTRAL_HEATING') {
+                        nextFeatures = nextFeatures.filter(id => id !== 'UNDERFLOOR_HEATING');
+                     } else if (featureId === 'FURNISHED') {
+                        nextFeatures = nextFeatures.filter(id => id !== 'SEMI_FURNISHED' && id !== 'UNFURNISHED');
+                     } else if (featureId === 'SEMI_FURNISHED') {
+                        nextFeatures = nextFeatures.filter(id => id !== 'FURNISHED' && id !== 'UNFURNISHED');
+                     } else if (featureId === 'UNFURNISHED') {
+                        nextFeatures = nextFeatures.filter(id => id !== 'FURNISHED' && id !== 'SEMI_FURNISHED');
+                     } else if (featureId === 'ANMELDUNG') {
+                        nextFeatures = nextFeatures.filter(id => id !== 'NO_ANMELDUNG');
+                     } else if (featureId === 'NO_ANMELDUNG') {
+                        nextFeatures = nextFeatures.filter(id => id !== 'ANMELDUNG');
+                     }
+                     if (!nextFeatures.includes(featureId)) nextFeatures.push(featureId);
+                  } else {
+                     nextFeatures = nextFeatures.filter(f => f !== featureId);
+                  }
+                  setPropertyFeatures(nextFeatures);
+               };
+
                return (
                  <label 
                    key={feature.id}
@@ -503,13 +531,7 @@ export default function AdForm({ initialData = null }) {
                      type="checkbox" 
                      className="hidden"
                      checked={isSelected}
-                     onChange={(e) => {
-                       if (e.target.checked) {
-                         setPropertyFeatures([...propertyFeatures, feature.id]);
-                       } else {
-                         setPropertyFeatures(propertyFeatures.filter(f => f !== feature.id));
-                       }
-                     }}
+                     onChange={(e) => handleFeatureToggle(feature.id, e.target.checked)}
                    />
                    <span className="text-2xl">{feature.icon}</span>
                    <span className="text-xs font-semibold">{feature.label}</span>

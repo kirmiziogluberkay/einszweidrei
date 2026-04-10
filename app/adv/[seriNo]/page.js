@@ -170,6 +170,8 @@ export default async function AdDetailPage({ params }) {
   const propertyFeatures = rawTags.filter(t => typeof t === 'string' && t.startsWith('FEATURE:')).map(t => t.split(':')[1]);
   
   const AVAILABLE_FEATURES = [
+    { id: 'ANMELDUNG', label: 'Anmeldung Possible', icon: '📝' },
+    { id: 'NO_ANMELDUNG', label: 'Anmeldung Not Possible', icon: '🚫' },
     { id: 'UNDERFLOOR_HEATING', label: 'Underfloor Heating', icon: '♨️' },
     { id: 'CENTRAL_HEATING', label: 'Central Heating', icon: '🌡️' },
     { id: 'ELEVATOR', label: 'Elevator / Lift', icon: '🛗' },
@@ -193,7 +195,6 @@ export default async function AdDetailPage({ params }) {
     { id: 'BICYCLE_STORAGE', label: 'Bicycle Storage', icon: '🚲' },
     { id: 'BASEMENT_STORAGE', label: 'Basement Storage Unit', icon: '📦' },
     { id: 'AIR_CONDITIONING', label: 'Air Conditioning', icon: '❄️' },
-    { id: 'ANMELDUNG', label: 'Anmeldung Possible', icon: '📝' },
     { id: 'FURNISHED', label: 'Furnished', icon: '🛋️' },
     { id: 'SEMI_FURNISHED', label: 'Semi-furnished', icon: '🪑' },
     { id: 'UNFURNISHED', label: 'Unfurnished', icon: '🏠' },
