@@ -50,10 +50,19 @@ export default function AdCard({ ad, layout = 'grid' }) {
     owner,
     category,
     payment_methods = [],
+    tags = []
   } = ad;
 
   /** Link to the ad detail page */
   const adUrl = buildAdUrl(serial_number);
+
+  /** Extract special metadata tags */
+  const rentTypeTag = tags?.find(t => typeof t === 'string' && t.startsWith('RENT_TYPE:'));
+  const rentType = rentTypeTag ? rentTypeTag.split(':')[1] : null;
+
+  const roomTags = tags?.filter(t => typeof t === 'string' && t.startsWith('ROOM_')) || [];
+  const totalRoomsTag = roomTags.find(tag => tag.startsWith('ROOM_TOTAL:'));
+  const totalRooms = totalRoomsTag ? totalRoomsTag.split(':')[1] : null;
 
   /** Cover image to display (if any) */
   const coverImage = images?.[0] ?? null;
@@ -117,12 +126,19 @@ export default function AdCard({ ad, layout = 'grid' }) {
         <div className="flex-1 flex flex-col min-w-0">
           <div className="flex justify-between items-start gap-4">
             <div className="min-w-0 flex-1">
-              {category && (
-                <div className="flex items-center gap-1 text-xs text-brand-600 font-medium mb-1">
-                  <Tag className="w-3 h-3" />
-                  <span>{category.name}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2 mb-1">
+                {category && (
+                  <div className="flex items-center gap-1 text-xs text-brand-600 font-medium">
+                    <Tag className="w-3 h-3" />
+                    <span>{category.name}</span>
+                  </div>
+                )}
+                {totalRooms && (
+                  <span className="text-[10px] bg-brand-50 text-brand-600 px-2 py-0.5 rounded-md font-semibold border border-brand-100">
+                    1 Rm in {totalRooms}-Rm Apt
+                  </span>
+                )}
+              </div>
               <h3 className="font-bold text-ink text-xl leading-tight group-hover:text-brand-500 transition-colors line-clamp-2">
                 {title}
               </h3>
@@ -131,7 +147,10 @@ export default function AdCard({ ad, layout = 'grid' }) {
               {(!price || price === 0) ? (
                 <span className="font-bold text-green-500 text-[10px] leading-none uppercase tracking-wider">Free</span>
               ) : (
-                <span className="font-bold text-ink text-2xl leading-none">{formatPrice(price, currency)}</span>
+                <span className="font-bold text-ink text-2xl leading-none">
+                  {formatPrice(price, currency)}
+                  {rentType && <span className="text-sm text-ink-secondary ml-1 font-semibold">({rentType === 'WARM' ? 'Warm' : 'Cold'})</span>}
+                </span>
               )}
             </div>
           </div>
@@ -225,16 +244,20 @@ export default function AdCard({ ad, layout = 'grid' }) {
       {/* Content Container */}
       <div className="p-4 flex flex-col flex-1 min-h-0">
         <div className="flex flex-col gap-1.5 mb-3">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-start justify-between gap-2">
             {(!price || price === 0) ? (
               <span className="font-bold text-green-500 text-[11px] uppercase tracking-wider">Free</span>
             ) : (
-              <span className="font-bold text-ink text-lg leading-none">{formatPrice(price, currency)}</span>
+              <span className="font-bold text-ink text-lg leading-none">
+                 {formatPrice(price, currency)}
+                 {rentType && <span className="text-[11px] text-ink-secondary ml-1 font-semibold">({rentType === 'WARM' ? 'Warm' : 'Cold'})</span>}
+              </span>
             )}
             {category && (
-              <div className="flex items-center gap-1 text-[11px] text-brand-600 font-bold bg-brand-50 px-2 py-1 rounded-lg border border-brand-100">
-                <Tag className="w-3 h-3" />
+              <div className="flex items-center gap-1 text-[11px] text-brand-600 font-bold bg-brand-50 px-2 py-1 rounded-lg border border-brand-100 shrink-0">
+                <Tag className="w-3 h-3 shrink-0" />
                 <span className="truncate max-w-[80px]">{category.name}</span>
+                {totalRooms && <span className="ml-1 pl-1 border-l border-brand-200">1/{totalRooms} Rm</span>}
               </div>
             )}
           </div>

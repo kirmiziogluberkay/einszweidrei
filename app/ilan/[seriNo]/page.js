@@ -72,6 +72,7 @@ export default async function AdDetailPage({ params }) {
       currency,
       images,
       status,
+      area,
       payment_methods,
       tags,
       created_at,
@@ -87,7 +88,19 @@ export default async function AdDetailPage({ params }) {
 
   const statusInfo = AD_STATUSES[ad.status] ?? AD_STATUSES.active;
 
-  const roomTags = ad.tags?.filter(t => typeof t === 'string' && t.startsWith('ROOM_')) || [];
+  // Güvenli tag ayrıştırma (Eğer tags string geldiyse veya null ise korur)
+  let rawTags = [];
+  if (Array.isArray(ad.tags)) {
+    rawTags = ad.tags;
+  } else if (typeof ad.tags === 'string') {
+    try {
+       rawTags = JSON.parse(ad.tags);
+    } catch(e) {
+       rawTags = ad.tags.replace(/^{|}$/g, '').split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+    }
+  }
+
+  const roomTags = rawTags.filter(t => typeof t === 'string' && t.startsWith('ROOM_'));
   const getTag = (prefix) => {
      const t = roomTags.find(tag => tag.startsWith(prefix));
      return t ? t.split(':')[1] : null;
@@ -97,7 +110,13 @@ export default async function AdDetailPage({ params }) {
   const totalRooms = parseInt(getTag('ROOM_TOTAL') || '2', 10);
   const residentFemale = parseInt(getTag('ROOM_FEMALE') || '0', 10);
   const residentMale = parseInt(getTag('ROOM_MALE') || '0', 10);
+  const preferredGender = getTag('ROOM_TARGET') || 'ANY';
   const hasRoomDetails = roomTags.length > 0;
+  
+  const sharedCount = residentFemale + residentMale;
+
+  const rentTypeTag = rawTags.find(t => typeof t === 'string' && t.startsWith('RENT_TYPE:'));
+  const rentType = rentTypeTag ? rentTypeTag.split(':')[1] : null;
 
   return (
     <div className="container-app py-8">
@@ -148,11 +167,11 @@ export default async function AdDetailPage({ params }) {
                <div className="p-6 space-y-6">
                  {/* Hierarchy 1: Privacy Type */}
                  <div>
-                   <h3 className="text-xs uppercase font-bold text-ink-tertiary mb-3 tracking-wider">Privacy Features</h3>
+                   <h3 className="text-xs uppercase font-bold text-ink-tertiary mb-3 tracking-wider">Features & Access</h3>
                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                      <div className="bg-white border border-surface-tertiary rounded-2xl p-4 flex items-center gap-4">
-                       <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${roomType === '2' || roomType === '3' ? 'bg-green-100 text-green-600' : 'bg-red-50 text-red-500'}`}>
-                         {roomType === '2' || roomType === '3' ? '✅' : '❌'}
+                       <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-green-100 text-green-600">
+                         ✅
                        </div>
                        <div>
                          <div className="font-semibold text-sm text-ink">{roomType === '2' || roomType === '3' ? 'Private Bath (En-suite)' : 'Shared Bathroom'}</div>
@@ -160,8 +179,8 @@ export default async function AdDetailPage({ params }) {
                        </div>
                      </div>
                      <div className="bg-white border border-surface-tertiary rounded-2xl p-4 flex items-center gap-4">
-                       <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${roomType === '3' ? 'bg-green-100 text-green-600' : 'bg-red-50 text-red-500'}`}>
-                         {roomType === '3' ? '✅' : '❌'}
+                       <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-green-100 text-green-600">
+                         ✅
                        </div>
                        <div>
                          <div className="font-semibold text-sm text-ink">{roomType === '3' ? 'Private Kitchen' : 'Shared Kitchen'}</div>
@@ -181,26 +200,47 @@ export default async function AdDetailPage({ params }) {
                       </div>
                       
                       <div className="border-t border-surface-tertiary pt-4 mt-2">
-                        <p className="text-sm text-ink-secondary mb-3">Current Flatmates in other rooms:</p>
-                        <div className="flex flex-wrap items-center gap-3">
-                          {residentFemale === 0 && residentMale === 0 && (
-                            <span className="text-sm font-medium text-ink-tertiary px-3 py-1.5 bg-surface-secondary rounded-lg">No current flatmates specified</span>
-                          )}
-                          {residentFemale > 0 && Array.from({length: residentFemale}).map((_, i) => (
-                            <div key={`f-${i}`} className="flex items-center gap-1.5 bg-pink-50 text-pink-700 px-3 py-1.5 rounded-xl border border-pink-100 font-semibold text-sm shadow-sm">
-                              🚶‍♀️ Female
-                            </div>
-                          ))}
-                          {residentMale > 0 && Array.from({length: residentMale}).map((_, i) => (
-                            <div key={`m-${i}`} className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl border border-blue-100 font-semibold text-sm shadow-sm">
-                              🚶‍♂️ Male
-                            </div>
-                          ))}
+                        <p className="text-sm text-ink-secondary mb-3">
+                           {sharedCount > 0 
+                             ? <span>You will be sharing the apartment with <strong>{sharedCount}</strong> other people:</span> 
+                             : "You will be the only person living in the other rooms."
+                           }
+                        </p>
+                        {sharedCount > 0 && (
+                          <div className="flex flex-wrap items-center gap-3">
+                            {residentFemale > 0 && Array.from({length: residentFemale}).map((_, i) => (
+                              <div key={`f-${i}`} className="flex items-center gap-1.5 bg-pink-50 text-pink-700 px-3 py-1.5 rounded-xl border border-pink-100 font-semibold text-sm shadow-sm">
+                                🚶‍♀️ Female
+                              </div>
+                            ))}
+                            {residentMale > 0 && Array.from({length: residentMale}).map((_, i) => (
+                              <div key={`m-${i}`} className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl border border-blue-100 font-semibold text-sm shadow-sm">
+                                🚶‍♂️ Male
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="border-t border-surface-tertiary pt-4 mt-4">
+                        <p className="text-sm text-ink-secondary mb-2">Target Tenant Preference:</p>
+                        <div className="flex items-center gap-2">
+                           {preferredGender === 'ANY' && <span className="bg-brand-50 text-brand-700 px-3 py-1.5 rounded-lg text-sm font-semibold border border-brand-100">Any Gender</span>}
+                           {preferredGender === 'FEMALE' && <span className="bg-pink-50 text-pink-700 px-3 py-1.5 rounded-lg text-sm font-semibold border border-pink-100">Female Only</span>}
+                           {preferredGender === 'MALE' && <span className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-semibold border border-blue-100">Male Only</span>}
                         </div>
                       </div>
                    </div>
                  </div>
                </div>
+            </div>
+          )}
+
+          {/* Fallback Information: Eger oda detaylari hala gozukmuyorsa diye bir uyari goster */}
+          {ad.category?.slug?.includes('room') && !hasRoomDetails && (
+            <div className="card p-6 bg-orange-50 border-orange-100">
+               <h2 className="text-sm font-bold text-orange-700 mb-2">Notice for Visitors</h2>
+               <p className="text-xs text-orange-600">The homeowner hasn't updated the detailed room, flatmate and privacy preferences for this room yet.</p>
             </div>
           )}
 
@@ -251,9 +291,14 @@ export default async function AdDetailPage({ params }) {
             <h1 className="text-2xl font-bold text-ink leading-tight">{ad.title}</h1>
 
             {/* Fiyat */}
-            <p className="text-3xl font-bold text-brand-500">
-              {formatPrice(ad.price, ad.currency)}
-            </p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-3xl font-bold text-brand-500">
+                {formatPrice(ad.price, ad.currency)}
+              </p>
+              {rentType && (
+                <span className="text-lg text-ink-secondary font-semibold">({rentType === 'WARM' ? 'Warm' : 'Cold'})</span>
+              )}
+            </div>
 
             {/* Meta bilgiler */}
             <div className="divider" />
@@ -266,6 +311,12 @@ export default async function AdDetailPage({ params }) {
                 <div className="flex justify-between">
                   <dt className="text-ink-secondary">Category</dt>
                   <dd className="text-ink">{ad.category.name}</dd>
+                </div>
+              )}
+              {ad.area && (
+                <div className="flex justify-between">
+                  <dt className="text-ink-secondary">Area</dt>
+                  <dd className="text-ink">{ad.area} m²</dd>
                 </div>
               )}
                   <div className="flex justify-between">

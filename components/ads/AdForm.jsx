@@ -75,6 +75,8 @@ export default function AdForm({ initialData = null }) {
   const [totalRooms, setTotalRooms] = useState(parseInt(getTagValue('ROOM_TOTAL') || '2', 10));
   const [residentFemale, setResidentFemale] = useState(parseInt(getTagValue('ROOM_FEMALE') || '0', 10));
   const [residentMale, setResidentMale] = useState(parseInt(getTagValue('ROOM_MALE') || '0', 10));
+  const [preferredGender, setPreferredGender] = useState((getTagValue('ROOM_TARGET') || 'ANY').toUpperCase());
+  const [rentType, setRentType] = useState((getTagValue('RENT_TYPE') || 'warm').toLowerCase());
 
   /**
    * Updates a single form field.
@@ -224,11 +226,15 @@ export default function AdForm({ initialData = null }) {
     }
 
     let computedTags = [];
-    if (isAccommodation && selectedCategoryObj?.slug?.includes('room')) {
-      computedTags.push(`ROOM_TYPE:${roomType}`);
-      computedTags.push(`ROOM_TOTAL:${totalRooms}`);
-      computedTags.push(`ROOM_FEMALE:${residentFemale}`);
-      computedTags.push(`ROOM_MALE:${residentMale}`);
+    if (isAccommodation) {
+      computedTags.push(`RENT_TYPE:${rentType.toUpperCase()}`);
+      if (selectedCategoryObj?.slug?.includes('room')) {
+        computedTags.push(`ROOM_TYPE:${roomType}`);
+        computedTags.push(`ROOM_TOTAL:${totalRooms}`);
+        computedTags.push(`ROOM_FEMALE:${residentFemale}`);
+        computedTags.push(`ROOM_MALE:${residentMale}`);
+        computedTags.push(`ROOM_TARGET:${preferredGender}`);
+      }
     }
 
     const payload = {
@@ -407,6 +413,27 @@ export default function AdForm({ initialData = null }) {
               <p className="text-xs text-red-500 font-semibold bg-red-50 p-2 rounded-lg border border-red-100">The total number of flatmates cannot exceed the remaining rooms ({totalRooms - 1}).</p>
             )}
           </div>
+
+          <div className="space-y-4 pt-3 border-t border-surface-tertiary">
+            <label className="label">4. Target Tenant Preference</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'ANY' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
+                   <input type="radio" name="preferredGender" value="ANY" checked={preferredGender === 'ANY'} onChange={() => setPreferredGender('ANY')} className="hidden" />
+                   <div className="font-semibold text-ink text-sm">Any Gender</div>
+                   <div className="text-xs text-ink-secondary mt-1">All genders welcome</div>
+                </label>
+                <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'FEMALE' ? 'border-pink-500 bg-pink-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-pink-300'}`}>
+                   <input type="radio" name="preferredGender" value="FEMALE" checked={preferredGender === 'FEMALE'} onChange={() => setPreferredGender('FEMALE')} className="hidden" />
+                   <div className="font-semibold text-pink-700 text-sm">Female Only</div>
+                   <div className="text-xs text-pink-600 mt-1">Looking for a female tenant</div>
+                </label>
+                <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'MALE' ? 'border-blue-500 bg-blue-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-blue-300'}`}>
+                   <input type="radio" name="preferredGender" value="MALE" checked={preferredGender === 'MALE'} onChange={() => setPreferredGender('MALE')} className="hidden" />
+                   <div className="font-semibold text-blue-700 text-sm">Male Only</div>
+                   <div className="text-xs text-blue-600 mt-1">Looking for a male tenant</div>
+                </label>
+            </div>
+          </div>
         </div>
       )}
 
@@ -445,25 +472,43 @@ export default function AdForm({ initialData = null }) {
       {/* ── Price and Area (side by side) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-        {/* Price / Rent */}
+        {/* ── Price ── */}
         <div>
           <label htmlFor="ad-price" className="label">
-            {isAccommodation ? 'Rent' : 'Price'} ({CURRENCY_SYMBOL}) {'*'}
+            {isAccommodation ? 'Rent' : 'Price'} ({CURRENCY_SYMBOL})
           </label>
-          <input
-            id="ad-price"
-            type="number"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            placeholder="0,00"
-            min="0"
-            step="0.01"
-            className="input"
-          />
-          <p className="text-xs text-ink-tertiary mt-1">
-            Leave empty or write 0 → "Free"
-          </p>
+          <div className="flex items-center gap-3">
+            <input
+              id="ad-price"
+              type="number"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+              className="input flex-1"
+            />
+            {isAccommodation && (
+              <div className="flex bg-surface-secondary p-1 rounded-xl shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setRentType('warm')}
+                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${rentType === 'warm' ? 'bg-white shadow relative text-ink border border-surface-tertiary' : 'text-ink-tertiary hover:text-ink-secondary'}`}
+                >
+                  Warm
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRentType('cold')}
+                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${rentType === 'cold' ? 'bg-white shadow relative text-ink border border-surface-tertiary' : 'text-ink-tertiary hover:text-ink-secondary'}`}
+                >
+                  Cold
+                </button>
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-ink-tertiary mt-1">Leave empty or write 0 → "Free"</p>
         </div>
 
         {/* Area (m²) - Conditional */}

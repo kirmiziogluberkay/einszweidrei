@@ -70,6 +70,7 @@ export function useAds(filters = {}) {
         images,
         status,
         payment_methods,
+        tags,
         category_id,
         created_at,
         category:categories(id, name, slug)
