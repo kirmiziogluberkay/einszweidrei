@@ -20,7 +20,13 @@ import { cn, formatUsername } from '@/lib/helpers';
 
 export default function Navbar() {
    const pathname = usePathname();
+   const router = useRouter();
    const { user, profile, loading, signOut } = useAuth();
+
+   const handleSignOut = async () => {
+      await signOut();
+      router.push('/');
+   };
 
    // Local state for notifications to prevent global hook crashes
    const [hasUnread, setHasUnread] = useState(false);
