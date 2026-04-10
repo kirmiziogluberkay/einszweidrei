@@ -12,6 +12,7 @@ import Navbar from '@/components/layout/Navbar';
 import MobileNav from '@/components/layout/MobileNav';
 import Footer from '@/components/layout/Footer';
 import Marquee from '@/components/layout/Marquee';
+import { AuthProvider } from '@/providers/AuthProvider';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
@@ -71,23 +72,23 @@ export default function RootLayout({ children }) {
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body className="flex flex-col min-h-screen bg-surface-secondary">
+        <AuthProvider>
+          <Marquee />
 
-        <Marquee />
+          {/* ── Top navigation (Desktop & Mobile) ── */}
+          <Navbar />
 
-        {/* ── Top navigation (Desktop & Mobile) ── */}
-        <Navbar />
+          {/* ── Main content ── */}
+          <main className="flex-1 pb-16 md:pb-0">
+            {children}
+          </main>
 
-        {/* ── Main content ── */}
-        <main className="flex-1 pb-16 md:pb-0">
-          {children}
-        </main>
+          {/* ── Bottom navigation (mobile only) ── */}
+          <MobileNav />
 
-        {/* ── Bottom navigation (mobile only) ── */}
-        <MobileNav />
-
-        {/* ── Footer (desktop only) ── */}
-        <Footer />
-
+          {/* ── Footer (desktop only) ── */}
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
