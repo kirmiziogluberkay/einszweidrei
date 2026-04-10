@@ -12,7 +12,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Plus, User, Menu, X, ShieldCheck, ChevronDown, LogOut, Mail } from 'lucide-react';
+import { Plus, User, Menu, X, ShieldCheck, ChevronDown, LogOut, Mail, Search } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
 import { SITE_NAME, AUTH_NAV_LINKS } from '@/constants/config';
@@ -22,6 +22,14 @@ export default function Navbar() {
    const pathname = usePathname();
    const router = useRouter();
    const { user, profile, loading, signOut } = useAuth();
+
+   // Global Search State
+   const [searchQuery, setSearchQuery] = useState('');
+   const handleSearchSubmit = (e) => {
+      e.preventDefault();
+      if (!searchQuery.trim()) return;
+      router.push(`/?q=${encodeURIComponent(searchQuery.trim())}`);
+   };
 
    const handleSignOut = async () => {
       router.push('/');
@@ -118,7 +126,19 @@ export default function Navbar() {
                <span className="text-[10px] text-ink-tertiary font-medium">The ultimate shortcut for buyers and sellers.</span>
             </Link>
 
-
+            {/* Middle: Universal Search Bar */}
+            <div className="flex-1 max-w-xl mx-4 hidden md:block">
+              <form onSubmit={handleSearchSubmit} className="relative w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-tertiary" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search among all ads..."
+                  className="w-full bg-surface-secondary/50 border border-surface-tertiary focus:border-brand-500 focus:bg-white rounded-xl py-2 pl-9 pr-4 text-sm outline-none transition-all"
+                />
+              </form>
+            </div>
 
             {/* Right side */}
             <div className="flex items-center gap-4 shrink-0">

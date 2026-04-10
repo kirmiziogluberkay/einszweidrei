@@ -9,8 +9,9 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Search, ChevronDown, ChevronRight } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useAds } from '@/hooks/useAds';
 import { useCategories } from '@/hooks/useCategories';
 import AdGrid from '@/components/ads/AdGrid';
@@ -18,12 +19,19 @@ import FeedbackBox from '@/components/FeedbackBox';
 import QuestionOfTheDay from '@/components/polls/QuestionOfTheDay';
 import { cn } from '@/lib/helpers';
 
-export default function HomePage() {
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const qParam = searchParams.get('q') || '';
+
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState(qParam);
   const [page, setPage] = useState(1);
+  
+  useEffect(() => {
+     setSearchQuery(qParam);
+     setPage(1);
+  }, [qParam]);
   const [expandedRoots, setExpandedRoots] = useState({});
   const [maxPriceApplied, setMaxPriceApplied] = useState(null);
   const [maxPriceLocal, setMaxPriceLocal] = useState(6000);
@@ -57,10 +65,9 @@ export default function HomePage() {
     }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setSearchQuery(searchInput);
-    setPage(1);
+  const handleSearchClear = () => {
+    // If we want to clear the global search bar, we should navigate back to /
+    window.location.href = '/';
   };
 
   const handlePaymentMethodChange = (method) => {
@@ -77,33 +84,20 @@ export default function HomePage() {
     <div className="container-app py-8">
 
 
-      {/* ── Search bar ── */}
-      <section className="mb-8">
-        <form onSubmit={handleSearch} className="flex gap-2 max-w-2xl mx-auto">
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-tertiary" />
-            <input
-              id="home-search"
-              type="search"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder={`Search among our advertisements...`}
-              className="input pl-12 py-3.5 text-base"
-            />
-          </div>
-          <button type="submit" className="btn-primary px-6 py-3.5">Search</button>
-        </form>
+      {/* ── Top Section (Question of the Day) ── */}
+      <section className="mb-8 max-w-lg mx-auto">
+         <QuestionOfTheDay />
 
         {searchQuery && (
-          <div className="flex items-center justify-center gap-2 mt-3">
+          <div className="flex items-center justify-center gap-2 mt-4 bg-brand-50/50 py-2 px-4 rounded-xl border border-brand-100">
             <span className="text-sm text-ink-secondary">
-              Results for "<span className="font-medium text-ink">{searchQuery}</span>" ({total} ads)
+              Search Results for "<span className="font-bold text-ink">{searchQuery}</span>" ({total} ads)
             </span>
             <button
-              onClick={() => { setSearchQuery(''); setSearchInput(''); setPage(1); }}
-              className="text-xs text-brand-500 hover:underline"
+              onClick={handleSearchClear}
+              className="text-xs font-bold text-brand-600 hover:text-brand-800 underline ml-2"
             >
-              Clear
+              Clear Search
             </button>
           </div>
         )}
@@ -292,10 +286,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="mt-8">
-              <QuestionOfTheDay />
-            </div>
-
             <FeedbackBox />
           </div>
         </aside>
@@ -392,5 +382,13 @@ export default function HomePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
