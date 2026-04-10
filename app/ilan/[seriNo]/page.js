@@ -73,7 +73,7 @@ export default async function AdDetailPage({ params }) {
       images,
       status,
       payment_methods,
-      payment_methods,
+      tags,
       created_at,
       updated_at,
       owner:profiles!owner_id(id, username, phone),
@@ -86,6 +86,18 @@ export default async function AdDetailPage({ params }) {
   if (!ad) notFound();
 
   const statusInfo = AD_STATUSES[ad.status] ?? AD_STATUSES.active;
+
+  const roomTags = ad.tags?.filter(t => typeof t === 'string' && t.startsWith('ROOM_')) || [];
+  const getTag = (prefix) => {
+     const t = roomTags.find(tag => tag.startsWith(prefix));
+     return t ? t.split(':')[1] : null;
+  }
+
+  const roomType = getTag('ROOM_TYPE') || '1';
+  const totalRooms = parseInt(getTag('ROOM_TOTAL') || '2', 10);
+  const residentFemale = parseInt(getTag('ROOM_FEMALE') || '0', 10);
+  const residentMale = parseInt(getTag('ROOM_MALE') || '0', 10);
+  const hasRoomDetails = roomTags.length > 0;
 
   return (
     <div className="container-app py-8">
@@ -120,6 +132,77 @@ export default async function AdDetailPage({ params }) {
 
           {/* Fotoğraf galerisi (Client Component) */}
           <AdDetailClient images={ad.images} title={ad.title} />
+
+          {/* Room Details Block */}
+          {hasRoomDetails && (
+            <div className="card p-0 overflow-hidden bg-brand-50/20 border-brand-100">
+               <div className="bg-brand-500 text-white px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                 <h2 className="text-xl font-bold flex items-center gap-2">
+                   🏡 Smart Room-Listing
+                 </h2>
+                 <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase border border-white/30 backdrop-blur-sm self-start sm:self-auto">
+                   Single Occupancy
+                 </span>
+               </div>
+               
+               <div className="p-6 space-y-6">
+                 {/* Hierarchy 1: Privacy Type */}
+                 <div>
+                   <h3 className="text-xs uppercase font-bold text-ink-tertiary mb-3 tracking-wider">Privacy Features</h3>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                     <div className="bg-white border border-surface-tertiary rounded-2xl p-4 flex items-center gap-4">
+                       <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${roomType === '2' || roomType === '3' ? 'bg-green-100 text-green-600' : 'bg-red-50 text-red-500'}`}>
+                         {roomType === '2' || roomType === '3' ? '✅' : '❌'}
+                       </div>
+                       <div>
+                         <div className="font-semibold text-sm text-ink">{roomType === '2' || roomType === '3' ? 'Private Bath (En-suite)' : 'Shared Bathroom'}</div>
+                         <div className="text-xs text-ink-secondary">Bathroom access</div>
+                       </div>
+                     </div>
+                     <div className="bg-white border border-surface-tertiary rounded-2xl p-4 flex items-center gap-4">
+                       <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${roomType === '3' ? 'bg-green-100 text-green-600' : 'bg-red-50 text-red-500'}`}>
+                         {roomType === '3' ? '✅' : '❌'}
+                       </div>
+                       <div>
+                         <div className="font-semibold text-sm text-ink">{roomType === '3' ? 'Private Kitchen' : 'Shared Kitchen'}</div>
+                         <div className="text-xs text-ink-secondary">Kitchen access</div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+
+                 {/* Hierarchy 2/3: Apartment & Flatmates */}
+                 <div>
+                   <h3 className="text-xs uppercase font-bold text-ink-tertiary mb-3 tracking-wider">Apartment & Flatmates</h3>
+                   <div className="bg-white border border-surface-tertiary rounded-2xl p-5">
+                      <div className="text-base text-ink mb-4 font-medium flex items-center gap-2">
+                        <span className="text-xl">🚪</span>
+                        This room is part of a <strong>{totalRooms}-room</strong> apartment.
+                      </div>
+                      
+                      <div className="border-t border-surface-tertiary pt-4 mt-2">
+                        <p className="text-sm text-ink-secondary mb-3">Current Flatmates in other rooms:</p>
+                        <div className="flex flex-wrap items-center gap-3">
+                          {residentFemale === 0 && residentMale === 0 && (
+                            <span className="text-sm font-medium text-ink-tertiary px-3 py-1.5 bg-surface-secondary rounded-lg">No current flatmates specified</span>
+                          )}
+                          {residentFemale > 0 && Array.from({length: residentFemale}).map((_, i) => (
+                            <div key={`f-${i}`} className="flex items-center gap-1.5 bg-pink-50 text-pink-700 px-3 py-1.5 rounded-xl border border-pink-100 font-semibold text-sm shadow-sm">
+                              🚶‍♀️ Female
+                            </div>
+                          ))}
+                          {residentMale > 0 && Array.from({length: residentMale}).map((_, i) => (
+                            <div key={`m-${i}`} className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl border border-blue-100 font-semibold text-sm shadow-sm">
+                              🚶‍♂️ Male
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                   </div>
+                 </div>
+               </div>
+            </div>
+          )}
 
           {/* Açıklama */}
           <div className="card p-6">

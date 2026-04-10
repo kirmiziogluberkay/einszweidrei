@@ -9,6 +9,7 @@
 'use client';
 
 import { buildWhatsAppShareUrl, buildTelegramShareUrl } from '@/lib/helpers';
+import { Mail } from 'lucide-react';
 
 /**
  * @param {{
@@ -68,6 +69,18 @@ export default function ShareButtons({ title, serialNumber }) {
           <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.01 9.47c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.873.75z" />
         </svg>
         Telegram
+      </a>
+
+      {/* Email */}
+      <a
+        href={`mailto:?subject=${encodeURIComponent(`Check out this ad: ${title}`)}&body=${encodeURIComponent(`I thought you might be interested in this ad: ${title}\n\nView it here: ${typeof window !== 'undefined' ? window.location.origin : ''}/ilan/${serialNumber}`)}`}
+        aria-label="Share via Email"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl
+                   bg-surface-secondary hover:bg-surface-tertiary text-ink text-sm font-medium
+                   transition-all duration-150 border border-surface-tertiary shadow-sm"
+      >
+        <Mail className="w-5 h-5" />
+        Email
       </a>
     </div>
   );

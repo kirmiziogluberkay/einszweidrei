@@ -52,6 +52,7 @@ export default function AdForm({ initialData = null }) {
     price: initialData?.price ?? '',
     category_id: initialData?.category_id ?? '',
     area: initialData?.area ?? '',
+    tags: initialData?.tags ?? [],
     payment_methods: (initialData?.payment_methods ?? []).map(m =>
       m?.toLowerCase() === 'paypal' ? 'PayPal' : (m?.toLowerCase() === 'cash' ? 'Cash' : m)
     ),
@@ -60,13 +61,20 @@ export default function AdForm({ initialData = null }) {
   /** URLs of uploaded photos (Supabase Storage) */
   const [uploadedImages, setUploadedImages] = useState(initialData?.images ?? []);
 
-  /** Local preview objects during upload process */
-  const [previews, setPreviews] = useState([]);
-
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+
+  /** Room Form State */
+  const getTagValue = (prefix) => {
+    const tag = (initialData?.tags || []).find(t => typeof t === 'string' && t.startsWith(prefix));
+    return tag ? tag.split(':')[1] : null;
+  };
+  const [roomType, setRoomType] = useState(getTagValue('ROOM_TYPE') || '1');
+  const [totalRooms, setTotalRooms] = useState(parseInt(getTagValue('ROOM_TOTAL') || '2', 10));
+  const [residentFemale, setResidentFemale] = useState(parseInt(getTagValue('ROOM_FEMALE') || '0', 10));
+  const [residentMale, setResidentMale] = useState(parseInt(getTagValue('ROOM_MALE') || '0', 10));
 
   /**
    * Updates a single form field.
@@ -215,6 +223,14 @@ export default function AdForm({ initialData = null }) {
       return;
     }
 
+    let computedTags = [];
+    if (isAccommodation && selectedCategoryObj?.slug?.includes('room')) {
+      computedTags.push(`ROOM_TYPE:${roomType}`);
+      computedTags.push(`ROOM_TOTAL:${totalRooms}`);
+      computedTags.push(`ROOM_FEMALE:${residentFemale}`);
+      computedTags.push(`ROOM_MALE:${residentMale}`);
+    }
+
     const payload = {
       title: formData.title.trim(),
       description: formData.description.trim(),
@@ -224,6 +240,7 @@ export default function AdForm({ initialData = null }) {
       area: isAccommodation ? (parseFloat(formData.area) || null) : null,
       images: uploadedImages,
       payment_methods: formData.payment_methods,
+      tags: computedTags,
       // To avoid changing the ad owner when an admin updates someone else's ad:
       owner_id: initialData?.owner_id || user.id,
     };
@@ -318,6 +335,80 @@ export default function AdForm({ initialData = null }) {
             ))}
         </select>
       </div>
+
+      {/* ── Room Dynamic Fields ── */}
+      {isAccommodation && categories.find(c => c.id === formData.category_id)?.slug?.includes('room') && (
+        <div className="border border-brand-100 bg-brand-50/30 rounded-3xl p-5 sm:p-7 space-y-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-surface-tertiary pb-4">
+            <h3 className="font-bold text-ink flex items-center gap-2">
+              <span className="text-2xl">🏠</span> Smart Room-Listing
+            </h3>
+            <span className="px-3 py-1.5 bg-ink text-white text-xs font-bold rounded-full tracking-wide">
+              Single Occupancy Only
+            </span>
+          </div>
+
+          <div className="space-y-3">
+             <label className="label">1. Room Privacy</label>
+             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${roomType === '1' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
+                   <input type="radio" name="roomType" value="1" checked={roomType === '1'} onChange={() => setRoomType('1')} className="hidden" />
+                   <div className="font-semibold text-ink text-sm">Type 1: Standard</div>
+                   <div className="text-xs text-ink-secondary mt-1">Shared Bath & Kitchen</div>
+                </label>
+                <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${roomType === '2' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
+                   <input type="radio" name="roomType" value="2" checked={roomType === '2'} onChange={() => setRoomType('2')} className="hidden" />
+                   <div className="font-semibold text-ink text-sm">Type 2: Comfort</div>
+                   <div className="text-xs text-ink-secondary mt-1">Private Bath, Shared Kitchen</div>
+                </label>
+                <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${roomType === '3' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
+                   <input type="radio" name="roomType" value="3" checked={roomType === '3'} onChange={() => setRoomType('3')} className="hidden" />
+                   <div className="font-semibold text-ink text-sm">Type 3: Premium</div>
+                   <div className="text-xs text-ink-secondary mt-1">Private Bath & Kitchen</div>
+                </label>
+             </div>
+          </div>
+
+          <div className="space-y-4 pt-3 border-t border-surface-tertiary">
+            <label className="label">2. Apartment Size</label>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-white p-4 rounded-2xl border border-surface-tertiary">
+              <span className="text-sm font-medium text-ink flex-1">Total Rooms in Apartment:</span>
+              <div className="flex items-center gap-3">
+                 <button type="button" onClick={() => setTotalRooms(Math.max(2, totalRooms - 1))} className="w-10 h-10 rounded-full border border-surface-tertiary hover:bg-surface-secondary font-bold text-xl flex items-center justify-center">-</button>
+                 <span className="w-8 text-center font-bold text-xl">{totalRooms}</span>
+                 <button type="button" onClick={() => setTotalRooms(Math.min(15, totalRooms + 1))} className="w-10 h-10 rounded-full border border-surface-tertiary hover:bg-surface-secondary font-bold text-xl flex items-center justify-center">+</button>
+              </div>
+            </div>
+            <p className="text-xs text-ink-tertiary px-2 font-medium">✨ This room automatically represents 1 room. The remaining {totalRooms - 1} room(s) represent the rest of the flatmates.</p>
+          </div>
+
+          <div className="space-y-4 pt-3 border-t border-surface-tertiary">
+            <label className="label">3. Current Flatmates</label>
+            <p className="text-xs text-ink-tertiary mb-3 mt-0">Specify the genders of the flatmates living in the other {totalRooms - 1} rooms.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-pink-50/60 p-4 rounded-2xl border border-pink-100 flex items-center justify-between">
+                 <span className="flex items-center gap-2 text-pink-600 font-semibold text-sm">🚶‍♀️ Female</span>
+                 <div className="flex items-center gap-3">
+                    <button type="button" onClick={() => setResidentFemale(Math.max(0, residentFemale - 1))} className="w-9 h-9 rounded-full bg-white border border-pink-200 text-pink-600 font-bold hover:bg-pink-100 flex items-center justify-center text-lg">-</button>
+                    <span className="w-5 text-center font-bold text-pink-700 text-lg">{residentFemale}</span>
+                    <button type="button" onClick={() => setResidentFemale(Math.min(totalRooms - 1 - residentMale, residentFemale + 1))} className="w-9 h-9 rounded-full bg-white border border-pink-200 text-pink-600 font-bold hover:bg-pink-100 flex items-center justify-center text-lg">+</button>
+                 </div>
+              </div>
+              <div className="bg-blue-50/60 p-4 rounded-2xl border border-blue-100 flex items-center justify-between">
+                 <span className="flex items-center gap-2 text-blue-600 font-semibold text-sm">🚶‍♂️ Male</span>
+                 <div className="flex items-center gap-3">
+                    <button type="button" onClick={() => setResidentMale(Math.max(0, residentMale - 1))} className="w-9 h-9 rounded-full bg-white border border-blue-200 text-blue-600 font-bold hover:bg-blue-100 flex items-center justify-center text-lg">-</button>
+                    <span className="w-5 text-center font-bold text-blue-700 text-lg">{residentMale}</span>
+                    <button type="button" onClick={() => setResidentMale(Math.min(totalRooms - 1 - residentFemale, residentMale + 1))} className="w-9 h-9 rounded-full bg-white border border-blue-200 text-blue-600 font-bold hover:bg-blue-100 flex items-center justify-center text-lg">+</button>
+                 </div>
+              </div>
+            </div>
+            {(residentFemale + residentMale > totalRooms - 1) && (
+              <p className="text-xs text-red-500 font-semibold bg-red-50 p-2 rounded-lg border border-red-100">The total number of flatmates cannot exceed the remaining rooms ({totalRooms - 1}).</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Title ── */}
       <div>
