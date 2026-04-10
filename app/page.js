@@ -15,6 +15,7 @@ import { useAds } from '@/hooks/useAds';
 import { useCategories } from '@/hooks/useCategories';
 import AdGrid from '@/components/ads/AdGrid';
 import FeedbackBox from '@/components/FeedbackBox';
+import QuestionOfTheDay from '@/components/polls/QuestionOfTheDay';
 import { cn } from '@/lib/helpers';
 
 export default function HomePage() {
@@ -289,6 +290,10 @@ export default function HomePage() {
                   </label>
                 ))}
               </div>
+            </div>
+
+            <div className="mt-8">
+              <QuestionOfTheDay />
             </div>
 
             <FeedbackBox />

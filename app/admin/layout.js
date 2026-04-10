@@ -13,6 +13,7 @@ const ADMIN_NAV = [
   { label: 'Category Management',href: '/admin/categories', icon: FolderTree        },
   { label: 'User Management',    href: '/admin/users',      icon: Users             },
   { label: 'Feedbacks',          href: '/admin/feedback',   icon: Lightbulb         },
+  { label: 'Polls & Questions',  href: '/admin/polls',      icon: MessageSquare     },
   { label: 'Site Settings',      href: '/admin/settings',   icon: Settings          },
 ];
 
