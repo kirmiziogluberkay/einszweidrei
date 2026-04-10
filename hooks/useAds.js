@@ -1,9 +1,4 @@
-// force-rebuild-v1
-// update 22:08
-// status: global visibility for reserved/rented enabled
-// feature: owner filter consolidated (supports owner_id and ownerId)
-// feature: public ads show active/reserved/rented (excludes sold)
-// logic: owner dashboard shows EVERYTHING including sold/passive if ownerId is passed
+// force-rebuild-v2
 'use client';
 
 /**
@@ -14,30 +9,15 @@
  * ─────────────────────────────────────────────────────
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { ADS_PER_PAGE } from '@/constants/config';
 
 /**
  * Hook that returns the list of ads.
- *
- * @param {{
- *   categoryId?: string,
- *   ownerId?: string,
- *   searchQuery?: string,
- *   page?: number
- * }} [filters]
- *
- * @returns {{
- *   ads: Array,
- *   total: number,
- *   loading: boolean,
- *   error: string | null,
- *   refetch: () => void
- * }}
  */
 export function useAds(filters = {}) {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const { skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods, page = 1 } = filters;
 
@@ -46,9 +26,6 @@ export function useAds(filters = {}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  /**
-   * Fetches ads from Supabase.
-   */
   const fetchAds = useCallback(async () => {
     if (skip) {
       setLoading(false);
@@ -57,7 +34,8 @@ export function useAds(filters = {}) {
     setLoading(true);
     setError(null);
 
-    // Base query - En hızlı alan seçimi (gereksiz joinler çıkarıldı)
+    const finalOwnerId = ownerId || owner_id;
+
     let query = supabase
       .from('ads')
       .select(`
@@ -77,7 +55,6 @@ export function useAds(filters = {}) {
       `, { count: 'exact' });
 
     // Status filter - Public visitors see 'active', 'reserved', and 'rented' ads.
-    const finalOwnerId = ownerId || owner_id;
     if (!finalOwnerId) {
       query = query.in('status', ['active', 'reserved', 'rented']);
     } else {
@@ -86,50 +63,35 @@ export function useAds(filters = {}) {
 
     query = query.order('created_at', { ascending: false });
 
-    // Category filter
     if (categoryIds && categoryIds.length > 0) {
       query = query.in('category_id', categoryIds);
     } else if (categoryId) {
       query = query.eq('category_id', categoryId);
     }
 
-    // Text search
     if (searchQuery) {
       query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
     }
 
-    // Price filter
     if (minPrice || maxPrice) {
-      if (minPrice) query = query.gte('price', minPrice);
-      if (maxPrice) query = query.lte('price', maxPrice);
+      if (minPrice !== null && minPrice !== undefined) query = query.gte('price', minPrice);
+      if (maxPrice !== null && maxPrice !== undefined) query = query.lte('price', maxPrice);
     }
 
-    // Payment method filter: Only apply if NOT all methods are selected
-    // Default is ['Cash', 'PayPal', 'Free']
     if (paymentMethods && paymentMethods.length > 0 && paymentMethods.length < 3) {
       const hasFree = paymentMethods.includes('Free');
       const otherMethods = paymentMethods.filter(m => m !== 'Free');
 
       if (hasFree && otherMethods.length === 0) {
-        // Only free ads (price is empty/0 or no payment method)
         query = query.or('price.is.null,price.eq.0');
       } else if (!hasFree && otherMethods.length > 0) {
-        // Only specific paid methods
         query = query.overlaps('payment_methods', otherMethods);
       } else if (hasFree && otherMethods.length > 0) {
-        // Free OR some paid methods - Using a safer PostgREST syntax
-        // Instead of complex OR with arrays, we check them sequentially or use overlaps
-        const orQuery = [];
-        orQuery.push('price.is.null');
-        orQuery.push('price.eq.0');
-        otherMethods.forEach(m => {
-          orQuery.push(`payment_methods.cs.{${m}}`); 
-        });
-        query = query.or(orQuery.join(','));
+        const otherMethodsList = otherMethods.join(',');
+        query = query.or(`price.is.null,price.eq.0,payment_methods.ov.{${otherMethodsList}}`);
       }
     }
 
-    // Pagination
     const from = (page - 1) * ADS_PER_PAGE;
     const to = from + ADS_PER_PAGE - 1;
     query = query.range(from, to);
@@ -137,27 +99,27 @@ export function useAds(filters = {}) {
     const { data, error: fetchError, count } = await query;
 
     if (fetchError) {
+      console.error('Supabase fetch error:', fetchError);
       setError(fetchError.message);
+      setAds([]);
+      setTotal(0);
       setLoading(false);
       return;
     }
 
-    // Fotoğraflı olanları başa, olmayanyaları sona al (Tarih sırasını da koruyarak)
-    const sortedData = (data ?? []).sort((a, b) => {
+    const resultData = data || [];
+    const sortedData = [...resultData].sort((a, b) => {
       const aHasImg = a.images && a.images.length > 0;
       const bHasImg = b.images && b.images.length > 0;
-
       if (aHasImg && !bHasImg) return -1;
       if (!aHasImg && bHasImg) return 1;
-
-      // İki tarafın da durumu aynıysa tarihe göre diz
       return new Date(b.created_at) - new Date(a.created_at);
     });
 
     setAds(sortedData);
     setTotal(count ?? 0);
     setLoading(false);
-  }, [supabase, categoryId, categoryIds?.join(','), ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods?.join(','), page]);
+  }, [supabase, skip, categoryId, categoryIds?.join(','), ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods?.join(','), page]);
 
   useEffect(() => {
     fetchAds();

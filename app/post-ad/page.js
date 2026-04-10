@@ -18,11 +18,11 @@ export const metadata = {
 };
 
 export default async function PostAdPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/register');
+    redirect('/login');
   }
 
   return (

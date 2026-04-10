@@ -6,6 +6,8 @@
  * ─────────────────────────────────────────────────────
  */
 
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
 import AdForm from '@/components/ads/AdForm';
 
 /** @type {import('next').Metadata} */
@@ -14,7 +16,14 @@ export const metadata = {
   description: 'Create a new ad and sell or rent out your items.',
 };
 
-export default function IlanVerPage() {
+export default async function IlanVerPage() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
   return (
     <div className="container-app py-8 max-w-2xl">
 
@@ -33,3 +42,4 @@ export default function IlanVerPage() {
     </div>
   );
 }
+

@@ -268,9 +268,9 @@ export default function AdForm({ initialData = null }) {
     let computedTags = [];
     if (isAccommodation) {
       computedTags.push(`RENT_TYPE:${rentType.toUpperCase()}`);
-      
+
       propertyFeatures.forEach(feature => {
-         computedTags.push(`FEATURE:${feature}`);
+        computedTags.push(`FEATURE:${feature}`);
       });
 
       if (selectedCategoryObj?.slug?.includes('room')) {
@@ -400,24 +400,24 @@ export default function AdForm({ initialData = null }) {
           </div>
 
           <div className="space-y-3">
-             <label className="label">1. Room Privacy</label>
-             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${roomType === '1' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
-                   <input type="radio" name="roomType" value="1" checked={roomType === '1'} onChange={() => setRoomType('1')} className="hidden" />
-                   <div className="font-semibold text-ink text-sm">Type 1: Standard</div>
-                   <div className="text-xs text-ink-secondary mt-1">Shared Bath & Kitchen</div>
-                </label>
-                <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${roomType === '2' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
-                   <input type="radio" name="roomType" value="2" checked={roomType === '2'} onChange={() => setRoomType('2')} className="hidden" />
-                   <div className="font-semibold text-ink text-sm">Type 2: Comfort</div>
-                   <div className="text-xs text-ink-secondary mt-1">Private Bath, Shared Kitchen</div>
-                </label>
-                <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${roomType === '3' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
-                   <input type="radio" name="roomType" value="3" checked={roomType === '3'} onChange={() => setRoomType('3')} className="hidden" />
-                   <div className="font-semibold text-ink text-sm">Type 3: Premium</div>
-                   <div className="text-xs text-ink-secondary mt-1">Private Bath & Kitchen</div>
-                </label>
-             </div>
+            <label className="label">1. Room Privacy</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${roomType === '1' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
+                <input type="radio" name="roomType" value="1" checked={roomType === '1'} onChange={() => setRoomType('1')} className="hidden" />
+                <div className="font-semibold text-ink text-sm">Type 1: Standard</div>
+                <div className="text-xs text-ink-secondary mt-1">Shared Bath & Kitchen</div>
+              </label>
+              <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${roomType === '2' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
+                <input type="radio" name="roomType" value="2" checked={roomType === '2'} onChange={() => setRoomType('2')} className="hidden" />
+                <div className="font-semibold text-ink text-sm">Type 2: Comfort</div>
+                <div className="text-xs text-ink-secondary mt-1">Private Bath, Shared Kitchen</div>
+              </label>
+              <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${roomType === '3' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
+                <input type="radio" name="roomType" value="3" checked={roomType === '3'} onChange={() => setRoomType('3')} className="hidden" />
+                <div className="font-semibold text-ink text-sm">Type 3: Premium</div>
+                <div className="text-xs text-ink-secondary mt-1">Private Bath & Kitchen</div>
+              </label>
+            </div>
           </div>
 
           <div className="space-y-4 pt-3 border-t border-surface-tertiary">
@@ -425,9 +425,9 @@ export default function AdForm({ initialData = null }) {
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-white p-4 rounded-2xl border border-surface-tertiary">
               <span className="text-sm font-medium text-ink flex-1">Total Rooms in Apartment:</span>
               <div className="flex items-center gap-3">
-                 <button type="button" onClick={() => setTotalRooms(Math.max(2, totalRooms - 1))} className="w-10 h-10 rounded-full border border-surface-tertiary hover:bg-surface-secondary font-bold text-xl flex items-center justify-center">-</button>
-                 <span className="w-8 text-center font-bold text-xl">{totalRooms}</span>
-                 <button type="button" onClick={() => setTotalRooms(Math.min(15, totalRooms + 1))} className="w-10 h-10 rounded-full border border-surface-tertiary hover:bg-surface-secondary font-bold text-xl flex items-center justify-center">+</button>
+                <button type="button" onClick={() => setTotalRooms(Math.max(2, totalRooms - 1))} className="w-10 h-10 rounded-full border border-surface-tertiary hover:bg-surface-secondary font-bold text-xl flex items-center justify-center">-</button>
+                <span className="w-8 text-center font-bold text-xl">{totalRooms}</span>
+                <button type="button" onClick={() => setTotalRooms(Math.min(15, totalRooms + 1))} className="w-10 h-10 rounded-full border border-surface-tertiary hover:bg-surface-secondary font-bold text-xl flex items-center justify-center">+</button>
               </div>
             </div>
             <p className="text-xs text-ink-tertiary px-2 font-medium">✨ This room automatically represents 1 room. The remaining {totalRooms - 1} room(s) represent the rest of the flatmates.</p>
@@ -438,20 +438,20 @@ export default function AdForm({ initialData = null }) {
             <p className="text-xs text-ink-tertiary mb-3 mt-0">Specify the genders of the flatmates living in the other {totalRooms - 1} rooms.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-pink-50/60 p-4 rounded-2xl border border-pink-100 flex items-center justify-between">
-                 <span className="flex items-center gap-2 text-pink-600 font-semibold text-sm">🚶‍♀️ Female</span>
-                 <div className="flex items-center gap-3">
-                    <button type="button" onClick={() => setResidentFemale(Math.max(0, residentFemale - 1))} className="w-9 h-9 rounded-full bg-white border border-pink-200 text-pink-600 font-bold hover:bg-pink-100 flex items-center justify-center text-lg">-</button>
-                    <span className="w-5 text-center font-bold text-pink-700 text-lg">{residentFemale}</span>
-                    <button type="button" onClick={() => setResidentFemale(Math.min(totalRooms - 1 - residentMale, residentFemale + 1))} className="w-9 h-9 rounded-full bg-white border border-pink-200 text-pink-600 font-bold hover:bg-pink-100 flex items-center justify-center text-lg">+</button>
-                 </div>
+                <span className="flex items-center gap-2 text-pink-600 font-semibold text-sm">🚶‍♀️ Female</span>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setResidentFemale(Math.max(0, residentFemale - 1))} className="w-9 h-9 rounded-full bg-white border border-pink-200 text-pink-600 font-bold hover:bg-pink-100 flex items-center justify-center text-lg">-</button>
+                  <span className="w-5 text-center font-bold text-pink-700 text-lg">{residentFemale}</span>
+                  <button type="button" onClick={() => setResidentFemale(Math.min(totalRooms - 1 - residentMale, residentFemale + 1))} className="w-9 h-9 rounded-full bg-white border border-pink-200 text-pink-600 font-bold hover:bg-pink-100 flex items-center justify-center text-lg">+</button>
+                </div>
               </div>
               <div className="bg-blue-50/60 p-4 rounded-2xl border border-blue-100 flex items-center justify-between">
-                 <span className="flex items-center gap-2 text-blue-600 font-semibold text-sm">🚶‍♂️ Male</span>
-                 <div className="flex items-center gap-3">
-                    <button type="button" onClick={() => setResidentMale(Math.max(0, residentMale - 1))} className="w-9 h-9 rounded-full bg-white border border-blue-200 text-blue-600 font-bold hover:bg-blue-100 flex items-center justify-center text-lg">-</button>
-                    <span className="w-5 text-center font-bold text-blue-700 text-lg">{residentMale}</span>
-                    <button type="button" onClick={() => setResidentMale(Math.min(totalRooms - 1 - residentFemale, residentMale + 1))} className="w-9 h-9 rounded-full bg-white border border-blue-200 text-blue-600 font-bold hover:bg-blue-100 flex items-center justify-center text-lg">+</button>
-                 </div>
+                <span className="flex items-center gap-2 text-blue-600 font-semibold text-sm">🚶‍♂️ Male</span>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setResidentMale(Math.max(0, residentMale - 1))} className="w-9 h-9 rounded-full bg-white border border-blue-200 text-blue-600 font-bold hover:bg-blue-100 flex items-center justify-center text-lg">-</button>
+                  <span className="w-5 text-center font-bold text-blue-700 text-lg">{residentMale}</span>
+                  <button type="button" onClick={() => setResidentMale(Math.min(totalRooms - 1 - residentFemale, residentMale + 1))} className="w-9 h-9 rounded-full bg-white border border-blue-200 text-blue-600 font-bold hover:bg-blue-100 flex items-center justify-center text-lg">+</button>
+                </div>
               </div>
             </div>
             {(residentFemale + residentMale > totalRooms - 1) && (
@@ -462,21 +462,21 @@ export default function AdForm({ initialData = null }) {
           <div className="space-y-4 pt-3 border-t border-surface-tertiary">
             <label className="label">4. Target Tenant Preference</label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'ANY' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
-                   <input type="radio" name="preferredGender" value="ANY" checked={preferredGender === 'ANY'} onChange={() => setPreferredGender('ANY')} className="hidden" />
-                   <div className="font-semibold text-ink text-sm">Any Gender</div>
-                   <div className="text-xs text-ink-secondary mt-1">All genders welcome</div>
-                </label>
-                <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'FEMALE' ? 'border-pink-500 bg-pink-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-pink-300'}`}>
-                   <input type="radio" name="preferredGender" value="FEMALE" checked={preferredGender === 'FEMALE'} onChange={() => setPreferredGender('FEMALE')} className="hidden" />
-                   <div className="font-semibold text-pink-700 text-sm">Female Only</div>
-                   <div className="text-xs text-pink-600 mt-1">Looking for a female tenant</div>
-                </label>
-                <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'MALE' ? 'border-blue-500 bg-blue-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-blue-300'}`}>
-                   <input type="radio" name="preferredGender" value="MALE" checked={preferredGender === 'MALE'} onChange={() => setPreferredGender('MALE')} className="hidden" />
-                   <div className="font-semibold text-blue-700 text-sm">Male Only</div>
-                   <div className="text-xs text-blue-600 mt-1">Looking for a male tenant</div>
-                </label>
+              <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'ANY' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
+                <input type="radio" name="preferredGender" value="ANY" checked={preferredGender === 'ANY'} onChange={() => setPreferredGender('ANY')} className="hidden" />
+                <div className="font-semibold text-ink text-sm">Any Gender</div>
+                <div className="text-xs text-ink-secondary mt-1">All genders welcome</div>
+              </label>
+              <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'FEMALE' ? 'border-pink-500 bg-pink-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-pink-300'}`}>
+                <input type="radio" name="preferredGender" value="FEMALE" checked={preferredGender === 'FEMALE'} onChange={() => setPreferredGender('FEMALE')} className="hidden" />
+                <div className="font-semibold text-pink-700 text-sm">Female Only</div>
+                <div className="text-xs text-pink-600 mt-1">Looking for a female tenant</div>
+              </label>
+              <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'MALE' ? 'border-blue-500 bg-blue-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-blue-300'}`}>
+                <input type="radio" name="preferredGender" value="MALE" checked={preferredGender === 'MALE'} onChange={() => setPreferredGender('MALE')} className="hidden" />
+                <div className="font-semibold text-blue-700 text-sm">Male Only</div>
+                <div className="text-xs text-blue-600 mt-1">Looking for a male tenant</div>
+              </label>
             </div>
           </div>
         </div>
@@ -485,60 +485,60 @@ export default function AdForm({ initialData = null }) {
       {/* ── Accomodation Features (Universal for apartments & rooms) ── */}
       {isAccommodation && (
         <div className="border border-brand-100 bg-brand-50/10 rounded-3xl p-5 sm:p-7 space-y-4 shadow-sm">
-           <h3 className="font-bold text-ink flex items-center gap-2 border-b border-surface-tertiary pb-4">
-             <span className="text-2xl">✨</span> Property Features
-           </h3>
-           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 pt-2">
-             {AVAILABLE_FEATURES.map(feature => {
-               const isSelected = propertyFeatures.includes(feature.id);
-               
-               const handleFeatureToggle = (featureId, checked) => {
-                  let nextFeatures = [...propertyFeatures];
-                  if (checked) {
-                     // Exclusivity Constraints
-                     if (featureId === 'UNDERFLOOR_HEATING') {
-                        nextFeatures = nextFeatures.filter(id => id !== 'CENTRAL_HEATING');
-                     } else if (featureId === 'CENTRAL_HEATING') {
-                        nextFeatures = nextFeatures.filter(id => id !== 'UNDERFLOOR_HEATING');
-                     } else if (featureId === 'FURNISHED') {
-                        nextFeatures = nextFeatures.filter(id => id !== 'SEMI_FURNISHED' && id !== 'UNFURNISHED');
-                     } else if (featureId === 'SEMI_FURNISHED') {
-                        nextFeatures = nextFeatures.filter(id => id !== 'FURNISHED' && id !== 'UNFURNISHED');
-                     } else if (featureId === 'UNFURNISHED') {
-                        nextFeatures = nextFeatures.filter(id => id !== 'FURNISHED' && id !== 'SEMI_FURNISHED');
-                     } else if (featureId === 'ANMELDUNG') {
-                        nextFeatures = nextFeatures.filter(id => id !== 'NO_ANMELDUNG');
-                     } else if (featureId === 'NO_ANMELDUNG') {
-                        nextFeatures = nextFeatures.filter(id => id !== 'ANMELDUNG');
-                     }
-                     if (!nextFeatures.includes(featureId)) nextFeatures.push(featureId);
-                  } else {
-                     nextFeatures = nextFeatures.filter(f => f !== featureId);
-                  }
-                  setPropertyFeatures(nextFeatures);
-               };
+          <h3 className="font-bold text-ink flex items-center gap-2 border-b border-surface-tertiary pb-4">
+            <span className="text-2xl">✨</span> Property Features
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 pt-2">
+            {AVAILABLE_FEATURES.map(feature => {
+              const isSelected = propertyFeatures.includes(feature.id);
 
-               return (
-                 <label 
-                   key={feature.id}
-                   className={`cursor-pointer p-3 rounded-2xl flex flex-col items-center justify-center gap-2 text-center transition-all border-2
-                     ${isSelected 
-                        ? 'border-brand-500 bg-brand-50/50 shadow-sm text-brand-700' 
-                        : 'border-surface-tertiary bg-white hover:border-brand-300 text-ink-secondary hover:text-ink'
-                     }`}
-                 >
-                   <input 
-                     type="checkbox" 
-                     className="hidden"
-                     checked={isSelected}
-                     onChange={(e) => handleFeatureToggle(feature.id, e.target.checked)}
-                   />
-                   <span className="text-2xl">{feature.icon}</span>
-                   <span className="text-xs font-semibold">{feature.label}</span>
-                 </label>
-               );
-             })}
-           </div>
+              const handleFeatureToggle = (featureId, checked) => {
+                let nextFeatures = [...propertyFeatures];
+                if (checked) {
+                  // Exclusivity Constraints
+                  if (featureId === 'UNDERFLOOR_HEATING') {
+                    nextFeatures = nextFeatures.filter(id => id !== 'CENTRAL_HEATING');
+                  } else if (featureId === 'CENTRAL_HEATING') {
+                    nextFeatures = nextFeatures.filter(id => id !== 'UNDERFLOOR_HEATING');
+                  } else if (featureId === 'FURNISHED') {
+                    nextFeatures = nextFeatures.filter(id => id !== 'SEMI_FURNISHED' && id !== 'UNFURNISHED');
+                  } else if (featureId === 'SEMI_FURNISHED') {
+                    nextFeatures = nextFeatures.filter(id => id !== 'FURNISHED' && id !== 'UNFURNISHED');
+                  } else if (featureId === 'UNFURNISHED') {
+                    nextFeatures = nextFeatures.filter(id => id !== 'FURNISHED' && id !== 'SEMI_FURNISHED');
+                  } else if (featureId === 'ANMELDUNG') {
+                    nextFeatures = nextFeatures.filter(id => id !== 'NO_ANMELDUNG');
+                  } else if (featureId === 'NO_ANMELDUNG') {
+                    nextFeatures = nextFeatures.filter(id => id !== 'ANMELDUNG');
+                  }
+                  if (!nextFeatures.includes(featureId)) nextFeatures.push(featureId);
+                } else {
+                  nextFeatures = nextFeatures.filter(f => f !== featureId);
+                }
+                setPropertyFeatures(nextFeatures);
+              };
+
+              return (
+                <label
+                  key={feature.id}
+                  className={`cursor-pointer p-3 rounded-2xl flex flex-col items-center justify-center gap-2 text-center transition-all border-2
+                     ${isSelected
+                      ? 'border-brand-500 bg-brand-50/50 shadow-sm text-brand-700'
+                      : 'border-surface-tertiary bg-white hover:border-brand-300 text-ink-secondary hover:text-ink'
+                    }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    checked={isSelected}
+                    onChange={(e) => handleFeatureToggle(feature.id, e.target.checked)}
+                  />
+                  <span className="text-2xl">{feature.icon}</span>
+                  <span className="text-xs font-semibold">{feature.label}</span>
+                </label>
+              );
+            })}
+          </div>
         </div>
       )}
 
