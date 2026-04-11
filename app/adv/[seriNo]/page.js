@@ -1,4 +1,4 @@
-// force-rebuild-v1
+// force-rebuild-v2 - Updated
 /**
  * app/adv/[seriNo]/page.js
  * ─────────────────────────────────────────────────────
@@ -545,6 +545,7 @@ export default async function AdDetailPage({ params }) {
 
               {ad.address && (
                 <div className="card p-6">
+                  {/* Updated */}
                   <div className="flex flex-col gap-3 mb-4">
                     <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
                        <MapPin className="w-5 h-5 text-brand-500" />
