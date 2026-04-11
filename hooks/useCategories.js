@@ -3,8 +3,8 @@
 /**
  * hooks/useCategories.js
  * ─────────────────────────────────────────────────────
- * Kategorileri Supabase'den çeken ve ağaç yapısına
- * dönüştüren custom React hook.
+ * Custom React hook that fetches categories from Supabase
+ * and transforms them into a tree structure.
  * ─────────────────────────────────────────────────────
  */
 
@@ -14,7 +14,7 @@ import { createClient } from '@/lib/supabase/client';
 import { buildCategoryTree } from '@/lib/helpers';
 
 /**
- * Tüm kategorileri düz liste ve ağaç yapısında döndürür.
+ * Returns all categories as both a flat list and a tree structure.
  *
  * @returns {{
  *   categories: Array,
@@ -28,7 +28,6 @@ export function useCategories() {
   const supabase = useMemo(() => createClient(), []);
 
   const fetchCategories = async () => {
-    console.log('fetchCategories called');
     const { data, error: fetchError } = await supabase
       .from('categories')
       .select('id, name, slug, parent_id, sort_order')
@@ -45,11 +44,11 @@ export function useCategories() {
     return { categories, categoryTree };
   };
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['categories'],
     queryFn: fetchCategories,
     staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 30 * 60 * 1000,    // 30 minutes
   });
 
   return {
@@ -57,6 +56,6 @@ export function useCategories() {
     categoryTree: data?.categoryTree || [],
     loading: isLoading,
     error: error?.message || null,
-    refetch: () => {}, // React Query handles refetch
+    refetch,
   };
 }

@@ -12,10 +12,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Plus, User, Menu, X, ShieldCheck, ChevronDown, LogOut, Mail, Search } from 'lucide-react';
+import { Plus, Menu, X, ShieldCheck, LogOut, Mail, Search } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
-import { SITE_NAME, AUTH_NAV_LINKS } from '@/constants/config';
+import { AUTH_NAV_LINKS } from '@/constants/config';
 import { cn, formatUsername } from '@/lib/helpers';
 
 export default function Navbar() {
@@ -232,7 +232,7 @@ export default function Navbar() {
                   {!user ? (
                      <>
                         <Link href="/" className="flex items-center px-4 py-3 text-sm font-medium text-ink rounded-xl hover:bg-surface-secondary transition-colors">Home</Link>
-                        <Link href="/ara" className="flex items-center px-4 py-3 text-sm font-medium text-ink rounded-xl hover:bg-surface-secondary transition-colors">Search</Link>
+                        <Link href="/search" className="flex items-center px-4 py-3 text-sm font-medium text-ink rounded-xl hover:bg-surface-secondary transition-colors">Search</Link>
                         <div className="border-t border-surface-tertiary my-2" />
                         <Link href="/register" className="flex items-center px-4 py-3 text-sm font-medium text-brand-600 rounded-xl hover:bg-brand-50 transition-colors">Sign Up</Link>
                         <Link href="/login" className="flex items-center px-4 py-3 text-sm font-bold text-white bg-brand-500 rounded-xl hover:bg-brand-600 transition-colors">Log In</Link>

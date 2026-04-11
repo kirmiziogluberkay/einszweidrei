@@ -4,12 +4,12 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 const nextConfig = {
-  // Supabase Storage'daki görsellere izin ver
+  // Allow images from Supabase Storage
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        // Supabase URL'inizi buraya girin (env'den okunur)
+        // Hostname is derived from the NEXT_PUBLIC_SUPABASE_URL env var
         hostname: process.env.NEXT_PUBLIC_SUPABASE_URL
           ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
           : '*.supabase.co',

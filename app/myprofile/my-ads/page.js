@@ -19,7 +19,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAds } from '@/hooks/useAds';
 import { useCategories } from '@/hooks/useCategories';
-import { formatPrice, buildAdUrl, timeAgo } from '@/lib/helpers';
+import { formatPrice, timeAgo } from '@/lib/helpers';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES, AD_STATUSES, AD_URL_PREFIX } from '@/constants/config';
 
 export default function MyAdsPage() {
@@ -234,7 +234,7 @@ export default function MyAdsPage() {
                             {ad.status === 'active' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
                           </button>
                           <Link
-                            href={`${AD_URL_PREFIX}/${ad.serial_number}/duzenle`}
+                            href={`${AD_URL_PREFIX}/${ad.serial_number}/edit`}
                             className="p-2 rounded-xl text-ink-tertiary hover:text-brand-500 hover:bg-brand-50 transition-colors"
                           >
                             <Edit3 className="w-4 h-4" />

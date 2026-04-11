@@ -13,7 +13,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 
 /** Routes that require a logged-in user */
-const PROTECTED_PATHS = ['/myprofile', '/inbox', '/ilan-ver', '/post-ad'];
+const PROTECTED_PATHS = ['/myprofile', '/inbox', '/post-ad'];
 
 /** Routes that require admin role */
 const ADMIN_PATHS = ['/admin'];
@@ -21,9 +21,11 @@ const ADMIN_PATHS = ['/admin'];
 export async function middleware(request) {
   let response = NextResponse.next({ request });
 
+  // @ts-ignore -- false positive: our cookies object uses getAll/setAll (non-deprecated);
+  // TypeScript loses overload precision on plain JS object literals in .js files.
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
     {
       cookies: {
         getAll() {

@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // Tailwind'in tarayacağı dosyalar
+  // Files Tailwind should scan for class names
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -8,7 +8,7 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // Apple tarzı font ailesi
+      // Apple-style font stack
       fontFamily: {
         sans: [
           '-apple-system',

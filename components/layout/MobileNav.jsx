@@ -3,7 +3,7 @@
 /**
  * components/layout/MobileNav.jsx
  * ─────────────────────────────────────────────────────
- * Mobilde ekranın altında görünen tab bar navigasyonu.
+ * Bottom tab bar navigation shown on mobile devices.
  * Integrated Notification Dot Version
  * ─────────────────────────────────────────────────────
  */
@@ -19,7 +19,7 @@ import { createClient } from '@/lib/supabase/client';
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/', icon: Home, authRequired: false },
-  { label: 'Search', href: '/ara', icon: Search, authRequired: false },
+  { label: 'Search', href: '/search', icon: Search, authRequired: false },
   { label: 'New Ad', href: '/post-ad', icon: Plus, authRequired: true, featured: true },
   { label: 'Inbox', href: '/inbox', icon: MessageSquare, authRequired: true },
   { label: 'Profile', href: '/myprofile', icon: User, authRequired: false },

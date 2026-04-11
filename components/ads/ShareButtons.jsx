@@ -1,8 +1,8 @@
 /**
  * components/ads/ShareButtons.jsx
  * ─────────────────────────────────────────────────────
- * İlan detay sayfasında gösterilen sosyal paylaşım
- * butonları (WhatsApp ve Telegram).
+ * Social share buttons (WhatsApp, Telegram, Email)
+ * shown on the ad detail page.
  * ─────────────────────────────────────────────────────
  */
 
@@ -73,7 +73,7 @@ export default function ShareButtons({ title, serialNumber }) {
 
       {/* Email */}
       <a
-        href={`mailto:?subject=${encodeURIComponent(`Check out this ad: ${title}`)}&body=${encodeURIComponent(`I thought you might be interested in this ad: ${title}\n\nView it here: ${typeof window !== 'undefined' ? window.location.origin : ''}/ilan/${serialNumber}`)}`}
+        href={`mailto:?subject=${encodeURIComponent(`Check out this ad: ${title}`)}&body=${encodeURIComponent(`I thought you might be interested in this ad: ${title}\n\nView it here: ${typeof window !== 'undefined' ? window.location.origin : ''}/adv/${serialNumber}`)}`}
         aria-label="Share via Email"
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl
                    bg-surface-secondary hover:bg-surface-tertiary text-ink text-sm font-medium

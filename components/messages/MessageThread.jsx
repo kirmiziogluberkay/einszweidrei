@@ -1,8 +1,8 @@
 /**
  * components/messages/MessageThread.jsx
  * ─────────────────────────────────────────────────────
- * İki kullanıcı arasındaki mesaj dizisini gösterir
- * ve yeni mesaj gönderme formunu içerir.
+ * Displays the message thread between two users
+ * and contains the new message send form.
  * ─────────────────────────────────────────────────────
  */
 
@@ -14,17 +14,16 @@ import { Send, Loader2, Trash2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { formatMessageDate, formatUsername } from '@/lib/helpers';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/constants/config';
+import { ERROR_MESSAGES } from '@/constants/config';
 
 /**
  * @param {{
  *   adId: string,
- *   receiverId: string,    // Mesaj alacak kullanıcı
- *   receiverName: string,
- *   adTitle: string
+ *   receiverId: string,
+ *   receiverName: string
  * }} props
  */
-export default function MessageThread({ adId, receiverId, receiverName, adTitle }) {
+export default function MessageThread({ adId, receiverId, receiverName }) {
   const supabase = createClient();
   const { user, profile } = useAuth();
   const [messages, setMessages] = useState([]);
@@ -37,7 +36,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
   const [error, setError]       = useState(null);
 
   /**
-   * Bu ilan için mesajları çeker.
+   * Fetches messages for this ad thread.
    */
   const fetchMessages = async () => {
     if (!user) return;
@@ -72,12 +71,12 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
     
     if (adData) setAdInfo(adData);
 
-    // Okunmamış mesajları okundu olarak işaretle
+    // Mark unread messages as read
     markAsRead();
   };
 
   /**
-   * Kullanıcıya gelen okunmamış mesajları okundu olarak işaretler.
+   * Marks incoming unread messages in this thread as read.
    */
   const markAsRead = async () => {
     if (!user) return;
@@ -109,7 +108,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
     
     fetchMessages();
 
-    // Realtime abonelik — yeni mesaj gelince listeyi güncelle
+    // Realtime subscription — refresh list when a new message arrives
     const channel = supabase
       .channel(`thread-${user.id}-${receiverId}`)
       .on('postgres_changes', {
@@ -117,7 +116,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
         schema: 'public',
         table: 'messages',
       }, (payload) => {
-        // Sadece bu görüşmeye ait bir mesaj ise listeyi tazele
+        // Only refresh if the message belongs to this conversation
         const newM = payload.new;
         const isRelevant = 
           (newM.sender_id === user.id && newM.receiver_id === receiverId) ||
@@ -135,11 +134,10 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adId, user, receiverId]);
 
-  // Mesaj listesi degisince de okundu isaretle (yeni mesaj gelirse)
+  // Also mark as read when the message list changes (e.g. new message arrives)
   useEffect(() => {
     if (!user?.id || loading || messages.length === 0) return;
-    
-    // Bana gelen ve henüz okunmamış herhangi bir mesaj var mı?
+
     const hasUnreadForMe = messages.some(m => !m.is_read && m.receiver_id === user.id);
     
     if (hasUnreadForMe) {
@@ -147,37 +145,37 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
     }
   }, [messages, user?.id, loading]);
 
-  // Mesaj listesi değişince (yeni mesaj gelince veya konuşma açılınca) en alta kaydır
+  // Scroll to bottom when messages change (new message arrives or conversation opens)
   useEffect(() => {
     const scrollToBottom = () => {
       if (scrollRef.current) {
         scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       }
-      // Yedek olarak scrollIntoView (Anlık geçiş için behavior: auto)
+      // Fallback via scrollIntoView (instant transition with behavior: auto)
       bottomRef.current?.scrollIntoView({ behavior: 'auto' });
     };
 
     scrollToBottom();
-    // Resim veya İlan bilgisi yüklendiğinde DOM değişeceği için gecikmeli teyit
-    const timeout = setTimeout(scrollToBottom, 300); // Gecikmeyi artırdım (resimler için)
+    // Delayed confirmation in case DOM changes after images or ad info load
+    const timeout = setTimeout(scrollToBottom, 300);
     return () => clearTimeout(timeout);
-  }, [messages, adInfo, user?.id]); // adInfo eklendi, çünkü ilan resmi gelince boy değişiyor
+  }, [messages, adInfo, user?.id]); // adInfo included because ad image load changes height
 
   /**
-   * Yeni mesaj gönderir.
+   * Sends a new message.
    * @param {React.FormEvent} e
    */
   const handleSend = async (e) => {
     e.preventDefault();
     if (!content.trim() || !user) return;
 
-    // Cevap yazarken mevcut mesajları okundu işaretle
+    // Mark existing messages as read when composing a reply
     markAsRead();
 
     setSending(true);
     setError(null);
 
-    // Optimistic update - Mesajı hemen ekrana bas
+    // Optimistic update — render the message immediately
     const optimisticMsg = {
       id:          'temp-' + Date.now(),
       content:     content.trim(),
@@ -199,10 +197,10 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
 
     if (sendError) {
       setError(ERROR_MESSAGES.generic);
-      // Hata durumunda optimistik mesajı geri al
+      // Roll back the optimistic message on error
       setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
     } else {
-      // Başarılı ise gerçek veriyi çek (ID ve tam tarih için)
+      // Fetch real data on success (for accurate ID and timestamp)
       fetchMessages();
     }
 
@@ -210,8 +208,8 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
   };
 
   /**
-   * Belirtilen mesajı siler.
-   * Kullanıcı sadece kendi gönderdiği mesajları silebilir.
+   * Deletes the specified message.
+   * Users can only delete messages they sent themselves.
    *
    * @param {string} messageId
    */
@@ -235,7 +233,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
 
   return (
     <div className="flex flex-col h-full">
-      {/* ── İlan Önizlemesi ── */}
+      {/* ── Ad Preview ── */}
       {adInfo && (
         <Link 
           href={`/adv/${adInfo.serial_number}`}
@@ -266,7 +264,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
         </div>
       </div>
 
-      {/* ── Mesaj listesi ── */}
+      {/* ── Message list ── */}
       <div 
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-4 space-y-3"
@@ -286,7 +284,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
                 className={`flex gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}
               >
                 <div className={`group relative max-w-[75%]`}>
-                  {/* Mesaj balonu */}
+                  {/* Message bubble */}
                   <div
                     className={`px-4 py-2.5 rounded-2xl text-sm ${
                       isMine
@@ -297,7 +295,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
                     {msg.content || ''}
                   </div>
 
-                  {/* Zaman ve sil butonu */}
+                  {/* Timestamp and delete button */}
                   <div className={`flex items-center gap-2 mt-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
                     <span className="text-[10px] text-ink-tertiary">
                       {formatMessageDate(msg.created_at)}
@@ -320,7 +318,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Mesaj gönderme formu ── */}
+      {/* ── Send message form ── */}
       {user && (
         <form onSubmit={handleSend} className="px-4 py-3 border-t border-surface-tertiary">
           {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
@@ -338,7 +336,7 @@ export default function MessageThread({ adId, receiverId, receiverName, adTitle 
             <button
               type="submit"
               disabled={sending || !content.trim()}
-              aria-label="Mesaj gönder"
+              aria-label="Send message"
               className="btn-primary px-3 py-3"
             >
               {sending

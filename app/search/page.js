@@ -1,26 +1,15 @@
-/**
- * app/ara/page.js
- * ─────────────────────────────────────────────────────
- * Search page — search is performed via URL parameter.
- * Supports GET parameter like ?q=laptop.
- * ─────────────────────────────────────────────────────
- */
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { useAds } from '@/hooks/useAds';
 import AdGrid from '@/components/ads/AdGrid';
 
-import { Suspense } from 'react';
-
-function AraContent() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const router       = useRouter();
 
-  /** Search term from URL */
   const urlQuery = searchParams.get('q') ?? '';
 
   const [inputValue, setInputValue] = useState(urlQuery);
@@ -28,39 +17,31 @@ function AraContent() {
   const [page, setPage] = useState(1);
   const [selectedPaymentMethods, setSelectedPaymentMethods] = useState(['Cash', 'PayPal', 'Free']);
 
-  const { ads, loading, error, total, totalPages } = useAds({ 
-    searchQuery, 
-    page, 
-    paymentMethods: selectedPaymentMethods 
+  const { ads, loading, error, total, totalPages } = useAds({
+    searchQuery,
+    page,
+    paymentMethods: selectedPaymentMethods,
   });
 
-  // Update state when URL changes
   useEffect(() => {
     setSearchQuery(urlQuery);
     setInputValue(urlQuery);
     setPage(1);
   }, [urlQuery]);
 
-  /**
-   * Submits the search form and updates the URL.
-   * @param {React.FormEvent} e
-   */
   const handleSearch = (e) => {
     e.preventDefault();
     setSearchQuery(inputValue);
     setPage(1);
-    router.push(`/ara?q=${encodeURIComponent(inputValue)}`);
+    router.push(`/search?q=${encodeURIComponent(inputValue)}`);
   };
 
-  /**
-   * Handles payment method selection.
-   */
   const handlePaymentMethodChange = (method) => {
     setSelectedPaymentMethods((prev) => {
       const next = prev.includes(method)
         ? prev.filter((m) => m !== method)
         : [...prev, method];
-      setPage(1); // Reset to first page on filter change
+      setPage(1);
       return next;
     });
   };
@@ -69,7 +50,6 @@ function AraContent() {
     <div className="container-app py-8">
       <h1 className="section-title">Search Ads</h1>
 
-      {/* Search form */}
       <form onSubmit={handleSearch} className="flex gap-2 max-w-xl mb-8">
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-tertiary" />
@@ -87,7 +67,6 @@ function AraContent() {
       </form>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar / Filters */}
         <aside className="w-full lg:w-64 flex-shrink-0">
           <div className="bg-surface p-6 rounded-2xl border border-surface-secondary sticky top-24">
             <h2 className="text-sm font-semibold text-ink uppercase tracking-wider mb-4">Payment Method</h2>
@@ -111,12 +90,10 @@ function AraContent() {
           </div>
         </aside>
 
-        {/* Main Content */}
         <div className="flex-1 min-w-0">
-          {/* Result count */}
           {searchQuery && !loading && (
             <p className="text-sm text-ink-secondary mb-5">
-              <span className="font-medium">{total}</span> results found for "<span className="font-medium text-ink">{searchQuery}</span>".
+              <span className="font-medium">{total}</span> results found for &ldquo;<span className="font-medium text-ink">{searchQuery}</span>&rdquo;.
             </p>
           )}
 
@@ -131,7 +108,6 @@ function AraContent() {
             }
           />
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-10">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary px-4 py-2 disabled:opacity-40">← Previous</button>
@@ -145,10 +121,10 @@ function AraContent() {
   );
 }
 
-export default function AraPage() {
+export default function SearchPage() {
   return (
     <Suspense fallback={<div className="container-app py-8 flex justify-center"><p>Loading...</p></div>}>
-      <AraContent />
+      <SearchContent />
     </Suspense>
   );
 }

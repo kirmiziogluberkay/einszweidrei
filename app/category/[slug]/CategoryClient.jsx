@@ -1,5 +1,5 @@
 /**
- * app/category/[slug]/KategoriClient.jsx
+ * app/category/[slug]/CategoryClient.jsx
  * ─────────────────────────────────────────────────────
  * Category page with full sidebar category tree navigation.
  * Active category and its breadcrumb are highlighted.
@@ -15,7 +15,7 @@ import { useAds } from '@/hooks/useAds';
 import AdGrid from '@/components/ads/AdGrid';
 import { cn } from '@/lib/helpers';
 
-export default function KategoriClient({ category, categoryTree = [] }) {
+export default function CategoryClient({ category, categoryTree = [] }) {
   const [page, setPage] = useState(1);
   const [maxPriceApplied, setMaxPriceApplied] = useState(null);
   const [maxPriceLocal, setMaxPriceLocal] = useState(6000);
@@ -70,7 +70,7 @@ export default function KategoriClient({ category, categoryTree = [] }) {
       {/* Main layout: sidebar + content */}
       <div className="flex gap-8">
 
-        {/* ── Left Sidebar: Full Category Tree ── */}
+        {/* Left Sidebar: Full Category Tree */}
         <aside className="hidden md:block w-56 flex-shrink-0">
           <div className="sticky top-20 bg-white border border-surface-tertiary rounded-2xl p-4 shadow-sm">
             <ul className="space-y-0.5 text-sm">
@@ -93,9 +93,7 @@ export default function KategoriClient({ category, categoryTree = [] }) {
 
                 return (
                   <li key={root.id}>
-                    {/* Root category row */}
                     <div className="flex items-center gap-1">
-                      {/* Expand/collapse toggle */}
                       {root.children?.length > 0 && (
                         <button
                           onClick={() => toggleRoot(root.id)}
@@ -108,7 +106,6 @@ export default function KategoriClient({ category, categoryTree = [] }) {
                         </button>
                       )}
 
-                      {/* Root category link */}
                       <Link
                         href={`/category/${root.slug}`}
                         className={cn(
@@ -122,7 +119,6 @@ export default function KategoriClient({ category, categoryTree = [] }) {
                       </Link>
                     </div>
 
-                    {/* Children (subcategories) */}
                     {isExpanded && root.children?.length > 0 && (
                       <ul className="mt-0.5 space-y-0.5">
                         {root.children.map(child => {
@@ -151,7 +147,7 @@ export default function KategoriClient({ category, categoryTree = [] }) {
               })}
             </ul>
 
-            {/* ── Price Filter ── */}
+            {/* Price Filter */}
             <div className="mt-8 border-t border-surface-tertiary pt-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-ink-secondary">Max Price</h3>
@@ -177,9 +173,7 @@ export default function KategoriClient({ category, categoryTree = [] }) {
                   max="6000"
                   step="50"
                   value={maxPriceLocal > 6000 ? 6000 : maxPriceLocal}
-                  onChange={(e) => {
-                    setMaxPriceLocal(Number(e.target.value));
-                  }}
+                  onChange={(e) => setMaxPriceLocal(Number(e.target.value))}
                   className="w-full h-1.5 bg-surface-tertiary rounded-lg appearance-none cursor-pointer accent-brand-500"
                 />
                 <div className="flex justify-between text-xs text-ink-tertiary mt-2">
@@ -197,11 +191,10 @@ export default function KategoriClient({ category, categoryTree = [] }) {
                 Search
               </button>
             </div>
-
           </div>
         </aside>
 
-        {/* ── Right: Ad Listing ── */}
+        {/* Right: Ad Listing */}
         <div className="flex-1 min-w-0">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-ink">{category.name}</h1>
