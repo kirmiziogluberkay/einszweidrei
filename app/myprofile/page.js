@@ -21,9 +21,8 @@ export default function MyProfilePage() {
   const { user, profile, loading: authLoading, refreshProfile, signOut } = useAuth();
 
   const handleSignOut = async () => {
-    // Navigate away first to prevent Auth Guard from sending us to /login
-    router.push('/');
     await signOut();
+    router.push('/');
   };
 
   // ── Auth Guard ──

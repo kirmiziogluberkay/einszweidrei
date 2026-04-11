@@ -9,6 +9,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { USER_ROLES } from '@/constants/config';
 
@@ -25,6 +26,7 @@ import { USER_ROLES } from '@/constants/config';
  */
 export function useAuth() {
   const supabase = createClient();
+  const queryClient = useQueryClient();
 
   /** Supabase auth user */
   const [user, setUser] = useState(null);
@@ -79,8 +81,9 @@ export function useAuth() {
    * Signs out the current user.
    */
   const signOut = useCallback(async () => {
+    queryClient.clear();
     await supabase.auth.signOut();
-  }, [supabase.auth]);
+  }, [supabase.auth, queryClient]);
 
   /**
    * Manually refreshes the profile data.

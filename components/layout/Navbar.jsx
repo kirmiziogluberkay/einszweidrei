@@ -32,8 +32,8 @@ export default function Navbar() {
    };
 
    const handleSignOut = async () => {
-      router.push('/');
       await signOut();
+      router.push('/');
    };
 
    // Local state for notifications to prevent global hook crashes

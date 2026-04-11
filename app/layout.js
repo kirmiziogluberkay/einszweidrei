@@ -74,8 +74,8 @@ export default function RootLayout({ children }) {
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body className="flex flex-col min-h-screen bg-surface-secondary">
-        <AuthProvider>
-          <QueryProvider>
+        <QueryProvider>
+          <AuthProvider>
             <Marquee />
 
             {/* ── Top navigation (Desktop & Mobile) ── */}
@@ -92,8 +92,8 @@ export default function RootLayout({ children }) {
             {/* ── Footer (desktop only) ── */}
             <Footer />
             <Analytics />
-          </QueryProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

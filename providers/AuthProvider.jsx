@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { USER_ROLES } from '@/constants/config';
 
@@ -15,6 +16,7 @@ const AuthContext = createContext({
 
 export const AuthProvider = ({ children }) => {
   const supabase = createClient();
+  const queryClient = useQueryClient();
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -70,6 +72,9 @@ export const AuthProvider = ({ children }) => {
   }, [supabase, fetchProfile]);
 
   const signOut = async () => {
+    // Clear all cached query data before signing out so stale authenticated
+    // data (saved ads, messages, etc.) is never served to the next session.
+    queryClient.clear();
     await supabase.auth.signOut();
   };
 
