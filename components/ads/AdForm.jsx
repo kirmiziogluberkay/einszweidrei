@@ -596,7 +596,7 @@ export default function AdForm({ initialData = null }) {
           name="address"
           value={formData.address}
           onChange={handleChange}
-          placeholder="e.g. Alexanderplatz 1, Berlin"
+          placeholder="e.g. Felsennelkenanger 21, 80937, München"
           maxLength={200}
           className="input"
         />
