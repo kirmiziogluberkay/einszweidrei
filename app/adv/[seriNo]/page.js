@@ -16,7 +16,7 @@ import ContactButton from './ContactButton';
 import DeleteAdButton from './DeleteAdButton';
 import StatusToggle from '@/components/ads/StatusToggle';
 import SoldToggle from '@/components/ads/SoldToggle';
-import { Pencil, CheckCircle2, MapPin } from 'lucide-react';
+import { Pencil, CheckCircle2, MapPin, Bookmark } from 'lucide-react';
 import { formatPrice, formatDate, formatUsername } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
 import SaveButton from '@/components/ads/SaveButton';
@@ -89,6 +89,12 @@ export default async function AdDetailPage({ params }) {
   }
 
   const canEdit = user && (user.id === ad.owner?.id || isAdmin);
+
+  // How many users have saved / are watching this ad
+  const { count: watchersCount } = await supabase
+    .from('saved_ads')
+    .select('*', { count: 'exact', head: true })
+    .eq('ad_id', ad.id);
 
   // Fetch all categories to identify parent names manually
   const { data: allCats } = await supabase
@@ -429,6 +435,16 @@ export default async function AdDetailPage({ params }) {
                     {user?.id === ad.owner_id && (
                       <p className="text-[11px] font-bold text-brand-500 uppercase tracking-widest text-center py-2.5 border-2 border-brand-100 rounded-xl bg-brand-50/50">
                         YOUR ADVERTISEMENT
+                      </p>
+                    )}
+                    {/* Watcher counter — visible to everyone */}
+                    {watchersCount > 0 && (
+                      <p className="flex items-center justify-center gap-1.5 text-[11px] text-ink-tertiary mt-1">
+                        <Bookmark className="w-3 h-3" />
+                        <span>
+                          <span className="font-semibold text-ink-secondary">{watchersCount}</span>
+                          {' '}{watchersCount === 1 ? 'person is' : 'people are'} watching this ad
+                        </span>
                       </p>
                     )}
                   </>
