@@ -16,6 +16,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { Upload, X, Loader2, AlertCircle, Star } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -41,6 +42,7 @@ import { buildAdUrl, cn } from '@/lib/helpers';
 export default function AdForm({ initialData = null }) {
   const supabase = createClient();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user, isAdmin } = useAuth();
   const { categories } = useCategories();
   const fileInputRef = useRef(null);
@@ -353,14 +355,13 @@ export default function AdForm({ initialData = null }) {
       return;
     }
 
-    setSuccessMsg(initialData ? SUCCESS_MESSAGES.adUpdated : SUCCESS_MESSAGES.adCreated);
     setSubmitting(false);
 
-    // Redirect to ad detail page
-    setTimeout(() => {
-      router.push(buildAdUrl(data.serial_number));
-      router.refresh();
-    }, 800);
+    // Invalidate React Query cache so the new/updated ad is visible immediately
+    await queryClient.invalidateQueries({ queryKey: ['ads'] });
+
+    // Redirect to ad detail page immediately
+    router.push(buildAdUrl(data.serial_number));
   };
 
   const isAccommodation = categories.find(c => c.id === formData.category_id)?.slug?.startsWith('accommodation');

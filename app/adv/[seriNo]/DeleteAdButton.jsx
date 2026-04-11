@@ -10,6 +10,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { Trash2, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '@/constants/config';
@@ -17,6 +18,7 @@ import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '@/constants/config';
 export default function DeleteAdButton({ adId }) {
   const supabase = createClient();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
@@ -57,9 +59,11 @@ export default function DeleteAdButton({ adId }) {
       setLoading(false);
     } else {
       alert(SUCCESS_MESSAGES.adDeleted);
-      // Başarılı silme sonrası ana sayfaya yönlendir
+      // Invalidate React Query cache so deleted ad disappears immediately everywhere
+      await queryClient.invalidateQueries({ queryKey: ['ads'] });
+      // Navigate home — do NOT call router.refresh() here as it races with
+      // the push and tries to re-fetch the now-deleted ad's server component.
       router.push('/');
-      router.refresh();
     }
   };
 
