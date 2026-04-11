@@ -16,7 +16,7 @@ import ContactButton from './ContactButton';
 import DeleteAdButton from './DeleteAdButton';
 import StatusToggle from '@/components/ads/StatusToggle';
 import SoldToggle from '@/components/ads/SoldToggle';
-import { Pencil, CheckCircle2 } from 'lucide-react';
+import { Pencil, CheckCircle2, MapPin } from 'lucide-react';
 import { formatPrice, formatDate, formatUsername } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
 
@@ -61,6 +61,7 @@ export default async function AdDetailPage({ params }) {
       status,
       payment_methods,
       tags,
+      address,
       owner_id,
       category_id,
       created_at,
@@ -374,6 +375,34 @@ export default async function AdDetailPage({ params }) {
                   {ad.description || 'Description not provided.'}
                 </p>
               </div>
+
+              {ad.address && (
+                <div className="card p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
+                       <MapPin className="w-5 h-5 text-brand-500" />
+                       Location
+                    </h2>
+                    <span className="text-sm text-ink-secondary">{ad.address}</span>
+                  </div>
+                  
+                  <div className="relative w-full h-[300px] rounded-2xl overflow-hidden bg-surface-secondary border border-surface-tertiary">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      style={{ border: 0 }}
+                      src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyA_NOT_A_REAL_KEY&q=${encodeURIComponent(ad.address)}`}
+                      allowFullScreen
+                    ></iframe>
+                    {/* Note: In a real app, you'd use a real API key or a different embed method */}
+                    <div className="absolute inset-0 pointer-events-none border border-black/5 rounded-2xl" />
+                  </div>
+                  <p className="text-[11px] text-ink-tertiary mt-3 italic">
+                    * Exact location might differ. Please contact the owner for more info.
+                  </p>
+                </div>
+              )}
 
               <div className="card p-5">
                 <ShareButtons title={ad.title} serialNumber={ad.serial_number} />

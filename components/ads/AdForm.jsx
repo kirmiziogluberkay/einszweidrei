@@ -56,6 +56,7 @@ export default function AdForm({ initialData = null }) {
     payment_methods: (initialData?.payment_methods ?? []).map(m =>
       m?.toLowerCase() === 'paypal' ? 'PayPal' : (m?.toLowerCase() === 'cash' ? 'Cash' : m)
     ),
+    address: initialData?.address ?? '',
   });
 
   /** URLs of uploaded photos (Supabase Storage) */
@@ -300,6 +301,7 @@ export default function AdForm({ initialData = null }) {
       images: uploadedImages,
       payment_methods: formData.payment_methods,
       tags: computedTags,
+      address: formData.address.trim(),
       // To avoid changing the ad owner when an admin updates someone else's ad:
       owner_id: initialData?.owner_id || user.id,
     };
@@ -564,6 +566,24 @@ export default function AdForm({ initialData = null }) {
           required
           className="input"
         />
+      </div>
+
+      {/* ── Address ── */}
+      <div>
+        <label htmlFor="ad-address" className="label">Address / Location</label>
+        <input
+          id="ad-address"
+          type="text"
+          name="address"
+          value={formData.address}
+          onChange={handleChange}
+          placeholder="e.g. Alexanderplatz 1, Berlin"
+          maxLength={200}
+          className="input"
+        />
+        <p className="text-[10px] text-ink-tertiary mt-1">
+          Provide a clear address to show your ad on the map.
+        </p>
       </div>
 
       {/* ── Description ── */}

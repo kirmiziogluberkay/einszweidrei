@@ -11,7 +11,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Clock, Tag } from 'lucide-react';
+import { Clock, Tag, MapPin } from 'lucide-react';
 import { formatPrice, buildAdUrl, timeAgo, formatUsername, cn } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
 
@@ -50,7 +50,8 @@ export default function AdCard({ ad, layout = 'grid' }) {
     owner,
     category,
     payment_methods = [],
-    tags = []
+    tags = [],
+    address,
   } = ad;
 
   /** Link to the ad detail page */
@@ -177,6 +178,12 @@ export default function AdCard({ ad, layout = 'grid' }) {
               <Clock className="w-3.5 h-3.5" />
               <span>{timeAgo(created_at)}</span>
             </div>
+            {address && (
+              <div className="flex items-center gap-1 text-xs text-ink-tertiary ml-auto truncate max-w-[150px]">
+                <MapPin className="w-3 h-3 text-brand-500" />
+                <span>{address}</span>
+              </div>
+            )}
           </div>
         </div>
       </Link>
@@ -284,6 +291,12 @@ export default function AdCard({ ad, layout = 'grid' }) {
               <Clock className="w-3.5 h-3.5" />
               <span>{timeAgo(created_at)}</span>
             </div>
+            {address && (
+              <div className="flex items-center gap-1 text-[10px] text-ink-tertiary max-w-[100px] truncate">
+                <MapPin className="w-3 h-3 text-brand-500" />
+                <span>{address}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

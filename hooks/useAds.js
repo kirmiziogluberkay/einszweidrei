@@ -55,6 +55,7 @@ export function useAds(filters = {}) {
         status,
         payment_methods,
         tags,
+        address,
         category_id,
         created_at,
         category:categories(id, name, slug)
