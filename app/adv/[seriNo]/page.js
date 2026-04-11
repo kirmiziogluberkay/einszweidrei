@@ -255,6 +255,14 @@ export default async function AdDetailPage({ params }) {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
             <div className="lg:col-span-3 space-y-6">
+              <div className="mb-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-ink leading-tight mb-2">{ad.title}</h1>
+                <div className="flex items-center gap-3 text-xs text-ink-tertiary">
+                  <span>{ad.category?.name}</span>
+                  <span className="w-1 h-1 bg-surface-tertiary rounded-full" />
+                  <span>{formatDate(ad.created_at)}</span>
+                </div>
+              </div>
               <AdDetailClient images={ad.images} title={ad.title} />
 
               {/* Room Details Block */}
@@ -439,7 +447,6 @@ export default async function AdDetailPage({ params }) {
                   </span>
                 </div>
 
-                <h1 className="text-[14px] font-bold text-ink leading-tight mb-4">{ad.title}</h1>
 
                 {canEdit && (
                   <div className="flex items-center gap-1 mb-6">
