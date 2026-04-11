@@ -168,9 +168,10 @@ export const STATIC_NAV_LINKS = [
 
 /** Additional nav links for logged-in users */
 export const AUTH_NAV_LINKS = [
-  { label: 'Messages',   href: '/inbox'  },
-  { label: 'Ads',        href: '/myprofile/my-ads'  },
-  { label: 'Profile',    href: '/myprofile'  },
+  { label: 'Messages',   href: '/inbox'        },
+  { label: 'Saved Ads',  href: '/myprofile/saved-ads'  },
+  { label: 'My Ads',     href: '/myprofile/my-ads'    },
+  { label: 'Profile',    href: '/myprofile'    },
 ];
 
 // ─── Error Messages ───────────────────────────────────────────────────────────

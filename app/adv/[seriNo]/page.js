@@ -19,6 +19,7 @@ import SoldToggle from '@/components/ads/SoldToggle';
 import { Pencil, CheckCircle2, MapPin } from 'lucide-react';
 import { formatPrice, formatDate, formatUsername } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
+import SaveButton from '@/components/ads/SaveButton';
 
 /** SEO metadata */
 export async function generateMetadata({ params }) {
@@ -402,12 +403,15 @@ export default async function AdDetailPage({ params }) {
                       </div>
                     </Link>
                     {user?.id !== ad.owner_id && (
-                      <ContactButton
-                        adId={ad.id}
-                        adTitle={ad.title}
-                        receiverId={ad.owner?.id}
-                        receiverName={ad.owner?.username}
-                      />
+                      <div className="space-y-2">
+                        <ContactButton
+                          adId={ad.id}
+                          adTitle={ad.title}
+                          receiverId={ad.owner?.id}
+                          receiverName={ad.owner?.username}
+                        />
+                        <SaveButton adId={ad.id} userId={user.id} />
+                      </div>
                     )}
                     {user?.id === ad.owner_id && (
                       <p className="text-[11px] font-bold text-brand-500 uppercase tracking-widest text-center py-2.5 border-2 border-brand-100 rounded-xl bg-brand-50/50">
@@ -426,6 +430,9 @@ export default async function AdDetailPage({ params }) {
                     >
                       Log In
                     </Link>
+                    <div className="mt-2 max-w-[200px] mx-auto">
+                      <SaveButton adId={ad.id} userId={null} />
+                    </div>
                   </div>
                 )}
               </div>
