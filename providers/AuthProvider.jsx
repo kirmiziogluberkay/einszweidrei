@@ -42,47 +42,23 @@ export const AuthProvider = ({ children }) => {
   }, [supabase]);
 
   useEffect(() => {
-    // Initial user check — with a 8-second safety timeout so a hung token
-    // refresh never leaves the UI frozen in the loading state indefinitely.
-    const initAuth = async () => {
-      try {
-        const timeout = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('auth_timeout')), 8000)
-        );
-        const authCheck = supabase.auth.getUser();
-
-        const { data: { user: u } } = await Promise.race([authCheck, timeout]);
-        setUser(u);
-        if (u) {
-          await fetchProfile(u.id);
-        }
-      } catch (err) {
-        // On timeout or any unexpected error, treat the user as logged out
-        // rather than leaving the app frozen.
-        if (err.message === 'auth_timeout') {
-          console.warn('[Auth] Session check timed out — clearing stale token.');
-          await supabase.auth.signOut();
-        }
-        setUser(null);
-        setProfile(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initAuth();
-
-    // Listen for auth changes
+    // onAuthStateChange fires INITIAL_SESSION immediately on mount with the
+    // persisted session (read from cookies/localStorage — no network call).
+    // Subsequent events (TOKEN_REFRESHED, SIGNED_IN, SIGNED_OUT) keep state
+    // in sync. This single listener replaces the old initAuth + getUser()
+    // pattern that caused a race: getUser() triggered a server round-trip
+    // that could time out and sign the user out while INITIAL_SESSION had
+    // already resolved the session successfully.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const u = session?.user ?? null;
       setUser(u);
-      
+
       if (u) {
         await fetchProfile(u.id);
       } else {
         setProfile(null);
       }
-      
+
       setLoading(false);
     });
 
