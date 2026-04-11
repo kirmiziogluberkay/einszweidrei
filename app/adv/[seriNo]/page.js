@@ -375,10 +375,6 @@ export default async function AdDetailPage({ params }) {
                 </p>
               </div>
 
-
-              <div className="card p-5">
-                <ShareButtons title={ad.title} serialNumber={ad.serial_number} />
-              </div>
             </div>
 
             <aside className="lg:col-span-2 space-y-4">
@@ -570,6 +566,10 @@ export default async function AdDetailPage({ params }) {
                   </p>
                 </div>
               )}
+
+              <div className="card p-5">
+                <ShareButtons title={ad.title} serialNumber={ad.serial_number} />
+              </div>
             </aside>
           </div>
         </div>
