@@ -138,16 +138,16 @@ export default async function AdDetailPage({ params }) {
     rawTags = ad.tags;
   } else if (typeof ad.tags === 'string') {
     try {
-       rawTags = JSON.parse(ad.tags);
-    } catch(e) {
-       rawTags = ad.tags.replace(/^{|}$/g, '').split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+      rawTags = JSON.parse(ad.tags);
+    } catch (e) {
+      rawTags = ad.tags.replace(/^{|}$/g, '').split(',').map(s => s.trim().replace(/^"|"$/g, ''));
     }
   }
 
   const roomTags = rawTags.filter(t => typeof t === 'string' && t.startsWith('ROOM_'));
   const getTag = (prefix) => {
-     const t = roomTags.find(tag => tag.startsWith(prefix));
-     return t ? t.split(':')[1] : null;
+    const t = roomTags.find(tag => tag.startsWith(prefix));
+    return t ? t.split(':')[1] : null;
   }
 
   const roomType = getTag('ROOM_TYPE') || '1';
@@ -156,14 +156,14 @@ export default async function AdDetailPage({ params }) {
   const residentMale = parseInt(getTag('ROOM_MALE') || '0', 10);
   const preferredGender = getTag('ROOM_TARGET') || 'ANY';
   const hasRoomDetails = roomTags.length > 0;
-  
+
   const sharedCount = residentFemale + residentMale;
 
   const rentTypeTag = rawTags.find(t => typeof t === 'string' && t.startsWith('RENT_TYPE:'));
   const rentType = rentTypeTag ? rentTypeTag.split(':')[1] : null;
 
   const propertyFeatures = rawTags.filter(t => typeof t === 'string' && t.startsWith('FEATURE:')).map(t => t.split(':')[1]);
-  
+
   const AVAILABLE_FEATURES = [
     { id: 'ANMELDUNG', label: 'Anmeldung Possible', icon: '📝' },
     { id: 'NO_ANMELDUNG', label: 'Anmeldung Not Possible', icon: '🚫' },
@@ -264,111 +264,111 @@ export default async function AdDetailPage({ params }) {
               {/* Room Details Block */}
               {hasRoomDetails && (
                 <div className="card p-0 overflow-hidden bg-brand-50/20 border-brand-100">
-                   <div className="bg-brand-500 text-white px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                     <h2 className="text-xl font-bold flex items-center gap-2">
-                       🏡 Smart Room-Listing
-                     </h2>
-                     <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase border border-white/30 backdrop-blur-sm self-start sm:self-auto">
-                       Single Occupancy
-                     </span>
-                   </div>
-                   
-                   <div className="p-6 space-y-6">
-                     {/* Hierarchy 1: Privacy Type */}
-                     <div>
-                       <h3 className="text-xs uppercase font-bold text-ink-tertiary mb-3 tracking-wider">Features & Access</h3>
-                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                         <div className="bg-white border border-surface-tertiary rounded-2xl p-4 flex items-center gap-4">
-                           <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-green-100 text-green-600">
-                             ✅
-                           </div>
-                           <div>
-                             <div className="font-semibold text-sm text-ink">{roomType === '2' || roomType === '3' ? 'Private Bath' : 'Shared Bath'}</div>
-                           </div>
-                         </div>
-                         <div className="bg-white border border-surface-tertiary rounded-2xl p-4 flex items-center gap-4">
-                           <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-green-100 text-green-600">
-                             ✅
-                           </div>
-                           <div>
-                             <div className="font-semibold text-sm text-ink">{roomType === '3' ? 'Private Kitchen' : 'Shared Kitchen'}</div>
-                           </div>
-                         </div>
-                       </div>
-                     </div>
+                  <div className="bg-brand-500 text-white px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <h2 className="text-xl font-bold flex items-center gap-2">
+                      🏡 Smart Room-Listing
+                    </h2>
+                    <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase border border-white/30 backdrop-blur-sm self-start sm:self-auto">
+                      Single Occupancy
+                    </span>
+                  </div>
 
-                     {/* Hierarchy 2/3: Apartment & Flatmates */}
-                     <div>
-                       <h3 className="text-xs uppercase font-bold text-ink-tertiary mb-3 tracking-wider">Apartment & Flatmates</h3>
-                       <div className="bg-white border border-surface-tertiary rounded-2xl p-5">
-                          <div className="text-base text-ink mb-4 font-medium flex items-center gap-2">
-                            <span className="text-xl">🚪</span>
-                            This room is part of a <strong>{totalRooms}-room</strong> apartment.
+                  <div className="p-6 space-y-6">
+                    {/* Hierarchy 1: Privacy Type */}
+                    <div>
+                      <h3 className="text-xs uppercase font-bold text-ink-tertiary mb-3 tracking-wider">Features & Access</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="bg-white border border-surface-tertiary rounded-2xl p-4 flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-green-100 text-green-600">
+                            ✅
                           </div>
-                          
-                          <div className="border-t border-surface-tertiary pt-4 mt-2">
-                            <p className="text-sm text-ink-secondary mb-3">
-                               {sharedCount > 0 
-                                 ? <span>You will be sharing the apartment with <strong>{sharedCount}</strong> other people:</span> 
-                                 : "You will be the only person living in the other rooms."
-                               }
-                            </p>
-                            {sharedCount > 0 && (
-                              <div className="flex flex-wrap items-center gap-3">
-                                {residentFemale > 0 && Array.from({length: residentFemale}).map((_, i) => (
-                                  <div key={`f-${i}`} className="flex items-center gap-1.5 bg-pink-50 text-pink-700 px-3 py-1.5 rounded-xl border border-pink-100 font-semibold text-sm shadow-sm">
-                                    🚶‍♀️ Female
-                                  </div>
-                                ))}
-                                {residentMale > 0 && Array.from({length: residentMale}).map((_, i) => (
-                                  <div key={`m-${i}`} className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl border border-blue-100 font-semibold text-sm shadow-sm">
-                                    🚶‍♂️ Male
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                          <div>
+                            <div className="font-semibold text-sm text-ink">{roomType === '2' || roomType === '3' ? 'Private Bath' : 'Shared Bath'}</div>
                           </div>
+                        </div>
+                        <div className="bg-white border border-surface-tertiary rounded-2xl p-4 flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-green-100 text-green-600">
+                            ✅
+                          </div>
+                          <div>
+                            <div className="font-semibold text-sm text-ink">{roomType === '3' ? 'Private Kitchen' : 'Shared Kitchen'}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-                          <div className="border-t border-surface-tertiary pt-4 mt-4">
-                            <p className="text-sm text-ink-secondary mb-2">Target Tenant Preference:</p>
-                            <div className="flex items-center gap-2">
-                               {preferredGender === 'ANY' && <span className="bg-brand-50 text-brand-700 px-3 py-1.5 rounded-lg text-sm font-semibold border border-brand-100">Any Gender</span>}
-                               {preferredGender === 'FEMALE' && <span className="bg-pink-50 text-pink-700 px-3 py-1.5 rounded-lg text-sm font-semibold border border-pink-100">Female Only</span>}
-                               {preferredGender === 'MALE' && <span className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-semibold border border-blue-100">Male Only</span>}
+                    {/* Hierarchy 2/3: Apartment & Flatmates */}
+                    <div>
+                      <h3 className="text-xs uppercase font-bold text-ink-tertiary mb-3 tracking-wider">Apartment & Flatmates</h3>
+                      <div className="bg-white border border-surface-tertiary rounded-2xl p-5">
+                        <div className="text-base text-ink mb-4 font-medium flex items-center gap-2">
+                          <span className="text-xl">🚪</span>
+                          This room is part of a <strong>{totalRooms}-room</strong> apartment.
+                        </div>
+
+                        <div className="border-t border-surface-tertiary pt-4 mt-2">
+                          <p className="text-sm text-ink-secondary mb-3">
+                            {sharedCount > 0
+                              ? <span>You will be sharing the apartment with <strong>{sharedCount}</strong> other people:</span>
+                              : "You will be the only person living in the other rooms."
+                            }
+                          </p>
+                          {sharedCount > 0 && (
+                            <div className="flex flex-wrap items-center gap-3">
+                              {residentFemale > 0 && Array.from({ length: residentFemale }).map((_, i) => (
+                                <div key={`f-${i}`} className="flex items-center gap-1.5 bg-pink-50 text-pink-700 px-3 py-1.5 rounded-xl border border-pink-100 font-semibold text-sm shadow-sm">
+                                  🚶‍♀️ Female
+                                </div>
+                              ))}
+                              {residentMale > 0 && Array.from({ length: residentMale }).map((_, i) => (
+                                <div key={`m-${i}`} className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl border border-blue-100 font-semibold text-sm shadow-sm">
+                                  🚶‍♂️ Male
+                                </div>
+                              ))}
                             </div>
+                          )}
+                        </div>
+
+                        <div className="border-t border-surface-tertiary pt-4 mt-4">
+                          <p className="text-sm text-ink-secondary mb-2">Target Tenant Preference:</p>
+                          <div className="flex items-center gap-2">
+                            {preferredGender === 'ANY' && <span className="bg-brand-50 text-brand-700 px-3 py-1.5 rounded-lg text-sm font-semibold border border-brand-100">Any Gender</span>}
+                            {preferredGender === 'FEMALE' && <span className="bg-pink-50 text-pink-700 px-3 py-1.5 rounded-lg text-sm font-semibold border border-pink-100">Female Only</span>}
+                            {preferredGender === 'MALE' && <span className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-semibold border border-blue-100">Male Only</span>}
                           </div>
-                       </div>
-                     </div>
-                   </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {/* Fallback: show a notice if room details are missing */}
               {ad.category?.slug?.includes('room') && !hasRoomDetails && (
                 <div className="card p-6 bg-orange-50 border-orange-100">
-                   <h2 className="text-sm font-bold text-orange-700 mb-2">Notice for Visitors</h2>
-                   <p className="text-xs text-orange-600">The homeowner hasn't updated the detailed room, flatmate and privacy preferences for this room yet.</p>
+                  <h2 className="text-sm font-bold text-orange-700 mb-2">Notice for Visitors</h2>
+                  <p className="text-xs text-orange-600">The homeowner hasn't updated the detailed room, flatmate and privacy preferences for this room yet.</p>
                 </div>
               )}
 
               {/* Property Features (Universal for all Accommodations) */}
               {propertyFeatures.length > 0 && (
                 <div className="card p-6 bg-brand-50/10 border-brand-100">
-                   <h2 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
-                     <span>✨</span> Property Features
-                   </h2>
-                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      {propertyFeatures.map(feat => {
-                        const def = AVAILABLE_FEATURES.find(f => f.id === feat);
-                        if (!def) return null;
-                        return (
-                          <div key={feat} className="flex flex-col items-center justify-center p-4 bg-white border border-brand-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow gap-2">
-                            <span className="text-3xl">{def.icon}</span>
-                            <span className="text-xs font-semibold text-ink text-center leading-tight">{def.label}</span>
-                          </div>
-                        );
-                      })}
-                   </div>
+                  <h2 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
+                    <span>✨</span> Property Features
+                  </h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {propertyFeatures.map(feat => {
+                      const def = AVAILABLE_FEATURES.find(f => f.id === feat);
+                      if (!def) return null;
+                      return (
+                        <div key={feat} className="flex flex-col items-center justify-center p-4 bg-white border border-brand-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow gap-2">
+                          <span className="text-3xl">{def.icon}</span>
+                          <span className="text-xs font-semibold text-ink text-center leading-tight">{def.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
@@ -547,12 +547,12 @@ export default async function AdDetailPage({ params }) {
                   {/* Updated */}
                   <div className="flex flex-col gap-3 mb-4">
                     <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
-                       <MapPin className="w-5 h-5 text-brand-500" />
-                       Location
+                      <MapPin className="w-5 h-5 text-brand-500" />
+                      Location
                     </h2>
                     <span className="text-sm text-ink-secondary bg-surface-secondary p-2.5 rounded-xl border border-surface-tertiary">{ad.address}</span>
                   </div>
-                  
+
                   <div className="relative w-full h-[250px] rounded-2xl overflow-hidden bg-surface-secondary border border-surface-tertiary">
                     <iframe
                       width="100%"
