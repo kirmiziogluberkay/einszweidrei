@@ -15,6 +15,7 @@ import Marquee from '@/components/layout/Marquee';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { QueryProvider } from '@/components/QueryProvider';
 import { Analytics } from '@vercel/analytics/next';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
@@ -79,7 +80,9 @@ export default function RootLayout({ children }) {
             <Marquee />
 
             {/* ── Top navigation (Desktop & Mobile) ── */}
-            <Navbar />
+            <ErrorBoundary fallback={<header className="h-16 bg-white border-b border-surface-tertiary" />}>
+              <Navbar />
+            </ErrorBoundary>
 
             {/* ── Main content ── */}
             <main className="flex-1 main-content md:pb-0">

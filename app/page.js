@@ -16,6 +16,7 @@ import { useAds } from '@/hooks/useAds';
 import { useCategories } from '@/hooks/useCategories';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/helpers';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Lazy load components
 const AdGrid = dynamic(() => import('@/components/ads/AdGrid'), {
@@ -117,6 +118,7 @@ function HomeContent() {
 
         {/* ── LEFT SIDEBAR: Category Tree ── */}
         <aside className="hidden md:block w-56 flex-shrink-0">
+          <ErrorBoundary fallback={<div className="sticky top-20 p-4 text-xs text-ink-tertiary">Categories unavailable.</div>}>
           <div className="sticky top-20 bg-white border border-surface-tertiary rounded-2xl p-4 shadow-sm">
           <ul className="space-y-0.5 text-sm">
 
@@ -297,12 +299,14 @@ function HomeContent() {
 
             <FeedbackBox />
           </div>
+          </ErrorBoundary>
         </aside>
 
         {/* ── RIGHT: Ads ── */}
         <div className="flex-1 min-w-0">
 
           {/* Mobile category pills */}
+          <ErrorBoundary fallback={null}>
           <div className="flex md:hidden gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4 scrollbar-none">
             <button
               onClick={() => handleCategorySelect(null)}
@@ -345,6 +349,7 @@ function HomeContent() {
               </div>
             ))}
           </div>
+          </ErrorBoundary>
 
           {/* Ad count */}
           {!loading && (searchQuery || selectedCategory) && (

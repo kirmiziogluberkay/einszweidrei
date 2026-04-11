@@ -10,11 +10,13 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit3, Loader2, ChevronRight, FolderOpen } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { slugify, buildCategoryTree } from '@/lib/helpers';
 
 export default function AdminCategoriesPage() {
   const supabase = createClient();
+  const queryClient = useQueryClient();
 
   const [categories, setCategories] = useState([]);
   const [tree,       setTree]       = useState([]);
@@ -79,6 +81,8 @@ export default function AdminCategoriesPage() {
       setForm({ name: '', parent_id: '', sort_order: 0 });
       setEditingId(null);
       await fetchCategories();
+      // Bust the homepage/global category cache so the new category appears immediately
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
     }
 
     setSaving(false);
@@ -105,6 +109,7 @@ export default function AdminCategoriesPage() {
     if (!confirm('Are you sure you want to delete this category?\nSubcategories will be left without a parent.')) return;
     await supabase.from('categories').delete().eq('id', id);
     await fetchCategories();
+    queryClient.invalidateQueries({ queryKey: ['categories'] });
   };
 
   /**
