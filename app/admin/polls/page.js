@@ -37,8 +37,10 @@ export default function AdminPollsPage() {
     const next = !pollsEnabled;
     const { error } = await supabase
       .from('site_settings')
-      .upsert({ key: 'polls_enabled', value: String(next), updated_at: new Date().toISOString() })
-      .eq('key', 'polls_enabled');
+      .upsert(
+        { key: 'polls_enabled', value: String(next), updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      );
 
     if (!error) {
       setPollsEnabled(next);
