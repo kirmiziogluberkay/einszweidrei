@@ -14,6 +14,7 @@ import Footer from '@/components/layout/Footer';
 import Marquee from '@/components/layout/Marquee';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { QueryProvider } from '@/components/QueryProvider';
+import { Analytics } from '@vercel/analytics/next';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
@@ -90,6 +91,7 @@ export default function RootLayout({ children }) {
 
             {/* ── Footer (desktop only) ── */}
             <Footer />
+            <Analytics />
           </QueryProvider>
         </AuthProvider>
       </body>
