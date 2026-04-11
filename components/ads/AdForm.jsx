@@ -17,7 +17,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Upload, X, Loader2, AlertCircle } from 'lucide-react';
+import { Upload, X, Loader2, AlertCircle, Star } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
@@ -230,6 +230,22 @@ export default function AdForm({ initialData = null }) {
       await supabase.storage.from(STORAGE_BUCKET).remove([storagePath]);
     }
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  /**
+   * Moves the selected image to the first position (index 0)
+   * to set it as the cover photo.
+   *
+   * @param {number} index
+   */
+  const setAsCover = (index) => {
+    if (index === 0) return;
+    setUploadedImages((prev) => {
+      const next = [...prev];
+      const [item] = next.splice(index, 1);
+      next.unshift(item);
+      return next;
+    });
   };
 
   /**
@@ -712,17 +728,41 @@ export default function AdForm({ initialData = null }) {
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-2">
           {/* Uploaded photos */}
           {uploadedImages.map((url, index) => (
-            <div key={url} className="relative aspect-square rounded-2xl overflow-hidden group">
+            <div key={url} className={cn(
+              "relative aspect-square rounded-2xl overflow-hidden group border-2 transition-all",
+              index === 0 ? "border-green-500 ring-2 ring-green-100" : "border-transparent"
+            )}>
               <Image src={url} alt={`Photo ${index + 1}`} fill className="object-cover" />
-              <button
-                type="button"
-                onClick={() => removeImage(index)}
-                aria-label="Remove photo"
-                className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/50 text-white
-                           flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
+              
+              {/* Cover Indicator */}
+              {index === 0 && (
+                <div className="absolute top-1.5 left-1.5 bg-green-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-sm z-10 flex items-center gap-1">
+                  <Star className="w-2.5 h-2.5 fill-current" />
+                  COVER
+                </div>
+              )}
+
+              {/* Action Buttons Container */}
+              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                {index !== 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setAsCover(index)}
+                    title="Set as Cover"
+                    className="w-8 h-8 rounded-full bg-white text-brand-500 flex items-center justify-center hover:bg-brand-50 transition-colors shadow-lg"
+                  >
+                    <Star className="w-4 h-4" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeImage(index)}
+                  title="Remove photo"
+                  className="w-8 h-8 rounded-full bg-white text-red-500 flex items-center justify-center hover:bg-red-50 transition-colors shadow-lg"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           ))}
 
