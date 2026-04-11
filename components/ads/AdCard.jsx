@@ -45,6 +45,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
     title,
     description,
     price,
+    original_price,
     currency,
     images,
     status,
@@ -55,6 +56,9 @@ export default function AdCard({ ad, layout = 'grid' }) {
     tags = [],
     address,
   } = ad;
+
+  // Show a strikethrough only when there is a genuine price drop
+  const hasPriceDrop = original_price != null && original_price > 0 && price != null && price < original_price;
 
   /** Link to the ad detail page */
   const adUrl = buildAdUrl(serial_number);
@@ -151,10 +155,17 @@ export default function AdCard({ ad, layout = 'grid' }) {
               {(!price || price === 0) ? (
                 <span className="font-bold text-green-500 text-[10px] leading-none uppercase tracking-wider">Free</span>
               ) : (
-                <span className="font-bold text-ink text-2xl leading-none">
-                  {formatPrice(price, currency)}
-                  {rentType && <span className="text-sm text-ink-secondary ml-1 font-semibold">({rentType === 'WARM' ? 'Warm' : 'Cold'})</span>}
-                </span>
+                <div className="flex flex-col items-end gap-0.5">
+                  {hasPriceDrop && (
+                    <span className="text-sm text-ink-tertiary line-through leading-none">
+                      {formatPrice(original_price, currency)}
+                    </span>
+                  )}
+                  <span className={cn('font-bold text-2xl leading-none', hasPriceDrop ? 'text-red-500' : 'text-ink')}>
+                    {formatPrice(price, currency)}
+                    {rentType && <span className="text-sm text-ink-secondary ml-1 font-semibold">({rentType === 'WARM' ? 'Warm' : 'Cold'})</span>}
+                  </span>
+                </div>
               )}
             </div>
           </div>
@@ -264,10 +275,17 @@ export default function AdCard({ ad, layout = 'grid' }) {
             {(!price || price === 0) ? (
               <span className="font-bold text-green-500 text-[11px] uppercase tracking-wider">Free</span>
             ) : (
-              <span className="font-bold text-ink text-lg leading-none">
-                 {formatPrice(price, currency)}
-                 {rentType && <span className="text-[11px] text-ink-secondary ml-1 font-semibold">({rentType === 'WARM' ? 'Warm' : 'Cold'})</span>}
-              </span>
+              <div className="flex flex-col gap-0.5">
+                {hasPriceDrop && (
+                  <span className="text-[11px] text-ink-tertiary line-through leading-none">
+                    {formatPrice(original_price, currency)}
+                  </span>
+                )}
+                <span className={cn('font-bold text-lg leading-none', hasPriceDrop ? 'text-red-500' : 'text-ink')}>
+                  {formatPrice(price, currency)}
+                  {rentType && <span className="text-[11px] text-ink-secondary ml-1 font-semibold">({rentType === 'WARM' ? 'Warm' : 'Cold'})</span>}
+                </span>
+              </div>
             )}
             {category && (
               <div className="flex items-center gap-1 text-[11px] text-brand-600 font-bold bg-brand-50 px-2 py-1 rounded-lg border border-brand-100 shrink-0">

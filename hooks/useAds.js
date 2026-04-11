@@ -50,6 +50,7 @@ export function useAds(filters = {}) {
         title,
         description,
         price,
+        original_price,
         currency,
         images,
         status,

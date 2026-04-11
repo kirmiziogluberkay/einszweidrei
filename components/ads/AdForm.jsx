@@ -308,10 +308,30 @@ export default function AdForm({ initialData = null }) {
       }
     }
 
+    const newPrice = formData.price ? parseFloat(formData.price) : null;
+
+    // ── Price history logic ──
+    // When the price changes, store the previous price in original_price so the
+    // UI can display a strikethrough. If the new price matches the stored
+    // original_price the user has reverted, so clear it.
+    let originalPrice = initialData?.original_price ?? null;
+    if (initialData?.id) {
+      const prevPrice = initialData.price ?? null;
+      if (newPrice !== prevPrice) {
+        // Price changed — capture the old price as original
+        originalPrice = prevPrice;
+      }
+      // If the new price equals the already-stored original, the drop was reverted — clear it
+      if (newPrice === originalPrice) {
+        originalPrice = null;
+      }
+    }
+
     const payload = {
       title: formData.title.trim(),
       description: formData.description.trim(),
-      price: formData.price ? parseFloat(formData.price) : null,
+      price: newPrice,
+      original_price: originalPrice,
       currency: DEFAULT_CURRENCY,
       category_id: formData.category_id || null,
       area: isAccommodation ? (parseFloat(formData.area) || null) : null,
@@ -338,11 +358,10 @@ export default function AdForm({ initialData = null }) {
         .select('serial_number')
         .single();
     } else {
-      // ── Creation mode (serial_number assigned via trigger) ──
-      // owner_id is set from the authenticated session — never from form input.
+      // ── Creation mode — original_price is always null for new listings ──
       result = await supabase
         .from('ads')
-        .insert({ ...payload, owner_id: user.id })
+        .insert({ ...payload, original_price: null, owner_id: user.id })
         .select('serial_number')
         .single();
     }

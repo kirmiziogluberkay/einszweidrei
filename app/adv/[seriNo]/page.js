@@ -517,16 +517,31 @@ export default async function AdDetailPage({ params }) {
                   {/* Free in green if no price given */}
                   {(!ad.price || ad.price === 0) ? (
                     <p className="text-3xl font-bold text-green-500">Free</p>
-                  ) : (
-                    <div className="flex items-baseline gap-2">
-                      <p className="text-3xl font-bold text-brand-500">
-                        {formatPrice(ad.price, ad.currency)}
-                      </p>
-                      {rentType && (
-                        <span className="text-lg text-ink-secondary font-semibold">({rentType === 'WARM' ? 'Warm' : 'Cold'})</span>
-                      )}
-                    </div>
-                  )}
+                  ) : (() => {
+                    const hasPriceDrop = ad.original_price != null && ad.original_price > 0 && ad.price < ad.original_price;
+                    return (
+                      <div className="flex flex-col gap-1">
+                        {hasPriceDrop && (
+                          <span className="text-base text-ink-tertiary line-through leading-none">
+                            {formatPrice(ad.original_price, ad.currency)}
+                          </span>
+                        )}
+                        <div className="flex items-baseline gap-2">
+                          <p className={`text-3xl font-bold ${hasPriceDrop ? 'text-red-500' : 'text-brand-500'}`}>
+                            {formatPrice(ad.price, ad.currency)}
+                          </p>
+                          {rentType && (
+                            <span className="text-lg text-ink-secondary font-semibold">({rentType === 'WARM' ? 'Warm' : 'Cold'})</span>
+                          )}
+                        </div>
+                        {hasPriceDrop && (
+                          <span className="text-[11px] font-bold text-red-500 bg-red-50 border border-red-100 px-2 py-0.5 rounded-md self-start">
+                            ↓ {Math.round(((ad.original_price - ad.price) / ad.original_price) * 100)}% price drop
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div className="divider" />
