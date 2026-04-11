@@ -40,9 +40,13 @@ export const metadata = {
   // ── PWA ────────────────────────────────────────────
   manifest: '/manifest.json',
   appleWebApp: {
-    capable: true,
+    capable: true,        // generates apple-mobile-web-app-capable
     title: SITE_NAME,
     statusBarStyle: 'default',
+  },
+  // modern cross-platform equivalent (suppresses the deprecation warning)
+  other: {
+    'mobile-web-app-capable': 'yes',
   },
 
   // ── Other ──────────────────────────────────────────
@@ -70,7 +74,7 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* PWA: Apple Touch Icon */}
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" href="/icons/icon.svg" />
         {/* Viewport: mobile optimization */}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>

@@ -42,14 +42,32 @@ export const AuthProvider = ({ children }) => {
   }, [supabase]);
 
   useEffect(() => {
-    // Initial user check
+    // Initial user check — with a 8-second safety timeout so a hung token
+    // refresh never leaves the UI frozen in the loading state indefinitely.
     const initAuth = async () => {
-      const { data: { user: u } } = await supabase.auth.getUser();
-      setUser(u);
-      if (u) {
-        await fetchProfile(u.id);
+      try {
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('auth_timeout')), 8000)
+        );
+        const authCheck = supabase.auth.getUser();
+
+        const { data: { user: u } } = await Promise.race([authCheck, timeout]);
+        setUser(u);
+        if (u) {
+          await fetchProfile(u.id);
+        }
+      } catch (err) {
+        // On timeout or any unexpected error, treat the user as logged out
+        // rather than leaving the app frozen.
+        if (err.message === 'auth_timeout') {
+          console.warn('[Auth] Session check timed out — clearing stale token.');
+          await supabase.auth.signOut();
+        }
+        setUser(null);
+        setProfile(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     initAuth();

@@ -28,7 +28,6 @@ export default function MessageThread({ adId, receiverId, receiverName }) {
   const { user, profile } = useAuth();
   const [messages, setMessages] = useState([]);
   const scrollRef = useRef(null);
-  const bottomRef = useRef(null); 
   const [content, setContent]   = useState('');
   const [loading, setLoading]   = useState(true);
   const [adInfo, setAdInfo]     = useState(null);
@@ -150,21 +149,20 @@ export default function MessageThread({ adId, receiverId, receiverName }) {
     }
   }, [messages, user?.id, loading]);
 
-  // Scroll to bottom when messages change (new message arrives or conversation opens)
+  // Scroll to bottom when messages change (new message arrives or conversation opens).
+  // Only scrolls within the message container — never the page window.
   useEffect(() => {
     const scrollToBottom = () => {
       if (scrollRef.current) {
         scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       }
-      // Fallback via scrollIntoView (instant transition with behavior: auto)
-      bottomRef.current?.scrollIntoView({ behavior: 'auto' });
     };
 
     scrollToBottom();
-    // Delayed confirmation in case DOM changes after images or ad info load
-    const timeout = setTimeout(scrollToBottom, 300);
+    // Delayed pass in case the ad-info image load shifts the container height
+    const timeout = setTimeout(scrollToBottom, 150);
     return () => clearTimeout(timeout);
-  }, [messages, adInfo, user?.id]); // adInfo included because ad image load changes height
+  }, [messages, adInfo, user?.id]);
 
   /**
    * Sends a new message.
@@ -335,7 +333,6 @@ export default function MessageThread({ adId, receiverId, receiverName }) {
             );
           })
         )}
-        <div ref={bottomRef} />
       </div>
 
       {/* ── Send message form ── */}

@@ -53,14 +53,32 @@ export function useAuth() {
   }, [supabase]);
 
   useEffect(() => {
-    // Current user
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      setUser(user ?? null);
-      if (user) {
-        await fetchProfile(user.id);
+    // Current user — with safety timeout to prevent a hung token refresh
+    // from freezing the UI indefinitely in normal (non-incognito) mode.
+    const initAuth = async () => {
+      try {
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('auth_timeout')), 8000)
+        );
+        const { data: { user } } = await Promise.race([
+          supabase.auth.getUser(),
+          timeout,
+        ]);
+        setUser(user ?? null);
+        if (user) await fetchProfile(user.id);
+      } catch (err) {
+        if (err.message === 'auth_timeout') {
+          console.warn('[Auth] Session check timed out — clearing stale token.');
+          await supabase.auth.signOut();
+        }
+        setUser(null);
+        setProfile(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    };
+
+    initAuth();
 
     // Auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {

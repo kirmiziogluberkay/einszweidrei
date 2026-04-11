@@ -8,35 +8,47 @@ export default function Marquee() {
   const supabase = createClient();
 
   useEffect(() => {
+    let channel;
+    let isMounted = true;
+
     async function fetchSettings() {
       const { data } = await supabase
         .from('site_settings')
         .select('value')
         .eq('key', 'marquee')
         .single();
-      
-      if (data) {
+
+      if (isMounted && data) {
         setSettings(data.value);
       }
+
+      // Only subscribe to realtime after the initial fetch, and only if the
+      // component is still mounted. This prevents the "WebSocket closed before
+      // connection established" warning caused by early unmounts (StrictMode).
+      if (!isMounted) return;
+
+      channel = supabase
+        .channel('site_settings_marquee')
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'site_settings',
+          filter: 'key=eq.marquee'
+        }, (payload) => {
+          if (isMounted) setSettings(payload.new.value);
+        })
+        .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.warn('[Marquee] Realtime channel error — will use polling fallback.');
+          }
+        });
     }
 
     fetchSettings();
 
-    // Subscribe to changes
-    const channel = supabase
-      .channel('site_settings_changes')
-      .on('postgres_changes', { 
-        event: 'UPDATE', 
-        schema: 'public', 
-        table: 'site_settings',
-        filter: 'key=eq.marquee'
-      }, (payload) => {
-        setSettings(payload.new.value);
-      })
-      .subscribe();
-
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      if (channel) supabase.removeChannel(channel).catch(() => {});
     };
   }, []);
 
