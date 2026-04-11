@@ -151,7 +151,10 @@ export default function Navbar() {
                {!loading && (
                   <>
                      {!user ? (
-                        <Link href="/login" className="btn-primary py-2 px-6 text-sm h-10 rounded-xl">Login</Link>
+                        <div className="flex items-center gap-2">
+                           <Link href="/register" className="hidden md:flex btn-secondary py-2 px-4 text-sm h-10 rounded-xl">Sign Up</Link>
+                           <Link href="/login" className="btn-primary py-2 px-5 text-sm h-10 rounded-xl">Login</Link>
+                        </div>
                      ) : (
                         <div className="flex items-center gap-3">
                            <div className="relative group flex items-center">

@@ -17,7 +17,7 @@ import { cn } from '@/lib/helpers';
 
 export default function KategoriClient({ category, categoryTree = [] }) {
   const [page, setPage] = useState(1);
-  const [maxPriceApplied, setMaxPriceApplied] = useState(6000);
+  const [maxPriceApplied, setMaxPriceApplied] = useState(null);
   const [maxPriceLocal, setMaxPriceLocal] = useState(6000);
 
   // Expanded state for each root category in the sidebar
@@ -189,7 +189,7 @@ export default function KategoriClient({ category, categoryTree = [] }) {
               </div>
               <button
                 onClick={() => {
-                  setMaxPriceApplied(maxPriceLocal);
+                  setMaxPriceApplied(maxPriceLocal === 6000 ? null : maxPriceLocal);
                   setPage(1);
                 }}
                 className="w-full mt-4 btn-primary text-xs py-2"
