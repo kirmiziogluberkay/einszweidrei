@@ -59,9 +59,6 @@ export default function AdDetailClient({ images, title }) {
               <ChevronRight className="w-5 h-5" />
             </button>
 
-            <div className="absolute bottom-3 right-3 badge bg-black/50 text-white text-xs">
-              {activeIndex + 1} / {images.length}
-            </div>
           </>
         )}
       </div>
