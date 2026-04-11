@@ -61,9 +61,11 @@ export function useAds(filters = {}) {
         category:categories(id, name, slug)
       `, { count: 'exact' });
 
-    // Status filter - Public visitors see 'active', 'reserved', and 'rented' ads.
+    // Status filter - Public discovery feed shows only 'active' and 'rented' ads.
+    // 'reserved' items are intentionally excluded so they don't clutter the feed;
+    // they remain accessible via direct link on the PDP.
     if (!finalOwnerId) {
-      query = query.in('status', ['active', 'reserved', 'rented']);
+      query = query.in('status', ['active', 'rented']);
     } else {
       query = query.eq('owner_id', finalOwnerId);
     }

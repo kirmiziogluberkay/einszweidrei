@@ -214,6 +214,19 @@ export default async function AdDetailPage({ params }) {
         <span className="text-ink font-medium truncate max-w-[200px]">{ad.title}</span>
       </nav>
 
+      {/* Reserved banner — shown when the item has already been reserved */}
+      {ad.status === 'reserved' && (
+        <div className="flex items-center gap-3 mb-6 px-5 py-4 rounded-2xl bg-amber-50 border-2 border-amber-300">
+          <span className="text-2xl" aria-hidden="true">🔒</span>
+          <div>
+            <p className="font-bold text-amber-800 text-sm">This item has been reserved</p>
+            <p className="text-amber-700 text-xs mt-0.5">
+              The seller is currently in the process of completing a transaction. It is no longer available for new inquiries.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Main layout: sidebar + content */}
       <div className="flex gap-4">
 

@@ -15,6 +15,19 @@ export default function QuestionOfTheDay() {
 
   const fetchActivePoll = async () => {
     setLoading(true);
+
+    // Check global polls toggle first
+    const { data: setting } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'polls_enabled')
+      .single();
+
+    if (setting?.value !== 'true') {
+      setLoading(false);
+      return; // polls turned off globally — render nothing
+    }
+
     // Fetch the only active poll
     const { data: pollData, error } = await supabase
       .from('polls')

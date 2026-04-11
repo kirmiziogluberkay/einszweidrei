@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Trash2, Plus, CheckCircle } from 'lucide-react';
+import { Trash2, CheckCircle, Power } from 'lucide-react';
 
 export default function AdminPollsPage() {
   const supabase = createClient();
@@ -10,13 +10,44 @@ export default function AdminPollsPage() {
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState(null);
 
+  // Global polls on/off toggle
+  const [pollsEnabled, setPollsEnabled] = useState(true);
+  const [togglingEnabled, setTogglingEnabled] = useState(false);
+
   // Form State
   const [newQuestion, setNewQuestion] = useState('');
-  const [options, setOptions] = useState(['', '']); 
+  const [options, setOptions] = useState(['', '']);
 
   useEffect(() => {
     fetchPolls();
+    fetchPollsEnabled();
   }, []);
+
+  const fetchPollsEnabled = async () => {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'polls_enabled')
+      .single();
+    if (data) setPollsEnabled(data.value === 'true');
+  };
+
+  const handleToggleEnabled = async () => {
+    setTogglingEnabled(true);
+    const next = !pollsEnabled;
+    const { error } = await supabase
+      .from('site_settings')
+      .upsert({ key: 'polls_enabled', value: String(next), updated_at: new Date().toISOString() })
+      .eq('key', 'polls_enabled');
+
+    if (!error) {
+      setPollsEnabled(next);
+      setMsg({ type: 'success', text: `Polls ${next ? 'enabled' : 'disabled'} on homepage.` });
+    } else {
+      setMsg({ type: 'error', text: error.message });
+    }
+    setTogglingEnabled(false);
+  };
 
   const fetchPolls = async () => {
     setLoading(true);
@@ -89,8 +120,36 @@ export default function AdminPollsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-4">
         <h1 className="text-2xl font-bold text-ink">Question Pool (Polls)</h1>
+
+        {/* Global on/off toggle */}
+        <button
+          onClick={handleToggleEnabled}
+          disabled={togglingEnabled}
+          className={`flex items-center gap-3 px-5 py-2.5 rounded-2xl border-2 font-semibold text-sm transition-all ${
+            pollsEnabled
+              ? 'bg-green-50 border-green-400 text-green-700 hover:bg-green-100'
+              : 'bg-red-50 border-red-300 text-red-600 hover:bg-red-100'
+          }`}
+        >
+          <Power className={`w-4 h-4 ${togglingEnabled ? 'animate-pulse' : ''}`} />
+          {/* Toggle pill */}
+          <span className="flex items-center gap-2">
+            <span
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                pollsEnabled ? 'bg-green-500' : 'bg-red-400'
+              }`}
+            >
+              <span
+                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                  pollsEnabled ? 'translate-x-4' : 'translate-x-1'
+                }`}
+              />
+            </span>
+            {pollsEnabled ? 'Polls: ON' : 'Polls: OFF'}
+          </span>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
