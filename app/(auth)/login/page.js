@@ -20,6 +20,10 @@ import { SITE_NAME } from '@/constants/config';
 
 import { Suspense } from 'react';
 
+// Maximum failed attempts before a temporary lockout
+const MAX_ATTEMPTS  = 5;
+const LOCKOUT_MS    = 60_000; // 1 minute
+
 function LoginContent() {
   const supabase    = createClient();
   const router      = useRouter();
@@ -29,10 +33,12 @@ function LoginContent() {
   const rawRedirect = searchParams.get('redirect') || '/';
   const redirectTo = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/';
 
-  const [email,    setEmail]    = useState('');
-  const [password, setPassword] = useState('');
-  const [loading,  setLoading]  = useState(false);
-  const [error,    setError]    = useState(null);
+  const [email,       setEmail]       = useState('');
+  const [password,    setPassword]    = useState('');
+  const [loading,     setLoading]     = useState(false);
+  const [error,       setError]       = useState(null);
+  const [attempts,    setAttempts]    = useState(0);
+  const [lockedUntil, setLockedUntil] = useState(null); // timestamp (ms)
 
   /**
    * Submits the login form.
@@ -41,6 +47,14 @@ function LoginContent() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);
+
+    // Lockout check
+    if (lockedUntil && Date.now() < lockedUntil) {
+      const secsLeft = Math.ceil((lockedUntil - Date.now()) / 1000);
+      setError(`Too many failed attempts. Please wait ${secsLeft} seconds.`);
+      return;
+    }
+
     setLoading(true);
 
     const { error: authError } = await supabase.auth.signInWithPassword({
@@ -49,15 +63,35 @@ function LoginContent() {
     });
 
     if (authError) {
-      setError(
-        authError.message === 'Invalid login credentials'
-          ? 'Invalid email or password.'
-          : authError.message
-      );
+      const nextAttempts = attempts + 1;
+      setAttempts(nextAttempts);
+
+      // Log failed attempt to the console (server logs will capture this via SSR)
+      console.warn('[Auth] Failed login attempt', {
+        email: email.trim(),
+        attempt: nextAttempts,
+        at: new Date().toISOString(),
+      });
+
+      if (nextAttempts >= MAX_ATTEMPTS) {
+        setLockedUntil(Date.now() + LOCKOUT_MS);
+        setAttempts(0);
+        setError(`Too many failed attempts. Please wait 60 seconds before trying again.`);
+      } else {
+        setError(
+          authError.message === 'Invalid login credentials'
+            ? `Invalid email or password. (${nextAttempts}/${MAX_ATTEMPTS} attempts)`
+            : authError.message
+        );
+      }
+
       setLoading(false);
       return;
     }
 
+    // Successful login — reset counters
+    setAttempts(0);
+    setLockedUntil(null);
     router.push(redirectTo);
     router.refresh();
   };
@@ -120,7 +154,7 @@ function LoginContent() {
             {/* Submit button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (lockedUntil && Date.now() < lockedUntil)}
               id="login-submit-btn"
               className="btn-primary w-full py-3"
             >

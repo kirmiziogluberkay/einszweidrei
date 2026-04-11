@@ -67,7 +67,7 @@ export default async function AdDetailPage({ params }) {
       category_id,
       created_at,
       updated_at,
-      owner:profiles!owner_id(id, username, phone),
+      owner:profiles!owner_id(id, username),
       category:categories(id, name, slug, parent_id)
     `)
     .eq('serial_number', params.seriNo)

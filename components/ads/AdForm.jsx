@@ -319,30 +319,30 @@ export default function AdForm({ initialData = null }) {
       payment_methods: formData.payment_methods,
       tags: computedTags,
       address: formData.address.trim(),
-      // To avoid changing the ad owner when an admin updates someone else's ad:
-      owner_id: initialData?.owner_id || user.id,
+      // owner_id is intentionally excluded from updates — the DB owner never changes.
+      // For inserts it is set below from the authenticated session only.
     };
 
     let result;
 
     if (initialData?.id) {
       // ── Update mode ──
-      let query = supabase
-        .from('ads')
-        .update({ ...payload, updated_at: new Date().toISOString() })
-        .eq('id', initialData.id);
-
-      // If NOT admin, require owning the ad to update
-      if (!isAdmin) {
-        query = query.eq('owner_id', user.id);
-      }
-
-      result = await query.select('serial_number').single();
-    } else {
-      // ── Creation mode (serial_number assigned via trigger) ──
+      // Always filter by owner_id for the authenticated user.
+      // Supabase RLS admin policy bypasses this filter for admins server-side,
+      // so we never rely on the client-side isAdmin flag for authorization.
       result = await supabase
         .from('ads')
-        .insert(payload)
+        .update({ ...payload, updated_at: new Date().toISOString() })
+        .eq('id', initialData.id)
+        .eq('owner_id', user.id)
+        .select('serial_number')
+        .single();
+    } else {
+      // ── Creation mode (serial_number assigned via trigger) ──
+      // owner_id is set from the authenticated session — never from form input.
+      result = await supabase
+        .from('ads')
+        .insert({ ...payload, owner_id: user.id })
         .select('serial_number')
         .single();
     }

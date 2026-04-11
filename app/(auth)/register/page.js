@@ -15,6 +15,16 @@ import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { SITE_NAME } from '@/constants/config';
 
+const RESERVED_USERNAMES = new Set([
+  'admin', 'administrator', 'moderator', 'mod', 'support', 'help',
+  'system', 'root', 'superuser', 'staff', 'team', 'official',
+  'info', 'contact', 'noreply', 'no-reply', 'mail', 'email',
+  'user', 'users', 'account', 'accounts', 'profile', 'profiles',
+  'api', 'dev', 'developer', 'test', 'demo', 'guest', 'anonymous',
+  'null', 'undefined', 'void', 'true', 'false',
+  'einszweidrei', 'site', 'webmaster', 'postmaster',
+]);
+
 export default function RegisterPage() {
   const supabase = createClient();
   const router   = useRouter();
@@ -59,9 +69,16 @@ export default function RegisterPage() {
       return;
     }
 
-    // Username validation (letters, numbers, and underscores only)
+    // Username format validation (letters, numbers, and underscores only)
     if (!/^[a-zA-Z0-9_]{3,30}$/.test(formData.username)) {
       setError('Username must be 3-30 characters, containing only letters/numbers/underscores.');
+      setLoading(false);
+      return;
+    }
+
+    // Username blacklist — reserved words cannot be registered
+    if (RESERVED_USERNAMES.has(formData.username.toLowerCase())) {
+      setError('This username is reserved and cannot be used. Please choose a different one.');
       setLoading(false);
       return;
     }

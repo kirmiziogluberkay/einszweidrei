@@ -35,6 +35,11 @@ export default function MessageThread({ adId, receiverId, receiverName }) {
   const [sending, setSending]   = useState(false);
   const [error, setError]       = useState(null);
 
+  // Rate limiting: track timestamps of the last few sends
+  const sendTimestampsRef = useRef([]); // rolling window of send times
+  const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+  const RATE_LIMIT_MAX       = 10;     // max 10 messages per minute
+
   /**
    * Fetches messages for this ad thread.
    */
@@ -169,6 +174,17 @@ export default function MessageThread({ adId, receiverId, receiverName }) {
     e.preventDefault();
     if (!content.trim() || !user) return;
 
+    // Rate limiting: drop timestamps older than the window, then check count
+    const now = Date.now();
+    sendTimestampsRef.current = sendTimestampsRef.current.filter(
+      (t) => now - t < RATE_LIMIT_WINDOW_MS
+    );
+    if (sendTimestampsRef.current.length >= RATE_LIMIT_MAX) {
+      setError('You are sending messages too fast. Please wait a moment.');
+      return;
+    }
+    sendTimestampsRef.current.push(now);
+
     // Mark existing messages as read when composing a reply
     markAsRead();
 
@@ -214,12 +230,16 @@ export default function MessageThread({ adId, receiverId, receiverName }) {
    * @param {string} messageId
    */
   const handleDeleteMessage = async (messageId) => {
-    await supabase
+    const { error: deleteError } = await supabase
       .from('messages')
       .delete()
       .eq('id', messageId)
       .eq('sender_id', user.id);
 
+    if (deleteError) {
+      setError('Could not delete the message. Please try again.');
+      return;
+    }
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
   };
 
