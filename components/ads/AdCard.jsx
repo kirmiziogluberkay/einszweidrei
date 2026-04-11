@@ -14,6 +14,7 @@ import Image from 'next/image';
 import { Clock, Tag, MapPin } from 'lucide-react';
 import { formatPrice, buildAdUrl, timeAgo, formatUsername, cn } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
+import SaveButton from '@/components/ads/SaveButton';
 
 /**
  * @param {{
@@ -73,10 +74,11 @@ export default function AdCard({ ad, layout = 'grid' }) {
 
   if (layout === 'list') {
     return (
+      <div className="card group flex flex-col md:flex-row gap-6 p-4 transition-shadow relative">
       <Link
         href={adUrl}
         prefetch={false}
-        className="card group flex flex-col md:flex-row gap-6 p-4 hover:shadow-md transition-shadow"
+        className="contents"
         aria-label={`Go to ${title}`}
       >
         {/* ── Left: Image ── */}
@@ -187,15 +189,21 @@ export default function AdCard({ ad, layout = 'grid' }) {
           </div>
         </div>
       </Link>
+      {/* Save button — image üzerinde sol üst köşe */}
+      <div className="absolute top-[1.25rem] left-[1.25rem] z-20">
+        <SaveButton adId={id} iconOnly />
+      </div>
+      </div>
     );
   }
 
   // ─── Default Grid Layout ───
   return (
+    <div className="group card flex flex-col h-full transition-shadow relative overflow-hidden">
     <Link
       href={adUrl}
       prefetch={false}
-      className="group card flex flex-col h-full hover:shadow-md transition-shadow relative overflow-hidden"
+      className="flex flex-col h-full"
       aria-label={`Go to ${title}`}
     >
       {/* Aspect Ratio 4:3 Image Container */}
@@ -301,5 +309,10 @@ export default function AdCard({ ad, layout = 'grid' }) {
         </div>
       </div>
     </Link>
+    {/* Save button — resim üzerinde sol üst köşe */}
+    <div className="absolute top-2 left-2 z-20">
+      <SaveButton adId={id} iconOnly />
+    </div>
+    </div>
   );
 }

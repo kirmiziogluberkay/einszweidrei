@@ -410,7 +410,7 @@ export default async function AdDetailPage({ params }) {
                           receiverId={ad.owner?.id}
                           receiverName={ad.owner?.username}
                         />
-                        <SaveButton adId={ad.id} userId={user.id} />
+                        <SaveButton adId={ad.id} />
                       </div>
                     )}
                     {user?.id === ad.owner_id && (
@@ -564,7 +564,6 @@ export default async function AdDetailPage({ params }) {
                     <iframe
                       width="100%"
                       height="100%"
-                      frameBorder="0"
                       style={{ border: 0 }}
                       src={`https://maps.google.com/maps?q=${encodeURIComponent(ad.address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
                       allowFullScreen
