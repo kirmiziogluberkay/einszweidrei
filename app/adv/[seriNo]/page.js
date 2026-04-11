@@ -243,7 +243,7 @@ export default async function AdDetailPage({ params }) {
               <li style={{ paddingLeft: `${(breadcrumbs.length + 1) * 16}px` }}>
                 <span className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-brand-50 text-brand-600 font-medium text-xs">
                   <span className="opacity-40">└</span>
-                  <span className="truncate">{ad.title}</span>
+                  <span className="truncate font-mono tracking-wider">#{ad.serial_number}</span>
                 </span>
               </li>
             </ul>
@@ -255,13 +255,8 @@ export default async function AdDetailPage({ params }) {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
             <div className="lg:col-span-3 space-y-6">
-              <div className="mb-2">
-                <h1 className="text-2xl sm:text-3xl font-bold text-ink leading-tight mb-2">{ad.title}</h1>
-                <div className="flex items-center gap-3 text-xs text-ink-tertiary">
-                  <span>{ad.category?.name}</span>
-                  <span className="w-1 h-1 bg-surface-tertiary rounded-full" />
-                  <span>{formatDate(ad.created_at)}</span>
-                </div>
+              <div className="mb-4">
+                <h1 className="text-2xl sm:text-3xl font-bold text-ink leading-tight">{ad.title}</h1>
               </div>
               <AdDetailClient images={ad.images} title={ad.title} />
 
