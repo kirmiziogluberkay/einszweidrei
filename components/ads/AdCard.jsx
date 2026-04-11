@@ -40,6 +40,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
   if (!ad) return null;
 
   const {
+    id,
     serial_number,
     title,
     description,
