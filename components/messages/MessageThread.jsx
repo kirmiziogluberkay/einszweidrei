@@ -39,10 +39,17 @@ export default function MessageThread({ adId, receiverId, receiverName }) {
   const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
   const RATE_LIMIT_MAX       = 10;     // max 10 messages per minute
 
+  // Unique mount ID — appended to the Realtime channel name so that a
+  // re-mount never collides with a channel that is still being torn down
+  // from a previous visit. Collision causes subscribe() to hang, freezing
+  // the spinner and blocking all click handlers on the page.
+  const mountIdRef = useRef(`${Date.now()}-${Math.random().toString(36).slice(2)}`);
+
   /**
    * Fetches messages for this ad thread.
+   * isMounted guard prevents state updates on an already-unmounted component.
    */
-  const fetchMessages = async () => {
+  const fetchMessages = async (isMounted) => {
     if (!user) return;
 
     let query = supabase
@@ -63,6 +70,7 @@ export default function MessageThread({ adId, receiverId, receiverName }) {
 
     const { data } = await query;
 
+    if (!isMounted.current) return;
     setMessages(data ?? []);
     setLoading(false);
 
@@ -72,8 +80,8 @@ export default function MessageThread({ adId, receiverId, receiverName }) {
       .select('id, title, price, currency, images, serial_number')
       .eq('id', adId)
       .single();
-    
-    if (adData) setAdInfo(adData);
+
+    if (isMounted.current && adData) setAdInfo(adData);
 
     // Mark unread messages as read
     markAsRead();
@@ -109,12 +117,15 @@ export default function MessageThread({ adId, receiverId, receiverName }) {
 
   useEffect(() => {
     if (!user) return;
-    
-    fetchMessages();
 
-    // Realtime subscription — refresh list when a new message arrives
+    const isMounted = { current: true };
+    fetchMessages(isMounted);
+
+    // Realtime subscription — refresh list when a new message arrives.
+    // mountIdRef.current makes the channel name unique per mount so a
+    // re-mount never collides with a channel still being torn down.
     const channel = supabase
-      .channel(`thread-${user.id}-${receiverId}`)
+      .channel(`thread-${user.id}-${receiverId}-${mountIdRef.current}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -122,19 +133,22 @@ export default function MessageThread({ adId, receiverId, receiverName }) {
       }, (payload) => {
         // Only refresh if the message belongs to this conversation
         const newM = payload.new;
-        const isRelevant = 
+        const isRelevant =
           (newM.sender_id === user.id && newM.receiver_id === receiverId) ||
           (newM.receiver_id === user.id && newM.sender_id === receiverId);
-        
+
         const adCheck = (adId && adId !== 'null') ? String(newM.ad_id) === String(adId) : !newM.ad_id;
 
         if (isRelevant && adCheck) {
-          fetchMessages();
+          fetchMessages(isMounted);
         }
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      isMounted.current = false;
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adId, user, receiverId]);
 
