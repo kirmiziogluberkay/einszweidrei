@@ -81,7 +81,7 @@ export default function RootLayout({ children }) {
             <Navbar />
 
             {/* ── Main content ── */}
-            <main className="flex-1 pb-16 md:pb-0">
+            <main className="flex-1 main-content md:pb-0">
               {children}
             </main>
 

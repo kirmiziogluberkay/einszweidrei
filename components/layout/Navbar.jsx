@@ -135,7 +135,7 @@ export default function Navbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search among all ads..."
-                  className="w-full bg-surface-secondary/50 border border-surface-tertiary focus:border-brand-500 focus:bg-white rounded-xl py-2 pl-9 pr-4 text-sm outline-none transition-all"
+                  className="w-full bg-surface-secondary/50 border border-surface-tertiary focus:border-brand-500 focus:bg-white rounded-xl py-2 pl-9 pr-4 text-base outline-none transition-all"
                 />
               </form>
             </div>
@@ -219,7 +219,7 @@ export default function Navbar() {
                   </>
                )}
 
-               <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)}>
+               <button className="md:hidden p-3 -mr-1" onClick={() => setMobileOpen(!mobileOpen)}>
                   {mobileOpen ? <X /> : <Menu />}
                </button>
             </div>

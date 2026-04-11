@@ -75,7 +75,7 @@ export default function MobileNav() {
   if (pathname.startsWith('/admin')) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/80 backdrop-blur-xl border-t border-surface-tertiary">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/80 backdrop-blur-xl border-t border-surface-tertiary mobile-nav-bar">
       <div className="flex items-center justify-around h-16">
         {NAV_ITEMS.map((item) => {
           if (item.authRequired && !user) return null;

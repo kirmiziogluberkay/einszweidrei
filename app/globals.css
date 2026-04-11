@@ -41,13 +41,34 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
+  /* Prevent Safari text size adjustment on orientation change */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   background-color: var(--color-surface-2);
   color: var(--color-ink);
   min-height: 100vh;
+  /* Prevent horizontal overflow on mobile */
+  overflow-x: hidden;
 }
+
+/* ── iOS / Mobile Touch Fixes ── */
+
+/* Remove iOS tap blue flash on all elements */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent double-tap zoom delay on interactive elements */
+button, a, [role="button"], label,
+input[type="button"], input[type="submit"] {
+  touch-action: manipulation;
+}
+
+/* iOS Safari: Prevent auto-zoom on input focus (requires font-size >= 16px) */
+/* Applied directly on .input and specific inputs below */
 
 /* ── Tipografi ── */
 h1 { font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; }
@@ -82,9 +103,12 @@ input, textarea, select {
   transition: all 0.2s ease-in-out;
 }
 
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+/* Hover only on devices that support it (not touch screens) */
+@media (hover: hover) {
+  .card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
 }
 
 .btn-primary {
@@ -103,7 +127,10 @@ input, textarea, select {
   cursor: pointer;
 }
 
-.btn-primary:hover { background-color: var(--color-brand-dark); }
+@media (hover: hover) {
+  .btn-primary:hover { background-color: var(--color-brand-dark); }
+}
+.btn-primary:active  { background-color: var(--color-brand-dark); }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-secondary {
@@ -122,7 +149,10 @@ input, textarea, select {
   cursor: pointer;
 }
 
-.btn-secondary:hover { background-color: var(--color-surface-3); }
+@media (hover: hover) {
+  .btn-secondary:hover { background-color: var(--color-surface-3); }
+}
+.btn-secondary:active { background-color: var(--color-surface-3); }
 
 .input {
   width: 100%;
@@ -131,7 +161,8 @@ input, textarea, select {
   background-color: var(--color-surface-2);
   border: 1px solid var(--color-surface-3);
   color: var(--color-ink);
-  font-size: 0.875rem;
+  /* 1rem (16px) minimum — prevents iOS Safari auto-zoom on focus */
+  font-size: 1rem;
   transition: all 0.15s ease-in-out;
 }
 
@@ -182,8 +213,27 @@ input, textarea, select {
   background: rgba(255, 255, 255, 0.8);
 }
 
+/* ── Safe Area Utilities (iPhone notch / home bar) ── */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Mobile nav fixed bar: h-16 content + safe area */
+.mobile-nav-bar {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Main content on mobile: room for fixed bottom nav + home bar */
+@media (max-width: 767px) {
+  .main-content {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* iOS momentum scrolling for horizontal scroll containers */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
 }
 
 .gradient-text {
