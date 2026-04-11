@@ -419,7 +419,7 @@ export default async function AdDetailPage({ params }) {
                       </div>
                     )}
                     <Link
-                      href={`/ilan/${ad.serial_number}/duzenle`}
+                      href={`/adv/${ad.serial_number}/duzenle`}
                       className="btn-owner-action w-20 flex-shrink-0 bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50"
                       title="Edit Ad"
                     >

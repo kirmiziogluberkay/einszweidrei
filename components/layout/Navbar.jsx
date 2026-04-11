@@ -224,6 +224,49 @@ export default function Navbar() {
                </button>
             </div>
          </nav>
+
+         {/* ── Mobile Menu Drawer ── */}
+         {mobileOpen && (
+            <div className="md:hidden border-t border-surface-tertiary bg-white shadow-lg">
+               <div className="container-app py-4 space-y-1">
+                  {!user ? (
+                     <>
+                        <Link href="/" className="flex items-center px-4 py-3 text-sm font-medium text-ink rounded-xl hover:bg-surface-secondary transition-colors">Home</Link>
+                        <Link href="/ara" className="flex items-center px-4 py-3 text-sm font-medium text-ink rounded-xl hover:bg-surface-secondary transition-colors">Search</Link>
+                        <div className="border-t border-surface-tertiary my-2" />
+                        <Link href="/register" className="flex items-center px-4 py-3 text-sm font-medium text-brand-600 rounded-xl hover:bg-brand-50 transition-colors">Sign Up</Link>
+                        <Link href="/login" className="flex items-center px-4 py-3 text-sm font-bold text-white bg-brand-500 rounded-xl hover:bg-brand-600 transition-colors">Log In</Link>
+                     </>
+                  ) : (
+                     <>
+                        <div className="flex items-center gap-3 px-4 py-3 mb-1">
+                           <div className="w-9 h-9 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-sm border border-brand-100">
+                              {usernameDisplay?.charAt(0).toUpperCase() ?? '?'}
+                           </div>
+                           <div>
+                              <p className="text-sm font-bold text-ink">{usernameDisplay}</p>
+                              <p className="text-xs text-ink-tertiary">{user.email}</p>
+                           </div>
+                        </div>
+                        <div className="border-t border-surface-tertiary my-2" />
+                        <Link href="/post-ad" className="flex items-center px-4 py-3 text-sm font-medium text-ink rounded-xl hover:bg-surface-secondary transition-colors">New Ad</Link>
+                        <Link href="/myprofile" className="flex items-center px-4 py-3 text-sm font-medium text-ink rounded-xl hover:bg-surface-secondary transition-colors">My Profile</Link>
+                        <Link href="/inbox" className="flex items-center justify-between px-4 py-3 text-sm font-medium text-ink rounded-xl hover:bg-surface-secondary transition-colors">
+                           <span>Inbox</span>
+                           {hasUnread && <span className="w-2 h-2 bg-green-500 rounded-full" />}
+                        </Link>
+                        {profile?.role === 'admin' && (
+                           <Link href="/admin" className="flex items-center px-4 py-3 text-sm font-medium text-brand-600 rounded-xl hover:bg-brand-50 transition-colors">Admin Panel</Link>
+                        )}
+                        <div className="border-t border-surface-tertiary my-2" />
+                        <button onClick={handleSignOut} className="w-full flex items-center gap-2 px-4 py-3 text-sm font-bold text-red-500 rounded-xl hover:bg-red-50 transition-colors">
+                           <LogOut className="w-4 h-4" /> Log Out
+                        </button>
+                     </>
+                  )}
+               </div>
+            </div>
+         )}
       </header>
    );
 }

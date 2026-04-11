@@ -25,8 +25,9 @@ function LoginContent() {
   const router      = useRouter();
   const searchParams = useSearchParams();
 
-  /** Başarılı girişten sonra yönlendirilecek URL */
-  const redirectTo = searchParams.get('redirect') || '/';
+  /** Başarılı girişten sonra yönlendirilecek URL — sadece iç path'lere izin ver */
+  const rawRedirect = searchParams.get('redirect') || '/';
+  const redirectTo = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/';
 
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');

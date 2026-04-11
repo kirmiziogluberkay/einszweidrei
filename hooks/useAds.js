@@ -36,7 +36,6 @@ export function useAds(filters = {}) {
   ], [skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods, page]);
 
   const fetchAds = useCallback(async () => {
-    console.log('fetchAds called with filters:', { skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods, page });
     if (skip) {
       return { ads: [], total: 0 };
     }
@@ -121,7 +120,7 @@ export function useAds(filters = {}) {
     return { ads: sortedData, total: count ?? 0 };
   }, [supabase, skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods, page]);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey,
     queryFn: fetchAds,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -134,6 +133,6 @@ export function useAds(filters = {}) {
     totalPages: Math.ceil((data?.total || 0) / ADS_PER_PAGE),
     loading: isLoading,
     error: error?.message || null,
-    refetch: () => {}, // React Query handles refetch
+    refetch,
   };
 }

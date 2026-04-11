@@ -215,12 +215,20 @@ export default function AdForm({ initialData = null }) {
   };
 
   /**
-   * Removes the photo at the specified index from the list.
-   * (File in Supabase Storage is not deleted, only the reference is removed)
+   * Removes the photo at the specified index from the list
+   * and deletes the file from Supabase Storage.
    *
    * @param {number} index
    */
-  const removeImage = (index) => {
+  const removeImage = async (index) => {
+    const imageUrl = uploadedImages[index];
+    // Extract storage path from the public URL
+    const marker = `/storage/v1/object/public/${STORAGE_BUCKET}/`;
+    const pathIndex = imageUrl?.indexOf(marker);
+    if (pathIndex !== -1 && imageUrl) {
+      const storagePath = imageUrl.slice(pathIndex + marker.length);
+      await supabase.storage.from(STORAGE_BUCKET).remove([storagePath]);
+    }
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
