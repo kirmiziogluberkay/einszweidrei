@@ -115,8 +115,7 @@ export default function AdForm({ initialData = null }) {
     { id: 'SEMI_FURNISHED', label: 'Semi-furnished', icon: '🪑' },
     { id: 'UNFURNISHED', label: 'Unfurnished', icon: '🏠' },
     { id: 'NON_SMOKING', label: 'Non-smoking Household', icon: '🚭' },
-    { id: 'PET_FRIENDLY', label: 'Pet Friendly', icon: '🐾' },
-    { id: 'ENERGY_EFFICIENT', label: 'Energy Efficiency Rating', icon: '🌱' }
+    { id: 'PET_FRIENDLY', label: 'Pet Friendly', icon: '🐾' }
   ];
 
   /**
@@ -430,65 +429,69 @@ export default function AdForm({ initialData = null }) {
             </div>
           </div>
 
-          <div className="space-y-4 pt-3 border-t border-surface-tertiary">
-            <label className="label">2. Apartment Size</label>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-white p-4 rounded-2xl border border-surface-tertiary">
-              <span className="text-sm font-medium text-ink flex-1">Total Rooms in Apartment:</span>
-              <div className="flex items-center gap-3">
-                <button type="button" onClick={() => setTotalRooms(Math.max(2, totalRooms - 1))} className="w-10 h-10 rounded-full border border-surface-tertiary hover:bg-surface-secondary font-bold text-xl flex items-center justify-center">-</button>
-                <span className="w-8 text-center font-bold text-xl">{totalRooms}</span>
-                <button type="button" onClick={() => setTotalRooms(Math.min(15, totalRooms + 1))} className="w-10 h-10 rounded-full border border-surface-tertiary hover:bg-surface-secondary font-bold text-xl flex items-center justify-center">+</button>
+          {roomType !== '3' && (
+            <>
+              <div className="space-y-4 pt-3 border-t border-surface-tertiary">
+                <label className="label">2. Apartment Size</label>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-white p-4 rounded-2xl border border-surface-tertiary">
+                  <span className="text-sm font-medium text-ink flex-1">Total Rooms in Apartment:</span>
+                  <div className="flex items-center gap-3">
+                    <button type="button" onClick={() => setTotalRooms(Math.max(2, totalRooms - 1))} className="w-10 h-10 rounded-full border border-surface-tertiary hover:bg-surface-secondary font-bold text-xl flex items-center justify-center">-</button>
+                    <span className="w-8 text-center font-bold text-xl">{totalRooms}</span>
+                    <button type="button" onClick={() => setTotalRooms(Math.min(15, totalRooms + 1))} className="w-10 h-10 rounded-full border border-surface-tertiary hover:bg-surface-secondary font-bold text-xl flex items-center justify-center">+</button>
+                  </div>
+                </div>
+                <p className="text-xs text-ink-tertiary px-2 font-medium">✨ This room automatically represents 1 room. The remaining {totalRooms - 1} room(s) represent the rest of the flatmates.</p>
               </div>
-            </div>
-            <p className="text-xs text-ink-tertiary px-2 font-medium">✨ This room automatically represents 1 room. The remaining {totalRooms - 1} room(s) represent the rest of the flatmates.</p>
-          </div>
 
-          <div className="space-y-4 pt-3 border-t border-surface-tertiary">
-            <label className="label">3. Current Flatmates</label>
-            <p className="text-xs text-ink-tertiary mb-3 mt-0">Specify the genders of the flatmates living in the other {totalRooms - 1} rooms.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-pink-50/60 p-4 rounded-2xl border border-pink-100 flex items-center justify-between">
-                <span className="flex items-center gap-2 text-pink-600 font-semibold text-sm">🚶‍♀️ Female</span>
-                <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => setResidentFemale(Math.max(0, residentFemale - 1))} className="w-9 h-9 rounded-full bg-white border border-pink-200 text-pink-600 font-bold hover:bg-pink-100 flex items-center justify-center text-lg">-</button>
-                  <span className="w-5 text-center font-bold text-pink-700 text-lg">{residentFemale}</span>
-                  <button type="button" onClick={() => setResidentFemale(Math.min(totalRooms - 1 - residentMale, residentFemale + 1))} className="w-9 h-9 rounded-full bg-white border border-pink-200 text-pink-600 font-bold hover:bg-pink-100 flex items-center justify-center text-lg">+</button>
+              <div className="space-y-4 pt-3 border-t border-surface-tertiary">
+                <label className="label">3. Current Flatmates</label>
+                <p className="text-xs text-ink-tertiary mb-3 mt-0">Specify the genders of the flatmates living in the other {totalRooms - 1} rooms.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-pink-50/60 p-4 rounded-2xl border border-pink-100 flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-pink-600 font-semibold text-sm">🚶‍♀️ Female</span>
+                    <div className="flex items-center gap-3">
+                      <button type="button" onClick={() => setResidentFemale(Math.max(0, residentFemale - 1))} className="w-9 h-9 rounded-full bg-white border border-pink-200 text-pink-600 font-bold hover:bg-pink-100 flex items-center justify-center text-lg">-</button>
+                      <span className="w-5 text-center font-bold text-pink-700 text-lg">{residentFemale}</span>
+                      <button type="button" onClick={() => setResidentFemale(Math.min(totalRooms - 1 - residentMale, residentFemale + 1))} className="w-9 h-9 rounded-full bg-white border border-pink-200 text-pink-600 font-bold hover:bg-pink-100 flex items-center justify-center text-lg">+</button>
+                    </div>
+                  </div>
+                  <div className="bg-blue-50/60 p-4 rounded-2xl border border-blue-100 flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-blue-600 font-semibold text-sm">🚶‍♂️ Male</span>
+                    <div className="flex items-center gap-3">
+                      <button type="button" onClick={() => setResidentMale(Math.max(0, residentMale - 1))} className="w-9 h-9 rounded-full bg-white border border-blue-200 text-blue-600 font-bold hover:bg-blue-100 flex items-center justify-center text-lg">-</button>
+                      <span className="w-5 text-center font-bold text-blue-700 text-lg">{residentMale}</span>
+                      <button type="button" onClick={() => setResidentMale(Math.min(totalRooms - 1 - residentFemale, residentMale + 1))} className="w-9 h-9 rounded-full bg-white border border-blue-200 text-blue-600 font-bold hover:bg-blue-100 flex items-center justify-center text-lg">+</button>
+                    </div>
+                  </div>
+                </div>
+                {(residentFemale + residentMale > totalRooms - 1) && (
+                  <p className="text-xs text-red-500 font-semibold bg-red-50 p-2 rounded-lg border border-red-100">The total number of flatmates cannot exceed the remaining rooms ({totalRooms - 1}).</p>
+                )}
+              </div>
+
+              <div className="space-y-4 pt-3 border-t border-surface-tertiary">
+                <label className="label">4. Target Tenant Preference</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'ANY' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
+                    <input type="radio" name="preferredGender" value="ANY" checked={preferredGender === 'ANY'} onChange={() => setPreferredGender('ANY')} className="hidden" />
+                    <div className="font-semibold text-ink text-sm">Any Gender</div>
+                    <div className="text-xs text-ink-secondary mt-1">All genders welcome</div>
+                  </label>
+                  <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'FEMALE' ? 'border-pink-500 bg-pink-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-pink-300'}`}>
+                    <input type="radio" name="preferredGender" value="FEMALE" checked={preferredGender === 'FEMALE'} onChange={() => setPreferredGender('FEMALE')} className="hidden" />
+                    <div className="font-semibold text-pink-700 text-sm">Female Only</div>
+                    <div className="text-xs text-pink-600 mt-1">Looking for a female tenant</div>
+                  </label>
+                  <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'MALE' ? 'border-blue-500 bg-blue-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-blue-300'}`}>
+                    <input type="radio" name="preferredGender" value="MALE" checked={preferredGender === 'MALE'} onChange={() => setPreferredGender('MALE')} className="hidden" />
+                    <div className="font-semibold text-blue-700 text-sm">Male Only</div>
+                    <div className="text-xs text-blue-600 mt-1">Looking for a male tenant</div>
+                  </label>
                 </div>
               </div>
-              <div className="bg-blue-50/60 p-4 rounded-2xl border border-blue-100 flex items-center justify-between">
-                <span className="flex items-center gap-2 text-blue-600 font-semibold text-sm">🚶‍♂️ Male</span>
-                <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => setResidentMale(Math.max(0, residentMale - 1))} className="w-9 h-9 rounded-full bg-white border border-blue-200 text-blue-600 font-bold hover:bg-blue-100 flex items-center justify-center text-lg">-</button>
-                  <span className="w-5 text-center font-bold text-blue-700 text-lg">{residentMale}</span>
-                  <button type="button" onClick={() => setResidentMale(Math.min(totalRooms - 1 - residentFemale, residentMale + 1))} className="w-9 h-9 rounded-full bg-white border border-blue-200 text-blue-600 font-bold hover:bg-blue-100 flex items-center justify-center text-lg">+</button>
-                </div>
-              </div>
-            </div>
-            {(residentFemale + residentMale > totalRooms - 1) && (
-              <p className="text-xs text-red-500 font-semibold bg-red-50 p-2 rounded-lg border border-red-100">The total number of flatmates cannot exceed the remaining rooms ({totalRooms - 1}).</p>
-            )}
-          </div>
-
-          <div className="space-y-4 pt-3 border-t border-surface-tertiary">
-            <label className="label">4. Target Tenant Preference</label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'ANY' ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-brand-300'}`}>
-                <input type="radio" name="preferredGender" value="ANY" checked={preferredGender === 'ANY'} onChange={() => setPreferredGender('ANY')} className="hidden" />
-                <div className="font-semibold text-ink text-sm">Any Gender</div>
-                <div className="text-xs text-ink-secondary mt-1">All genders welcome</div>
-              </label>
-              <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'FEMALE' ? 'border-pink-500 bg-pink-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-pink-300'}`}>
-                <input type="radio" name="preferredGender" value="FEMALE" checked={preferredGender === 'FEMALE'} onChange={() => setPreferredGender('FEMALE')} className="hidden" />
-                <div className="font-semibold text-pink-700 text-sm">Female Only</div>
-                <div className="text-xs text-pink-600 mt-1">Looking for a female tenant</div>
-              </label>
-              <label className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${preferredGender === 'MALE' ? 'border-blue-500 bg-blue-50/50 shadow-sm' : 'border-surface-tertiary bg-white hover:border-blue-300'}`}>
-                <input type="radio" name="preferredGender" value="MALE" checked={preferredGender === 'MALE'} onChange={() => setPreferredGender('MALE')} className="hidden" />
-                <div className="font-semibold text-blue-700 text-sm">Male Only</div>
-                <div className="text-xs text-blue-600 mt-1">Looking for a male tenant</div>
-              </label>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       )}
 

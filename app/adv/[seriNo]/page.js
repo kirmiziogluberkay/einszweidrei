@@ -194,8 +194,7 @@ export default async function AdDetailPage({ params }) {
     { id: 'SEMI_FURNISHED', label: 'Semi-furnished', icon: '🪑' },
     { id: 'UNFURNISHED', label: 'Unfurnished', icon: '🏠' },
     { id: 'NON_SMOKING', label: 'Non-smoking Household', icon: '🚭' },
-    { id: 'PET_FRIENDLY', label: 'Pet Friendly', icon: '🐾' },
-    { id: 'ENERGY_EFFICIENT', label: 'Energy Efficiency Rating', icon: '🌱' }
+    { id: 'PET_FRIENDLY', label: 'Pet Friendly', icon: '🐾' }
   ];
 
   return (
