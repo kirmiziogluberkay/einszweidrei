@@ -229,7 +229,7 @@ export default function MessageThread({ adId, receiverId, receiverName }) {
       setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
     } else {
       // Fetch real data on success (for accurate ID and timestamp)
-      fetchMessages();
+      fetchMessages({ current: true });
     }
 
     setSending(false);
