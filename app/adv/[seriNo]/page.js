@@ -255,10 +255,11 @@ export default async function AdDetailPage({ params }) {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
             <div className="lg:col-span-3 space-y-6">
-              <div className="mb-4">
+              {/* Title and Gallery Group with 14px gap */}
+              <div className="flex flex-col gap-[14px]">
                 <h1 className="text-2xl sm:text-3xl font-bold text-ink leading-tight">{ad.title}</h1>
+                <AdDetailClient images={ad.images} title={ad.title} />
               </div>
-              <AdDetailClient images={ad.images} title={ad.title} />
 
               {/* Room Details Block */}
               {hasRoomDetails && (
