@@ -593,32 +593,36 @@ export default async function AdDetailPage({ params }) {
                 )}
               </div>
 
-              {ad.address && (
-                <div className="card p-6">
-                  {/* Updated */}
-                  <div className="flex flex-col gap-3 mb-4">
-                    <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-brand-500" />
-                      Location
-                    </h2>
-                    <span className="text-sm text-ink-secondary bg-surface-secondary p-2.5 rounded-xl border border-surface-tertiary">{ad.address}</span>
-                  </div>
-
-                  <div className="relative w-full h-[250px] rounded-2xl overflow-hidden bg-surface-secondary border border-surface-tertiary">
-                    <iframe
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      src={`https://maps.google.com/maps?q=${encodeURIComponent(ad.address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
-                      allowFullScreen
-                    ></iframe>
-                    <div className="absolute inset-0 pointer-events-none border border-black/5 rounded-2xl" />
-                  </div>
-                  <p className="text-[10px] text-ink-tertiary mt-3 italic">
-                    * Exact location might differ.
+              <div className="card p-6">
+                <h2 className="text-lg font-semibold text-ink flex items-center gap-2 mb-4">
+                  <MapPin className="w-5 h-5 text-brand-500" />
+                  Location
+                </h2>
+                {ad.address ? (
+                  <>
+                    <span className="text-sm text-ink-secondary bg-surface-secondary p-2.5 rounded-xl border border-surface-tertiary block mb-4">
+                      {ad.address}
+                    </span>
+                    <div className="relative w-full h-[250px] rounded-2xl overflow-hidden bg-surface-secondary border border-surface-tertiary">
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        src={`https://maps.google.com/maps?q=${encodeURIComponent(ad.address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                        allowFullScreen
+                      ></iframe>
+                      <div className="absolute inset-0 pointer-events-none border border-black/5 rounded-2xl" />
+                    </div>
+                    <p className="text-[10px] text-ink-tertiary mt-3 italic">
+                      * Exact location might differ.
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-ink-tertiary italic">
+                    The user has not shared an address.
                   </p>
-                </div>
-              )}
+                )}
+              </div>
 
               <div className="card p-5">
                 <ShareButtons title={ad.title} serialNumber={ad.serial_number} />
