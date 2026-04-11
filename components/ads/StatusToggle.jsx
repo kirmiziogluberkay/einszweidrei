@@ -7,14 +7,14 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
 /**
- * İlan detay sayfasında sahibine özel 'Rezerve Et / Kiraladı' butonu.
+ * Owner-only 'Reserve / Rented' toggle button on the ad detail page.
  */
 export default function StatusToggle({ adId, currentStatus, categoryId, categories, ownerId }) {
   const supabase = createClient();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  // Kök kategorinin slug değerini bul:
+  // Find the root category's slug:
   const findRootSlug = (cId) => {
     const cat = categories.find(c => c.id === cId);
     if (!cat) return '';

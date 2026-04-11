@@ -13,6 +13,7 @@ import MobileNav from '@/components/layout/MobileNav';
 import Footer from '@/components/layout/Footer';
 import Marquee from '@/components/layout/Marquee';
 import { AuthProvider } from '@/providers/AuthProvider';
+import { QueryProvider } from '@/components/QueryProvider';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
@@ -73,21 +74,23 @@ export default function RootLayout({ children }) {
       </head>
       <body className="flex flex-col min-h-screen bg-surface-secondary">
         <AuthProvider>
-          <Marquee />
+          <QueryProvider>
+            <Marquee />
 
-          {/* ── Top navigation (Desktop & Mobile) ── */}
-          <Navbar />
+            {/* ── Top navigation (Desktop & Mobile) ── */}
+            <Navbar />
 
-          {/* ── Main content ── */}
-          <main className="flex-1 pb-16 md:pb-0">
-            {children}
-          </main>
+            {/* ── Main content ── */}
+            <main className="flex-1 pb-16 md:pb-0">
+              {children}
+            </main>
 
-          {/* ── Bottom navigation (mobile only) ── */}
-          <MobileNav />
+            {/* ── Bottom navigation (mobile only) ── */}
+            <MobileNav />
 
-          {/* ── Footer (desktop only) ── */}
-          <Footer />
+            {/* ── Footer (desktop only) ── */}
+            <Footer />
+          </QueryProvider>
         </AuthProvider>
       </body>
     </html>

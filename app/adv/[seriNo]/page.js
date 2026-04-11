@@ -1,10 +1,4 @@
 // force-rebuild-v1
-// update 22:08: Minimalist 14px (text-[14px]) başlık uygulandı.
-// update 20:41
-// update 20:37
-// update 17:18
-// update 17:02
-// update 16:42
 /**
  * app/adv/[seriNo]/page.js
  * ─────────────────────────────────────────────────────
@@ -79,7 +73,7 @@ export default async function AdDetailPage({ params }) {
 
   if (!ad) notFound();
 
-  // Aktif oturum ve yetkileri kontrol et
+  // Check active session and permissions
   const { data: { user } } = await supabase.auth.getUser();
   let isAdmin = false;
 
@@ -137,7 +131,7 @@ export default async function AdDetailPage({ params }) {
 
   const statusInfo = AD_STATUSES[ad.status] ?? AD_STATUSES.active;
 
-  // Güvenli tag ayrıştırma (Eğer tags string geldiyse veya null ise korur)
+  // Safe tag parsing (handles string or null values)
   let rawTags = [];
   if (Array.isArray(ad.tags)) {
     rawTags = ad.tags;
@@ -345,7 +339,7 @@ export default async function AdDetailPage({ params }) {
                 </div>
               )}
 
-              {/* Fallback Information: Eger oda detaylari hala gozukmuyorsa diye bir uyari goster */}
+              {/* Fallback: show a notice if room details are missing */}
               {ad.category?.slug?.includes('room') && !hasRoomDetails && (
                 <div className="card p-6 bg-orange-50 border-orange-100">
                    <h2 className="text-sm font-bold text-orange-700 mb-2">Notice for Visitors</h2>
@@ -419,7 +413,7 @@ export default async function AdDetailPage({ params }) {
                       </div>
                     )}
                     <Link
-                      href={`/ilan/${ad.serial_number}/duzenle`}
+                      href={`/adv/${ad.serial_number}/edit`}
                       className="btn-owner-action w-20 flex-shrink-0 bg-surface-secondary text-ink-secondary hover:text-brand-600 hover:bg-brand-50"
                       title="Edit Ad"
                     >

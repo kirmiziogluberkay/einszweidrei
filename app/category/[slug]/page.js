@@ -8,7 +8,7 @@
 
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import KategoriClient from './KategoriClient';
+import CategoryClient from './CategoryClient';
 
 export const revalidate = 0; // Force dynamic rendering for newest categories
 
@@ -90,5 +90,5 @@ export default async function CategoryPage({ params }) {
         .sort(sortBySortOrder),
     })) ?? [];
 
-  return <KategoriClient category={enrichedCategory} categoryTree={roots} />;
+  return <CategoryClient category={enrichedCategory} categoryTree={roots} />;
 }

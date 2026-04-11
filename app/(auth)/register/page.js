@@ -1,8 +1,8 @@
 /**
  * app/(auth)/register/page.js
  * ─────────────────────────────────────────────────────
- * Kayıt sayfası.
- * Kullanıcı kaydı: Supabase Auth + profiles tablosu.
+ * Registration page.
+ * User registration: Supabase Auth + profiles table.
  * ─────────────────────────────────────────────────────
  */
 
@@ -34,9 +34,9 @@ export default function RegisterPage() {
   };
 
   /**
-   * Kayıt formunu gönderir.
-   * 1 - Supabase Auth ile kullanıcı oluştur
-   * 2 - profiles tablosuna kayıt ekle
+   * Submits the registration form.
+   * 1 - Create user with Supabase Auth
+   * 2 - Insert record into the profiles table
    *
    * @param {React.FormEvent} e
    */
@@ -45,28 +45,28 @@ export default function RegisterPage() {
     setError(null);
     setLoading(true);
 
-    // Şifre eşleşme kontrolü
+    // Password match check
     if (formData.password !== formData.confirm) {
       setError('Passwords do not match.');
       setLoading(false);
       return;
     }
 
-    // Minimum şifre uzunluğu
+    // Minimum password length
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters.');
       setLoading(false);
       return;
     }
 
-    // Kullanıcı adı kontrolü (sadece harf, rakam ve alt çizgi)
+    // Username validation (letters, numbers, and underscores only)
     if (!/^[a-zA-Z0-9_]{3,30}$/.test(formData.username)) {
       setError('Username must be 3-30 characters, containing only letters/numbers/underscores.');
       setLoading(false);
       return;
     }
 
-    // Supabase Auth kaydı
+    // Supabase Auth signup
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email:    formData.email.trim(),
       password: formData.password,
@@ -83,7 +83,7 @@ export default function RegisterPage() {
       return;
     }
 
-    // profiles tablosuna eklemeyi dene (hata verirse bile kaydı bozma)
+    // Try inserting into profiles (don't abort registration on failure)
     try {
       if (authData.user) {
         await supabase.from('profiles').insert({
@@ -122,7 +122,7 @@ export default function RegisterPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
 
-        {/* Başlık */}
+        {/* Title */}
         <div className="text-center mb-8">
           <Link href="/" className="text-2xl font-bold text-ink hover:text-brand-500 transition-colors">
             {SITE_NAME}
@@ -141,7 +141,7 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleRegister} className="space-y-5">
-            {/* Kullanıcı adı */}
+            {/* Username */}
             <div>
               <label htmlFor="reg-username" className="label">Username</label>
               <input
@@ -157,7 +157,7 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* E-posta */}
+            {/* Email */}
             <div>
               <label htmlFor="reg-email" className="label">Email</label>
               <input
@@ -173,7 +173,7 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* Şifre */}
+            {/* Password */}
             <div>
               <label htmlFor="reg-password" className="label">Password</label>
               <input
@@ -190,7 +190,7 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* Şifre tekrar */}
+            {/* Confirm password */}
             <div>
               <label htmlFor="reg-confirm" className="label">Confirm Password</label>
               <input

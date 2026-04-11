@@ -27,8 +27,25 @@ export default function DeleteAdButton({ adId }) {
     if (!confirmed) return;
 
     setLoading(true);
-    
-    // Supabase silme işlemi
+
+    // İlana ait görselleri Storage'dan sil
+    const { data: adData } = await supabase
+      .from('ads')
+      .select('images')
+      .eq('id', adId)
+      .single();
+
+    if (adData?.images?.length > 0) {
+      const BUCKET = 'ad-images';
+      const marker = `/storage/v1/object/public/${BUCKET}/`;
+      const paths = adData.images
+        .map(url => { const i = url.indexOf(marker); return i !== -1 ? url.slice(i + marker.length) : null; })
+        .filter(Boolean);
+      if (paths.length > 0) {
+        await supabase.storage.from(BUCKET).remove(paths);
+      }
+    }
+
     // RLS (Row Level Security) zaten bu işlemi sadece sahibine/admin'e kısıtlamış olmalı
     const { error } = await supabase
       .from('ads')

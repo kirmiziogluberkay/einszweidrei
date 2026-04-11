@@ -14,10 +14,19 @@ import { Search, ChevronDown, ChevronRight } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useAds } from '@/hooks/useAds';
 import { useCategories } from '@/hooks/useCategories';
-import AdGrid from '@/components/ads/AdGrid';
-import FeedbackBox from '@/components/FeedbackBox';
-import QuestionOfTheDay from '@/components/polls/QuestionOfTheDay';
+import dynamic from 'next/dynamic';
 import { cn } from '@/lib/helpers';
+
+// Lazy load components
+const AdGrid = dynamic(() => import('@/components/ads/AdGrid'), {
+  loading: () => <div>Loading ads...</div>
+});
+const FeedbackBox = dynamic(() => import('@/components/FeedbackBox'), {
+  loading: () => <div>Loading feedback...</div>
+});
+const QuestionOfTheDay = dynamic(() => import('@/components/polls/QuestionOfTheDay'), {
+  loading: () => <div>Loading poll...</div>
+});
 
 function HomeContent() {
   const searchParams = useSearchParams();

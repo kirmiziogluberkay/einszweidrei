@@ -60,6 +60,22 @@ export default function MyProfilePage() {
     setSaving(true);
     setMsg(null);
 
+    // Username format kontrolü
+    if (username.trim() && !/^[a-zA-Z0-9_]{3,30}$/.test(username.trim())) {
+      setMsg('Username must be 3-30 characters, containing only letters, numbers, or underscores.');
+      setMsgType('error');
+      setSaving(false);
+      return;
+    }
+
+    // Telefon format kontrolü (opsiyonel alan)
+    if (phone.trim() && !/^\+?[\d\s\-().]{7,20}$/.test(phone.trim())) {
+      setMsg('Please enter a valid phone number (e.g. +49 123 456 7890).');
+      setMsgType('error');
+      setSaving(false);
+      return;
+    }
+
     const { error } = await supabase
       .from('profiles')
       .update({ username: username.trim(), phone: phone.trim() })
@@ -82,8 +98,8 @@ export default function MyProfilePage() {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     setPwdMsg(null);
-    if (!newPassword || newPassword.length < 6) {
-      setPwdMsg('Password must be at least 6 characters.');
+    if (!newPassword || newPassword.length < 8) {
+      setPwdMsg('Password must be at least 8 characters.');
       setPwdMsgType('error');
       return;
     }
@@ -219,7 +235,7 @@ export default function MyProfilePage() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="input"
-              placeholder="Minimum 6 characters"
+              placeholder="Minimum 8 characters"
             />
           </div>
           <div>

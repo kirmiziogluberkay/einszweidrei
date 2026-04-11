@@ -3,8 +3,8 @@
 /**
  * hooks/useAuth.js
  * ─────────────────────────────────────────────────────
- * Kimlik doğrulama durumunu ve kullanıcı profilini
- * yöneten custom React hook.
+ * Custom React hook that manages authentication state
+ * and the current user's profile.
  * ─────────────────────────────────────────────────────
  */
 
@@ -13,7 +13,7 @@ import { createClient } from '@/lib/supabase/client';
 import { USER_ROLES } from '@/constants/config';
 
 /**
- * Oturum, kullanıcı ve profil bilgilerini döndüren hook.
+ * Hook that returns session, user, and profile information.
  *
  * @returns {{
  *   user: import('@supabase/supabase-js').User | null,
@@ -26,17 +26,17 @@ import { USER_ROLES } from '@/constants/config';
 export function useAuth() {
   const supabase = createClient();
 
-  /** Supabase auth kullanıcısı */
+  /** Supabase auth user */
   const [user, setUser] = useState(null);
 
-  /** Veritabanından gelen profil bilgisi */
+  /** Profile record from the database */
   const [profile, setProfile] = useState(null);
 
-  /** İlk yükleme durumu */
+  /** Initial loading state */
   const [loading, setLoading] = useState(true);
 
   /**
-   * Kullanıcı id'sine göre profil kaydını çeker.
+   * Fetches the profile record for the given user ID.
    *
    * @param {string} userId
    */
@@ -76,14 +76,14 @@ export function useAuth() {
   }, [supabase, fetchProfile]);
 
   /**
-   * Kullanıcının oturumunu kapatır.
+   * Signs out the current user.
    */
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
   }, [supabase.auth]);
 
   /**
-   * Profil bilgilerini manuel olarak yeniler.
+   * Manually refreshes the profile data.
    */
   const refreshProfile = useCallback(async () => {
     if (user) await fetchProfile(user.id);
@@ -92,7 +92,7 @@ export function useAuth() {
   return {
     user,
     profile,
-    /** Kullanıcının admin rolüne sahip olup olmadığı */
+    /** Whether the current user has the admin role */
     isAdmin: profile?.role === USER_ROLES.ADMIN,
     loading,
     signOut,
