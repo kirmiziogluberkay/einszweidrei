@@ -376,33 +376,6 @@ export default async function AdDetailPage({ params }) {
                 </p>
               </div>
 
-              {ad.address && (
-                <div className="card p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
-                       <MapPin className="w-5 h-5 text-brand-500" />
-                       Location
-                    </h2>
-                    <span className="text-sm text-ink-secondary">{ad.address}</span>
-                  </div>
-                  
-                  <div className="relative w-full h-[300px] rounded-2xl overflow-hidden bg-surface-secondary border border-surface-tertiary">
-                    <iframe
-                      width="100%"
-                      height="100%"
-                      frameBorder="0"
-                      style={{ border: 0 }}
-                      src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyA_NOT_A_REAL_KEY&q=${encodeURIComponent(ad.address)}`}
-                      allowFullScreen
-                    ></iframe>
-                    {/* Note: In a real app, you'd use a real API key or a different embed method */}
-                    <div className="absolute inset-0 pointer-events-none border border-black/5 rounded-2xl" />
-                  </div>
-                  <p className="text-[11px] text-ink-tertiary mt-3 italic">
-                    * Exact location might differ. Please contact the owner for more info.
-                  </p>
-                </div>
-              )}
 
               <div className="card p-5">
                 <ShareButtons title={ad.title} serialNumber={ad.serial_number} />
@@ -410,6 +383,54 @@ export default async function AdDetailPage({ params }) {
             </div>
 
             <aside className="lg:col-span-2 space-y-4">
+              <div className="card p-6">
+                <h3 className="text-base font-semibold text-ink mb-4">Advertiser</h3>
+                {user ? (
+                  <>
+                    <Link
+                      href={`/profile/${ad.owner?.username}`}
+                      className="flex items-center gap-3 mb-4 group cursor-pointer"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-600
+                                      flex items-center justify-center font-bold text-sm
+                                      group-hover:bg-brand-500 group-hover:text-white transition-all shadow-sm">
+                        {formatUsername(ad.owner?.username).charAt(0) || "?"}
+                      </div>
+                      <div>
+                        <p className="font-bold text-ink text-sm group-hover:text-brand-500 transition-colors">
+                          {formatUsername(ad.owner?.username)}
+                        </p>
+                      </div>
+                    </Link>
+                    {user?.id !== ad.owner_id && (
+                      <ContactButton
+                        adId={ad.id}
+                        adTitle={ad.title}
+                        receiverId={ad.owner?.id}
+                        receiverName={ad.owner?.username}
+                      />
+                    )}
+                    {user?.id === ad.owner_id && (
+                      <p className="text-[11px] font-bold text-brand-500 uppercase tracking-widest text-center py-2.5 border-2 border-brand-100 rounded-xl bg-brand-50/50">
+                        YOUR ADVERTISEMENT
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-4 px-2 bg-surface-secondary rounded-xl border border-surface-tertiary">
+                    <p className="text-sm text-ink-secondary mb-3 px-2">
+                      Please log in to see seller information and send a message.
+                    </p>
+                    <Link
+                      href="/login"
+                      className="btn-primary w-full max-w-[200px] mx-auto text-sm py-2"
+                    >
+                      Log In
+                    </Link>
+                  </div>
+                )}
+              </div>
+
               <div className="card p-6 space-y-4">
                 <div className="flex flex-col gap-0.5 mb-2">
                   <span className="text-[9px] font-bold text-ink-tertiary uppercase tracking-wider">Status</span>
@@ -523,53 +544,32 @@ export default async function AdDetailPage({ params }) {
                 )}
               </div>
 
-              <div className="card p-6">
-                <h3 className="text-base font-semibold text-ink mb-4">Advertiser</h3>
-                {user ? (
-                  <>
-                    <Link
-                      href={`/profile/${ad.owner?.username}`}
-                      className="flex items-center gap-3 mb-4 group cursor-pointer"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-600
-                                      flex items-center justify-center font-bold text-sm
-                                      group-hover:bg-brand-500 group-hover:text-white transition-all shadow-sm">
-                        {formatUsername(ad.owner?.username).charAt(0) || "?"}
-                      </div>
-                      <div>
-                        <p className="font-bold text-ink text-sm group-hover:text-brand-500 transition-colors">
-                          {formatUsername(ad.owner?.username)}
-                        </p>
-                      </div>
-                    </Link>
-                    {user?.id !== ad.owner_id && (
-                      <ContactButton
-                        adId={ad.id}
-                        adTitle={ad.title}
-                        receiverId={ad.owner?.id}
-                        receiverName={ad.owner?.username}
-                      />
-                    )}
-                    {user?.id === ad.owner_id && (
-                      <p className="text-[11px] font-bold text-brand-500 uppercase tracking-widest text-center py-2.5 border-2 border-brand-100 rounded-xl bg-brand-50/50">
-                        YOUR ADVERTISEMENT
-                      </p>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center py-4 px-2 bg-surface-secondary rounded-xl border border-surface-tertiary">
-                    <p className="text-sm text-ink-secondary mb-3 px-2">
-                      Please log in to see seller information and send a message.
-                    </p>
-                    <Link
-                      href="/login"
-                      className="btn-primary w-full max-w-[200px] mx-auto text-sm py-2"
-                    >
-                      Log In
-                    </Link>
+              {ad.address && (
+                <div className="card p-6">
+                  <div className="flex flex-col gap-3 mb-4">
+                    <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
+                       <MapPin className="w-5 h-5 text-brand-500" />
+                       Location
+                    </h2>
+                    <span className="text-sm text-ink-secondary bg-surface-secondary p-2.5 rounded-xl border border-surface-tertiary">{ad.address}</span>
                   </div>
-                )}
-              </div>
+                  
+                  <div className="relative w-full h-[250px] rounded-2xl overflow-hidden bg-surface-secondary border border-surface-tertiary">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      style={{ border: 0 }}
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(ad.address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                      allowFullScreen
+                    ></iframe>
+                    <div className="absolute inset-0 pointer-events-none border border-black/5 rounded-2xl" />
+                  </div>
+                  <p className="text-[10px] text-ink-tertiary mt-3 italic">
+                    * Exact location might differ.
+                  </p>
+                </div>
+              )}
             </aside>
           </div>
         </div>
