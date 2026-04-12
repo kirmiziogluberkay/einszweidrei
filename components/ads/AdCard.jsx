@@ -12,7 +12,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Clock, Tag, MapPin } from 'lucide-react';
-import { formatPrice, buildAdUrl, timeAgo, formatUsername, cn } from '@/lib/helpers';
+import { formatPrice, buildAdUrl, timeAgo, cn } from '@/lib/helpers';
 import { AD_STATUSES } from '@/constants/config';
 import SaveButton from '@/components/ads/SaveButton';
 
@@ -50,7 +50,6 @@ export default function AdCard({ ad, layout = 'grid' }) {
     images,
     status,
     created_at,
-    owner,
     category,
     payment_methods = [],
     tags = [],
@@ -195,7 +194,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
             {address && (
               <div className="flex items-center gap-1 text-xs text-ink-tertiary ml-auto">
                 <MapPin className="w-3 h-3 text-brand-500" />
-                <span>{(() => { const clean = address.replace(/\s*,?\s*\d{4,5}.*$/, '').trim(); return clean.length > 30 ? clean.slice(0, 30) + '…' : clean; })()}</span>
+                <span>{(() => { const clean = address.replace(/\s*,?\s*\d{4,5}.*$/, '').trim(); return clean.length > 27 ? clean.slice(0, 27) + '…' : clean; })()}</span>
               </div>
             )}
           </div>
@@ -321,7 +320,7 @@ export default function AdCard({ ad, layout = 'grid' }) {
             {address && (
               <div className="flex items-center gap-1 text-[10px] text-ink-tertiary">
                 <MapPin className="w-3 h-3 text-brand-500" />
-                <span>{(() => { const clean = address.replace(/\s*,?\s*\d{4,5}.*$/, '').trim(); return clean.length > 30 ? clean.slice(0, 30) + '…' : clean; })()}</span>
+                <span>{(() => { const clean = address.replace(/\s*,?\s*\d{4,5}.*$/, '').trim(); return clean.length > 27 ? clean.slice(0, 27) + '…' : clean; })()}</span>
               </div>
             )}
           </div>

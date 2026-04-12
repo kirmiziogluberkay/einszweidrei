@@ -16,6 +16,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle, Lock, Unlock, CheckCircle, Circle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useAds } from '@/hooks/useAds';
 import { useCategories } from '@/hooks/useCategories';
@@ -25,6 +26,7 @@ import { SUCCESS_MESSAGES, ERROR_MESSAGES, AD_STATUSES, AD_URL_PREFIX } from '@/
 export default function MyAdsPage() {
   const supabase = createClient();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user, loading: authLoading } = useAuth();
   const { categories } = useCategories();
 
@@ -35,7 +37,7 @@ export default function MyAdsPage() {
     }
   }, [user, authLoading, router]);
 
-  const { ads, loading: adsLoading, refetch } = useAds(
+  const { ads, loading: adsLoading } = useAds(
     user?.id ? { owner_id: user.id } : { skip: true }
   );
 
@@ -67,7 +69,7 @@ export default function MyAdsPage() {
     if (!error) {
       setMsg(SUCCESS_MESSAGES.adDeleted);
       setMsgType('success');
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ['ads'] });
     } else {
       setMsg(ERROR_MESSAGES.generic);
       setMsgType('error');
@@ -96,7 +98,7 @@ export default function MyAdsPage() {
       .eq('owner_id', user.id);
 
     if (!error) {
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ['ads'] });
     } else {
       setMsg('Update failed: ' + error.message);
       setMsgType('error');
@@ -111,7 +113,7 @@ export default function MyAdsPage() {
       .eq('id', adId)
       .eq('owner_id', user.id);
 
-    if (!error) refetch();
+    if (!error) queryClient.invalidateQueries({ queryKey: ['ads'] });
   };
 
   if (authLoading) {

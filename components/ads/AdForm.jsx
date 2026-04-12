@@ -160,6 +160,7 @@ export default function AdForm({ initialData = null }) {
    * @param {React.ChangeEvent<HTMLInputElement>} e
    */
   const handleImageUpload = async (e) => {
+    if (!user) return;
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
 

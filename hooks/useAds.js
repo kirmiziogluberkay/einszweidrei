@@ -140,6 +140,7 @@ export function useAds(filters = {}) {
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     placeholderData: (prev) => prev,
+    refetchOnMount: 'always',
   });
 
   const ads = useMemo(() => data?.pages.flatMap(p => p.ads) ?? [], [data]);
