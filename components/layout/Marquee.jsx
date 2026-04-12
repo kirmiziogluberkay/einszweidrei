@@ -55,7 +55,7 @@ export default function Marquee() {
   if (!settings || !settings.active || !settings.text) return null;
 
   return (
-    <div className="bg-brand-600 text-white py-2 overflow-hidden whitespace-nowrap relative z-[60]">
+    <div className="bg-brand-600 text-white py-0.5 overflow-hidden whitespace-nowrap relative z-[60]">
       <div 
         className="inline-block animate-marquee"
         style={{ 

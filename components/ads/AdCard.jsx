@@ -193,9 +193,9 @@ export default function AdCard({ ad, layout = 'grid' }) {
               <span>{timeAgo(created_at)}</span>
             </div>
             {address && (
-              <div className="flex items-center gap-1 text-xs text-ink-tertiary ml-auto truncate max-w-[150px]">
+              <div className="flex items-center gap-1 text-xs text-ink-tertiary ml-auto">
                 <MapPin className="w-3 h-3 text-brand-500" />
-                <span>{address}</span>
+                <span>{(() => { const clean = address.replace(/\s*,?\s*\d{4,5}.*$/, '').trim(); return clean.length > 30 ? clean.slice(0, 30) + '…' : clean; })()}</span>
               </div>
             )}
           </div>
@@ -319,9 +319,9 @@ export default function AdCard({ ad, layout = 'grid' }) {
               <span>{timeAgo(created_at)}</span>
             </div>
             {address && (
-              <div className="flex items-center gap-1 text-[10px] text-ink-tertiary max-w-[100px] truncate">
+              <div className="flex items-center gap-1 text-[10px] text-ink-tertiary">
                 <MapPin className="w-3 h-3 text-brand-500" />
-                <span>{address}</span>
+                <span>{(() => { const clean = address.replace(/\s*,?\s*\d{4,5}.*$/, '').trim(); return clean.length > 30 ? clean.slice(0, 30) + '…' : clean; })()}</span>
               </div>
             )}
           </div>
