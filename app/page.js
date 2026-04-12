@@ -9,9 +9,9 @@
 
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { Search, ChevronDown, ChevronRight } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, useRef, Suspense } from 'react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useAds } from '@/hooks/useAds';
 import { useCategories } from '@/hooks/useCategories';
 import dynamic from 'next/dynamic';
@@ -30,17 +30,17 @@ const QuestionOfTheDay = dynamic(() => import('@/components/polls/QuestionOfTheD
 });
 
 function HomeContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const qParam = searchParams.get('q') || '';
 
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState(null);
   const [searchQuery, setSearchQuery] = useState(qParam);
-  const [page, setPage] = useState(1);
-  
+  const sentinelRef = useRef(null);
+
   useEffect(() => {
      setSearchQuery(qParam);
-     setPage(1);
   }, [qParam]);
   const [expandedRoots, setExpandedRoots] = useState({});
   const [maxPriceApplied, setMaxPriceApplied] = useState(null);
@@ -51,22 +51,31 @@ function HomeContent() {
 
   const { categoryTree } = useCategories();
 
-  const { ads, loading, error, total, totalPages } = useAds({
+  const { ads, loading, error, total, fetchNextPage, hasNextPage, isFetchingNextPage } = useAds({
     categoryId: selectedCategoryIds ? null : selectedCategory,
     categoryIds: selectedCategoryIds ?? undefined,
     searchQuery,
     minPrice: minPriceApplied,
     maxPrice: maxPriceApplied,
     paymentMethods: selectedPaymentMethods,
-    page,
   });
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) fetchNextPage(); },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const toggleRoot = (id) =>
     setExpandedRoots(prev => ({ ...prev, [id]: !prev[id] }));
 
   const handleCategorySelect = (categoryId, parentCat = null) => {
     setSelectedCategory(categoryId);
-    setPage(1);
     if (parentCat && parentCat.children?.length > 0) {
       const ids = [parentCat.id, ...parentCat.children.map(c => c.id)];
       setSelectedCategoryIds(ids);
@@ -76,8 +85,7 @@ function HomeContent() {
   };
 
   const handleSearchClear = () => {
-    // If we want to clear the global search bar, we should navigate back to /
-    window.location.href = '/';
+    router.push('/');
   };
 
   const handlePaymentMethodChange = (method) => {
@@ -85,7 +93,6 @@ function HomeContent() {
       const next = prev.includes(method)
         ? prev.filter((m) => m !== method)
         : [...prev, method];
-      setPage(1);
       return next;
     });
   };
@@ -269,7 +276,6 @@ function HomeContent() {
                 onClick={() => {
                   setMinPriceApplied(minPriceLocal);
                   setMaxPriceApplied(maxPriceLocal === 6000 ? null : maxPriceLocal);
-                  setPage(1);
                 }}
                 className="w-full btn-primary text-xs py-2.5 rounded-xl shadow-sm"
               >
@@ -372,27 +378,9 @@ function HomeContent() {
             }
           />
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-10">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="btn-secondary px-4 py-2 disabled:opacity-40"
-              >
-                ← Previous
-              </button>
-              <span className="text-sm text-ink-secondary px-4">
-                {page} / {totalPages}
-              </span>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="btn-secondary px-4 py-2 disabled:opacity-40"
-              >
-                Next →
-              </button>
-            </div>
-          )}
+          <div ref={sentinelRef} className="h-10 mt-4 flex items-center justify-center">
+            {isFetchingNextPage && <span className="text-xs text-ink-tertiary">Loading...</span>}
+          </div>
         </div>
       </div>
     </div>

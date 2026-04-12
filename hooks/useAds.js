@@ -1,26 +1,26 @@
-// force-rebuild-v2
+// force-rebuild-v3
 'use client';
 
 /**
  * hooks/useAds.js
  * ─────────────────────────────────────────────────────
  * Custom React hook managing ad listing, filtering,
- * and pagination logic.
+ * and infinite scroll pagination logic.
  * ─────────────────────────────────────────────────────
  */
 
 import { useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { ADS_PER_PAGE } from '@/constants/config';
 
 /**
- * Hook that returns the list of ads.
+ * Hook that returns the list of ads with infinite scroll support.
  */
 export function useAds(filters = {}) {
   const supabase = useMemo(() => createClient(), []);
 
-  const { skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods, page = 1 } = filters;
+  const { skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods } = filters;
 
   const queryKey = useMemo(() => [
     'ads',
@@ -32,12 +32,11 @@ export function useAds(filters = {}) {
     minPrice,
     maxPrice,
     paymentMethods?.join(','),
-    page
-  ], [skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods, page]);
+  ], [skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods]);
 
-  const fetchAds = useCallback(async () => {
+  const fetchAds = useCallback(async ({ pageParam = 1 }) => {
     if (skip) {
-      return { ads: [], total: 0 };
+      return { ads: [], total: 0, page: pageParam };
     }
 
     const finalOwnerId = ownerId || owner_id;
@@ -62,9 +61,6 @@ export function useAds(filters = {}) {
         category:categories(id, name, slug)
       `, { count: 'exact' });
 
-    // Status filter - Public discovery feed shows only 'active' and 'rented' ads.
-    // 'reserved' items are intentionally excluded so they don't clutter the feed;
-    // they remain accessible via direct link on the PDP.
     if (!finalOwnerId) {
       query = query.in('status', ['active', 'rented']);
     } else {
@@ -102,7 +98,7 @@ export function useAds(filters = {}) {
       }
     }
 
-    const from = (page - 1) * ADS_PER_PAGE;
+    const from = (pageParam - 1) * ADS_PER_PAGE;
     const to = from + ADS_PER_PAGE - 1;
     query = query.range(from, to);
 
@@ -121,22 +117,43 @@ export function useAds(filters = {}) {
       return new Date(b.created_at) - new Date(a.created_at);
     });
 
-    return { ads: sortedData, total: count ?? 0 };
-  }, [supabase, skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods, page]);
+    return { ads: sortedData, total: count ?? 0, page: pageParam };
+  }, [supabase, skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods]);
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey,
     queryFn: fetchAds,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      const totalLoaded = allPages.reduce((sum, p) => sum + p.ads.length, 0);
+      if (totalLoaded < lastPage.total) return allPages.length + 1;
+      return undefined;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    placeholderData: (prev) => prev,
   });
 
+  const ads = useMemo(() => data?.pages.flatMap(p => p.ads) ?? [], [data]);
+  const total = data?.pages[0]?.total ?? 0;
+
   return {
-    ads: data?.ads || [],
-    total: data?.total || 0,
-    totalPages: Math.ceil((data?.total || 0) / ADS_PER_PAGE),
+    ads,
+    total,
+    totalPages: Math.ceil(total / ADS_PER_PAGE),
     loading: isLoading,
     error: error?.message || null,
     refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   };
 }
