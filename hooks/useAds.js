@@ -122,7 +122,7 @@ export function useAds(filters = {}) {
 
   const {
     data,
-    isLoading,
+    isPending,
     error,
     refetch,
     fetchNextPage,
@@ -150,7 +150,7 @@ export function useAds(filters = {}) {
     ads,
     total,
     totalPages: Math.ceil(total / ADS_PER_PAGE),
-    loading: isLoading,
+    loading: isPending,
     error: error?.message || null,
     refetch,
     fetchNextPage,
