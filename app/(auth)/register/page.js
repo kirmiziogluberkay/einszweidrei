@@ -87,7 +87,7 @@ export default function RegisterPage() {
       password: formData.password,
       options:  {
         data:            { username: formData.username }, // Auth metadata
-        emailRedirectTo: 'https://einszweidrei.vercel.app',
+        emailRedirectTo: 'https://einszweidrei.vercel.app/auth/callback',
       },
     });
 
