@@ -10,7 +10,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { SITE_NAME } from '@/constants/config';
@@ -27,7 +26,6 @@ const RESERVED_USERNAMES = new Set([
 
 export default function RegisterPage() {
   const supabase = createClient();
-  const router   = useRouter();
 
   const [formData, setFormData] = useState({
     username: '',
@@ -88,7 +86,8 @@ export default function RegisterPage() {
       email:    formData.email.trim(),
       password: formData.password,
       options:  {
-        data: { username: formData.username }, // Auth metadata
+        data:            { username: formData.username }, // Auth metadata
+        emailRedirectTo: 'https://einszweidrei.vercel.app',
       },
     });
 
@@ -100,36 +99,48 @@ export default function RegisterPage() {
       return;
     }
 
-    // Try inserting into profiles (don't abort registration on failure)
-    try {
-      if (authData.user) {
-        await supabase.from('profiles').insert({
-          id:       authData.user.id,
-          username: formData.username.toLowerCase(),
-          role:     'user',
-        });
+    // Create profile via SECURITY DEFINER RPC — works even without a session
+    // (direct insert would be blocked by RLS since email is not yet confirmed)
+    if (authData.user) {
+      const { error: rpcError } = await supabase.rpc('create_user_profile', {
+        user_id:  authData.user.id,
+        username: formData.username,
+      });
+      if (rpcError) {
+        console.warn('Profile creation error:', rpcError.message);
       }
-    } catch (e) {
-      console.warn("Silent profile creation error:", e);
     }
 
     setSuccess(true);
     setLoading(false);
-    setTimeout(() => {
-      router.push('/');
-      router.refresh();
-    }, 1500);
   };
 
   if (success) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center px-4">
-        <div className="text-center space-y-4">
-          <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
-          <h2 className="text-xl font-semibold text-ink">Registration Successful!</h2>
-          <p className="text-ink-secondary text-sm">
-            Your account has been created. Redirecting...
-          </p>
+        <div className="w-full max-w-sm">
+          <div className="card p-8 text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-9 h-9 text-green-500" />
+            </div>
+            <h2 className="text-xl font-bold text-ink">Almost there!</h2>
+            <p className="text-ink-secondary text-sm leading-relaxed">
+              We sent a confirmation email to{' '}
+              <span className="font-semibold text-ink">{formData.email}</span>.
+            </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-left space-y-1">
+              <p className="text-amber-800 text-sm font-semibold">Please confirm your email address</p>
+              <p className="text-amber-700 text-xs leading-relaxed">
+                Click the link in the email to activate your account. Check your spam folder if you don't see it.
+              </p>
+            </div>
+            <Link
+              href="/login"
+              className="btn-primary w-full mt-2 block text-center"
+            >
+              Go to Login
+            </Link>
+          </div>
         </div>
       </div>
     );

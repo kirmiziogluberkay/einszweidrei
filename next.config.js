@@ -9,13 +9,18 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        // Hostname is derived from the NEXT_PUBLIC_SUPABASE_URL env var
         hostname: process.env.NEXT_PUBLIC_SUPABASE_URL
           ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
           : '*.supabase.co',
       },
     ],
+    // Aggressively cache optimised images on Vercel CDN
+    minimumCacheTTL: 60 * 60 * 24, // 24 hours
+    formats: ['image/avif', 'image/webp'],
   },
+
+  // Compress server responses
+  compress: true,
 
   async headers() {
     return [
