@@ -29,7 +29,7 @@ export default function StatusToggle({ adId, currentStatus, categoryId, categori
     
     // Kök kategoriye Göre Ayrım:
     let targetStatus = 'passive';
-    if (rootSlug.includes('rental')) targetStatus = 'rented';
+    if (rootSlug.includes('rental') || rootSlug.includes('accommodation')) targetStatus = 'rented';
     else if (rootSlug.includes('second-hand')) targetStatus = 'reserved';
     
     const newStatus = currentStatus === 'active' ? targetStatus : 'active';
@@ -64,8 +64,8 @@ export default function StatusToggle({ adId, currentStatus, categoryId, categori
       ) : (
         <>
           {currentStatus === 'active' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
-          {currentStatus === 'active' 
-            ? (findRootSlug(categoryId).includes('rental') ? 'Rented' : 'Reserved')
+          {currentStatus === 'active'
+            ? ((findRootSlug(categoryId).includes('rental') || findRootSlug(categoryId).includes('accommodation')) ? 'Rented' : 'Reserved')
             : 'Activate'
           }
         </>

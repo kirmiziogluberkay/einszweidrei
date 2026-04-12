@@ -31,21 +31,22 @@ export async function generateMetadata({ params }) {
 export default async function CategoryPage({ params }) {
   const supabase = await createClient();
 
-  // Fetch the requested category
+  // Fetch the requested category (only if active)
   const { data: category } = await supabase
     .from('categories')
-    .select('id, name, slug, parent_id')
+    .select('id, name, slug, parent_id, is_active')
     .eq('slug', params.slug)
     .single();
 
-  if (!category) notFound();
+  if (!category || category.is_active === false) notFound();
 
-  // Fetch ALL categories to:
+  // Fetch ALL active categories to:
   // 1. Resolve the parent category (for breadcrumb)
   // 2. Find all children (for showing subcategory ads)
   const { data: allCats } = await supabase
     .from('categories')
     .select('id, name, slug, parent_id, sort_order')
+    .eq('is_active', true)
     .order('sort_order', { ascending: true })
     .order('name', { ascending: true });
 

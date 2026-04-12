@@ -491,7 +491,10 @@ export default async function AdDetailPage({ params }) {
                       />
                     </div>
 
-                    {!breadcrumbs.some(bc => bc.name.toLowerCase().includes('rental')) && (
+                    {!breadcrumbs.some(bc =>
+                      bc.name.toLowerCase().includes('rental') ||
+                      bc.slug?.includes('accommodation')
+                    ) && (
                       <div className="w-28 flex-shrink-0">
                         <SoldToggle adId={ad.id} currentStatus={ad.status} />
                       </div>
