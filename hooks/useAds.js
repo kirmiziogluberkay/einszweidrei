@@ -24,7 +24,6 @@ export function useAds(filters = {}) {
 
   const queryKey = useMemo(() => [
     'ads',
-    skip,
     categoryId,
     categoryIds?.join(','),
     ownerId || owner_id,
@@ -32,13 +31,9 @@ export function useAds(filters = {}) {
     minPrice,
     maxPrice,
     paymentMethods?.join(','),
-  ], [skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods]);
+  ], [categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods]);
 
   const fetchAds = useCallback(async ({ pageParam = 1 }) => {
-    if (skip) {
-      return { ads: [], total: 0, page: pageParam };
-    }
-
     const finalOwnerId = ownerId || owner_id;
 
     let query = supabase
@@ -54,7 +49,6 @@ export function useAds(filters = {}) {
         images,
         status,
         payment_methods,
-        tags,
         address,
         category_id,
         created_at,
@@ -62,7 +56,7 @@ export function useAds(filters = {}) {
       `, { count: 'exact' });
 
     if (!finalOwnerId) {
-      query = query.in('status', ['active', 'rented']);
+      query = query.eq('status', 'active');
     } else {
       query = query.eq('owner_id', finalOwnerId);
     }
@@ -118,7 +112,7 @@ export function useAds(filters = {}) {
     });
 
     return { ads: sortedData, total: count ?? 0, page: pageParam };
-  }, [supabase, skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods]);
+  }, [supabase, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods]);
 
   const {
     data,
@@ -137,10 +131,12 @@ export function useAds(filters = {}) {
       if (totalLoaded < lastPage.total) return allPages.length + 1;
       return undefined;
     },
+    enabled: !skip,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     placeholderData: (prev) => prev,
     refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
   });
 
   const ads = useMemo(() => data?.pages.flatMap(p => p.ads) ?? [], [data]);

@@ -36,7 +36,7 @@ import SaveButton from '@/components/ads/SaveButton';
  *   layout?: 'grid' | 'list'
  * }} props
  */
-export default function AdCard({ ad, layout = 'grid' }) {
+export default function AdCard({ ad, layout = 'grid', priority = false }) {
   if (!ad) return null;
 
   const {
@@ -92,6 +92,8 @@ export default function AdCard({ ad, layout = 'grid' }) {
               src={coverImage}
               alt={title}
               fill
+              sizes="(max-width: 768px) 100vw, 256px"
+              priority={priority}
               className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
@@ -224,6 +226,8 @@ export default function AdCard({ ad, layout = 'grid' }) {
             src={coverImage}
             alt={title}
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+            priority={priority}
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
