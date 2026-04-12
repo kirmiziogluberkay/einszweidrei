@@ -29,12 +29,32 @@ export const AuthProvider = ({ children }) => {
         .eq('id', userId)
         .single();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-        setProfile(null);
-      } else {
+      if (!error && data) {
         setProfile(data);
+        return;
       }
+
+      // Profile missing — recover username from Auth metadata and create it now.
+      // This handles the edge case where the DB trigger or RPC failed at signup.
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const fallbackUsername =
+        authUser?.user_metadata?.username ||
+        authUser?.email?.split('@')[0] ||
+        `user_${userId.slice(0, 8)}`;
+
+      await supabase.rpc('create_user_profile', {
+        user_id:  userId,
+        username: fallbackUsername,
+      });
+
+      // Fetch again after creating
+      const { data: created } = await supabase
+        .from('profiles')
+        .select('id, username, role, avatar_url, phone')
+        .eq('id', userId)
+        .single();
+
+      setProfile(created ?? null);
     } catch (err) {
       console.error('Unexpected error fetching profile:', err);
       setProfile(null);
