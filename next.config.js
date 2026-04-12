@@ -7,12 +7,17 @@ const nextConfig = {
   // Allow images from Supabase Storage
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: process.env.NEXT_PUBLIC_SUPABASE_URL
-          ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
-          : '*.supabase.co',
-      },
+      // Images are served via the internal /api/image proxy — no external
+      // image hostnames needed. External patterns removed to prevent
+      // direct GitHub access.
+      //
+      // (Supabase Storage — kept commented for existing ads with old URLs)
+      // {
+      //   protocol: 'https',
+      //   hostname: process.env.NEXT_PUBLIC_SUPABASE_URL
+      //     ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+      //     : '*.supabase.co',
+      // },
     ],
     // Aggressively cache optimised images on Vercel CDN
     minimumCacheTTL: 60 * 60 * 24, // 24 hours

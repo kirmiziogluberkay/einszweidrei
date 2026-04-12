@@ -23,7 +23,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import {
-  STORAGE_BUCKET,
+  // STORAGE_BUCKET,   // Supabase Storage — no longer used, images go to GitHub
   MAX_IMAGES_PER_AD,
   MAX_IMAGE_SIZE_BYTES,
   ALLOWED_IMAGE_TYPES,
@@ -155,7 +155,7 @@ export default function AdForm({ initialData = null }) {
   };
 
   /**
-   * Uploads files selected by the user to Supabase Storage.
+   * Uploads files to GitHub via /api/upload and stores the returned URLs.
    *
    * @param {React.ChangeEvent<HTMLInputElement>} e
    */
@@ -177,19 +177,31 @@ export default function AdForm({ initialData = null }) {
     const newUrls = [];
 
     for (const file of filesToUpload) {
-      // Boyut kontrolü
       if (file.size > MAX_IMAGE_SIZE_BYTES) {
         setError(`The file "${file.name}" cannot be larger than 5 MB.`);
         continue;
       }
-
-      // Format kontrolü
       if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
         setError('Only JPEG, PNG and WebP formats are accepted.');
         continue;
       }
 
-      // Unique file path: owner_id/timestamp_randomsuffix.ext
+      const form = new FormData();
+      form.append('file', file);
+
+      const res = await fetch('/api/upload', { method: 'POST', body: form });
+      const json = await res.json();
+
+      if (!res.ok || !json.url) {
+        setError(json.error ?? ERROR_MESSAGES.uploadFailed);
+        continue;
+      }
+
+      newUrls.push(json.url);
+    }
+
+    /* — Supabase Storage (eski yöntem) —————————————————————————
+    for (const file of filesToUpload) {
       const ext = file.name.split('.').pop();
       const filePath = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 
@@ -197,41 +209,38 @@ export default function AdForm({ initialData = null }) {
         .from(STORAGE_BUCKET)
         .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
-      if (uploadError) {
-        setError(ERROR_MESSAGES.uploadFailed);
-        continue;
-      }
+      if (uploadError) { setError(ERROR_MESSAGES.uploadFailed); continue; }
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from(STORAGE_BUCKET)
         .getPublicUrl(filePath);
 
       newUrls.push(publicUrl);
     }
+    ——————————————————————————————————————————————————————————— */
 
     setUploadedImages((prev) => [...prev, ...newUrls]);
     setUploading(false);
-
-    // Reset input (same file can be selected again)
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   /**
-   * Removes the photo at the specified index from the list
-   * and deletes the file from Supabase Storage.
+   * Removes the photo at the specified index.
+   * GitHub API üzerinden dosya silme şu an yapılmıyor
+   * (ilanın DB kaydından kaldırılması yeterli).
    *
    * @param {number} index
    */
   const removeImage = async (index) => {
+    /* — Supabase Storage silme (eski yöntem) ————————————————————
     const imageUrl = uploadedImages[index];
-    // Extract storage path from the public URL
-    const marker = `/storage/v1/object/public/${STORAGE_BUCKET}/`;
+    const marker   = `/storage/v1/object/public/${STORAGE_BUCKET}/`;
     const pathIndex = imageUrl?.indexOf(marker);
     if (pathIndex !== -1 && imageUrl) {
       const storagePath = imageUrl.slice(pathIndex + marker.length);
       await supabase.storage.from(STORAGE_BUCKET).remove([storagePath]);
     }
+    ——————————————————————————————————————————————————————————— */
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
