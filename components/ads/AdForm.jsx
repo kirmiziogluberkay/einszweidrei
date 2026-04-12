@@ -27,7 +27,6 @@ import {
   MAX_IMAGES_PER_AD,
   MAX_IMAGE_SIZE_BYTES,
   ALLOWED_IMAGE_TYPES,
-  SUCCESS_MESSAGES,
   ERROR_MESSAGES,
   CURRENCY_SYMBOL,
   DEFAULT_CURRENCY,
@@ -43,7 +42,7 @@ export default function AdForm({ initialData = null }) {
   const supabase = createClient();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const { categories } = useCategories();
   const fileInputRef = useRef(null);
 
@@ -174,8 +173,8 @@ export default function AdForm({ initialData = null }) {
     setUploading(true);
     setError(null);
 
-    const newUrls = [];
-
+    // Validate files first
+    const validFiles = [];
     for (const file of filesToUpload) {
       if (file.size > MAX_IMAGE_SIZE_BYTES) {
         setError(`The file "${file.name}" cannot be larger than 5 MB.`);
@@ -185,20 +184,25 @@ export default function AdForm({ initialData = null }) {
         setError('Only JPEG, PNG and WebP formats are accepted.');
         continue;
       }
-
-      const form = new FormData();
-      form.append('file', file);
-
-      const res = await fetch('/api/upload', { method: 'POST', body: form });
-      const json = await res.json();
-
-      if (!res.ok || !json.url) {
-        setError(json.error ?? ERROR_MESSAGES.uploadFailed);
-        continue;
-      }
-
-      newUrls.push(json.url);
+      validFiles.push(file);
     }
+
+    // Upload all valid files in parallel
+    const uploadResults = await Promise.all(
+      validFiles.map(async (file) => {
+        const form = new FormData();
+        form.append('file', file);
+        const res = await fetch('/api/upload', { method: 'POST', body: form });
+        const json = await res.json();
+        if (!res.ok || !json.url) {
+          setError(json.error ?? ERROR_MESSAGES.uploadFailed);
+          return null;
+        }
+        return json.url;
+      })
+    );
+
+    const newUrls = uploadResults.filter(Boolean);
 
     /* — Supabase Storage (eski yöntem) —————————————————————————
     for (const file of filesToUpload) {
@@ -270,6 +274,13 @@ export default function AdForm({ initialData = null }) {
     setError(null);
     setSuccessMsg(null);
     setSubmitting(true);
+
+    // Auth guard — user state is loaded asynchronously
+    if (!user) {
+      setError('You must be logged in to post an ad.');
+      setSubmitting(false);
+      return;
+    }
 
     // Basic validation
     if (!formData.title.trim()) {
@@ -379,18 +390,24 @@ export default function AdForm({ initialData = null }) {
     const { data, error: dbError } = result;
 
     if (dbError) {
+      console.error('Ad save error:', dbError);
       setError(dbError.message || ERROR_MESSAGES.generic);
+      setSubmitting(false);
+      return;
+    }
+
+    if (!data?.serial_number) {
+      console.error('Ad save error: no serial_number returned', data);
+      setError('Ad was saved but could not be redirected. Please check your ads.');
       setSubmitting(false);
       return;
     }
 
     setSubmitting(false);
 
-    // Invalidate React Query cache so the new/updated ad is visible immediately
-    await queryClient.invalidateQueries({ queryKey: ['ads'] });
-
-    // Redirect to ad detail page immediately
+    // Redirect immediately, invalidate cache in background
     router.push(buildAdUrl(data.serial_number));
+    queryClient.invalidateQueries({ queryKey: ['ads'] });
   };
 
   const isAccommodation = categories.find(c => c.id === formData.category_id)?.slug?.startsWith('accommodation');
@@ -753,7 +770,15 @@ export default function AdForm({ initialData = null }) {
 
       {/* ── Photo upload ── */}
       <div>
-        <label className="label">Photos <span className="text-ink-tertiary font-normal">({uploadedImages.length}/{MAX_IMAGES_PER_AD})</span></label>
+        <div className="flex items-center gap-3 mb-2">
+          <label className="label mb-0">Photos <span className="text-ink-tertiary font-normal">({uploadedImages.length}/{MAX_IMAGES_PER_AD})</span></label>
+          {uploading && (
+            <span className="flex items-center gap-1.5 text-sm text-brand-500 font-medium">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Uploading…
+            </span>
+          )}
+        </div>
 
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-2">
           {/* Uploaded photos */}
@@ -838,7 +863,7 @@ export default function AdForm({ initialData = null }) {
       <div className="flex items-center gap-4 pt-2">
         <button
           type="submit"
-          disabled={submitting || uploading}
+          disabled={submitting || uploading || !user}
           className="btn-primary flex-1 sm:flex-none sm:min-w-[160px]"
           id="ad-submit-btn"
         >
