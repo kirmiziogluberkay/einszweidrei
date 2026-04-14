@@ -39,12 +39,29 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const body    = await request.json();
+  const body = await request.json();
+
+  // Whitelist — users can only update these fields
+  const ALLOWED_FIELDS = [
+    'title', 'description', 'price', 'original_price',
+    'currency', 'category_id', 'area', 'images',
+    'payment_methods', 'tags', 'address',
+  ];
+  // Admins can additionally update status
+  if (isAdmin) ALLOWED_FIELDS.push('status');
+
+  const patch = {};
+  for (const key of ALLOWED_FIELDS) {
+    if (key in body) patch[key] = body[key];
+  }
+
   const updated = {
     ...ads[idx],
-    ...body,
-    id:       ads[idx].id,
-    owner_id: ads[idx].owner_id,  // owner never changes
+    ...patch,
+    id:         ads[idx].id,        // immutable
+    owner_id:   ads[idx].owner_id,  // immutable
+    serial_number: ads[idx].serial_number, // immutable
+    created_at: ads[idx].created_at,       // immutable
     updated_at: new Date().toISOString(),
   };
 

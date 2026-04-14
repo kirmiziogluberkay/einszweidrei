@@ -9,6 +9,11 @@ import { readData, writeData } from '@/lib/github-db';
 import { getSession }          from '@/lib/auth-session';
 
 export async function POST(request, { params }) {
+  const session = await getSession();
+  if (!session.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { optionId } = await request.json().catch(() => ({}));
   if (!optionId) return NextResponse.json({ error: 'optionId required' }, { status: 400 });
 

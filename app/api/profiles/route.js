@@ -17,6 +17,7 @@ export async function GET(request) {
   if (role) result = result.filter(p => p.role === role);
   result = result.slice(0, limit);
 
-  const safe = result.map(({ password_hash, ...p }) => p);
+  // Strip sensitive fields — email and phone are private
+  const safe = result.map(({ password_hash, email, phone, ...p }) => p);
   return NextResponse.json(safe);
 }
