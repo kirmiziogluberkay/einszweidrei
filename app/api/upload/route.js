@@ -46,9 +46,12 @@ export async function POST(request) {
   }
 
   // ── Build unique file path ────────────────────────────
-  const ext      = file.name.split('.').pop().toLowerCase();
-  const fileName = `${session.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-  const filePath = `images/${fileName}`;
+  // adId is passed by AdForm so images go into an ad-specific folder.
+  // Fall back to userId if not provided (e.g. direct API calls).
+  const folderName = formData.get('adId')?.trim() || session.user.id;
+  const ext        = file.name.split('.').pop().toLowerCase();
+  const fileName   = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const filePath   = `images/${folderName}/${fileName}`;
 
   // ── Convert to Base64 ─────────────────────────────────
   const buffer = await file.arrayBuffer();

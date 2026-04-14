@@ -140,7 +140,7 @@ export async function POST(request) {
 
   const now = new Date().toISOString();
   const ad  = {
-    id:              randomUUID(),
+    id:              body.id ?? randomUUID(),  // use pendingAdId from AdForm if provided
     serial_number:   serial,
     title:           body.title?.trim() ?? '',
     description:     body.description?.trim() ?? '',

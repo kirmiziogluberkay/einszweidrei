@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
@@ -44,6 +44,14 @@ export default function AdForm({ initialData = null }) {
   const { user } = useAuth();
   const { categories } = useCategories();
   const fileInputRef = useRef(null);
+
+  // Stable ID for this ad session: reuse existing id in edit mode,
+  // or generate a new UUID for new ads (so images land in the right folder).
+  const pendingAdId = useMemo(
+    () => initialData?.id ?? crypto.randomUUID(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   /** Form field values */
   const [formData, setFormData] = useState({
@@ -164,6 +172,7 @@ export default function AdForm({ initialData = null }) {
     new Promise((resolve) => {
       const form = new FormData();
       form.append('file', file);
+      form.append('adId', pendingAdId); // folder hint for the upload API
 
       const xhr = new XMLHttpRequest();
 
@@ -412,7 +421,7 @@ export default function AdForm({ initialData = null }) {
       res = await fetch('/api/ads', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ ...payload, original_price: null }),
+        body:    JSON.stringify({ ...payload, original_price: null, id: pendingAdId }),
       });
     }
 
