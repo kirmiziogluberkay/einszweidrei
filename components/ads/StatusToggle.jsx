@@ -1,20 +1,13 @@
-// update 20:55
 'use client';
 
 import { useState } from 'react';
 import { Lock, Unlock, Loader2 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
-/**
- * Owner-only 'Reserve / Rented' toggle button on the ad detail page.
- */
-export default function StatusToggle({ adId, currentStatus, categoryId, categories, ownerId }) {
-  const supabase = createClient();
+export default function StatusToggle({ adId, currentStatus, categoryId, categories }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  // Find the root category's slug:
   const findRootSlug = (cId) => {
     const cat = categories.find(c => c.id === cId);
     if (!cat) return '';
@@ -24,38 +17,40 @@ export default function StatusToggle({ adId, currentStatus, categoryId, categori
 
   const handleToggle = async () => {
     setLoading(true);
-    
+
     const rootSlug = findRootSlug(categoryId).toLowerCase();
-    
-    // Kök kategoriye Göre Ayrım:
+
     let targetStatus = 'passive';
     if (rootSlug.includes('rental') || rootSlug.includes('accommodation')) targetStatus = 'rented';
     else if (rootSlug.includes('second-hand')) targetStatus = 'reserved';
-    
+
     const newStatus = currentStatus === 'active' ? targetStatus : 'active';
 
-    const { error } = await supabase
-      .from('ads')
-      .update({ status: newStatus })
-      .eq('id', adId);
+    const res = await fetch(`/api/ads/${adId}`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ status: newStatus }),
+    });
 
-    if (!error) {
+    if (res.ok) {
       router.refresh();
     } else {
-      alert('Update failed: ' + error.message);
+      const data = await res.json().catch(() => ({}));
+      alert('Update failed: ' + (data.error ?? 'Unknown error'));
     }
     setLoading(false);
   };
 
   const isReservedOrRented = currentStatus === 'reserved' || currentStatus === 'rented';
+  const rootSlug = findRootSlug(categoryId).toLowerCase();
 
   return (
     <button
       onClick={handleToggle}
       disabled={loading}
       className={`btn-owner-action w-full
-        ${isReservedOrRented 
-          ? 'bg-brand-50 border-brand-100 text-brand-600 hover:bg-brand-100' 
+        ${isReservedOrRented
+          ? 'bg-brand-50 border-brand-100 text-brand-600 hover:bg-brand-100'
           : 'bg-white border-surface-tertiary text-ink hover:bg-surface-secondary'
         } disabled:opacity-50`}
     >
@@ -65,7 +60,7 @@ export default function StatusToggle({ adId, currentStatus, categoryId, categori
         <>
           {currentStatus === 'active' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
           {currentStatus === 'active'
-            ? ((findRootSlug(categoryId).includes('rental') || findRootSlug(categoryId).includes('accommodation')) ? 'Rented' : 'Reserved')
+            ? ((rootSlug.includes('rental') || rootSlug.includes('accommodation')) ? 'Rented' : 'Reserved')
             : 'Activate'
           }
         </>

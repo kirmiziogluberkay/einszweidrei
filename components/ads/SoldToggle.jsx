@@ -1,13 +1,10 @@
-
 'use client';
 
 import { useState } from 'react';
 import { CheckCircle, Circle, Loader2 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
 export default function SoldToggle({ adId, currentStatus }) {
-  const supabase = createClient();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -15,15 +12,17 @@ export default function SoldToggle({ adId, currentStatus }) {
     setLoading(true);
     const newStatus = currentStatus === 'sold' ? 'active' : 'sold';
 
-    const { error } = await supabase
-      .from('ads')
-      .update({ status: newStatus })
-      .eq('id', adId);
+    const res = await fetch(`/api/ads/${adId}`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ status: newStatus }),
+    });
 
-    if (!error) {
+    if (res.ok) {
       router.refresh();
     } else {
-      alert('Update failed: ' + error.message);
+      const data = await res.json().catch(() => ({}));
+      alert('Update failed: ' + (data.error ?? 'Unknown error'));
     }
     setLoading(false);
   };

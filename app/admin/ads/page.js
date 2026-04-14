@@ -1,79 +1,55 @@
 /**
- * app/admin/ads/page.js
- * ─────────────────────────────────────────────────────
- * Admin — manage all ads (list, delete, change status).
- * ─────────────────────────────────────────────────────
+ * app/admin/ads/page.js — Admin: manage all ads
  */
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Trash2, Eye, RefreshCw, Search } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { formatPrice, buildAdUrl, timeAgo } from '@/lib/helpers';
 import { AD_STATUSES, ADMIN_ITEMS_PER_PAGE } from '@/constants/config';
 
 export default function AdminAdsPage() {
-  const supabase = createClient();
-
   const [ads,     setAds]     = useState([]);
   const [loading, setLoading] = useState(true);
   const [search,  setSearch]  = useState('');
   const [page,    setPage]    = useState(1);
   const [total,   setTotal]   = useState(0);
 
-  /**
-   * Fetches all ads (including all statuses).
-   */
   const fetchAds = useCallback(async () => {
     setLoading(true);
+    const params = new URLSearchParams({
+      all:  '1',
+      page: String(page),
+      limit: String(ADMIN_ITEMS_PER_PAGE),
+    });
+    if (search) params.set('q', search);
 
-    let query = supabase
-      .from('ads')
-      .select(`
-        id, serial_number, title, price, currency, status, created_at,
-        owner:profiles!owner_id(id, username),
-        category:categories(name)
-      `, { count: 'exact' })
-      .order('created_at', { ascending: false });
-
-    if (search) {
-      query = query.or(`title.ilike.%${search}%,serial_number.ilike.%${search}%`);
-    }
-
-    const from = (page - 1) * ADMIN_ITEMS_PER_PAGE;
-    query = query.range(from, from + ADMIN_ITEMS_PER_PAGE - 1);
-
-    const { data, count, error } = await query;
-    if (!error) {
-      setAds(data ?? []);
-      setTotal(count ?? 0);
+    const res = await fetch(`/api/ads?${params}`);
+    if (res.ok) {
+      const data = await res.json();
+      setAds(data.ads ?? []);
+      setTotal(data.total ?? 0);
     }
     setLoading(false);
-  }, [supabase, search, page]);
+  }, [search, page]);
 
   useEffect(() => { fetchAds(); }, [fetchAds]);
 
-  /**
-   * Changes the status of the ad (active / passive / sold).
-   * @param {string} adId
-   * @param {string} newStatus
-   */
   const handleStatusChange = async (adId, newStatus) => {
-    await supabase.from('ads').update({ status: newStatus }).eq('id', adId);
-    setAds((prev) => prev.map((a) => a.id === adId ? { ...a, status: newStatus } : a));
+    await fetch(`/api/ads/${adId}`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ status: newStatus }),
+    });
+    setAds(prev => prev.map(a => a.id === adId ? { ...a, status: newStatus } : a));
   };
 
-  /**
-   * Permanently deletes the ad.
-   * @param {string} adId
-   */
   const handleDelete = async (adId) => {
     if (!confirm('Are you sure you want to delete this ad?')) return;
-    await supabase.from('ads').delete().eq('id', adId);
-    setAds((prev) => prev.filter((a) => a.id !== adId));
-    setTotal((prev) => prev - 1);
+    await fetch(`/api/ads/${adId}`, { method: 'DELETE' });
+    setAds(prev => prev.filter(a => a.id !== adId));
+    setTotal(prev => prev - 1);
   };
 
   const totalPages = Math.ceil(total / ADMIN_ITEMS_PER_PAGE);
@@ -81,13 +57,14 @@ export default function AdminAdsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-ink">Ads Management <span className="text-ink-tertiary font-normal text-lg">({total})</span></h1>
+        <h1 className="text-2xl font-bold text-ink">
+          Ads Management <span className="text-ink-tertiary font-normal text-lg">({total})</span>
+        </h1>
         <button onClick={fetchAds} className="btn-secondary py-2">
           <RefreshCw className="w-4 h-4" /> Refresh
         </button>
       </div>
 
-      {/* Search */}
       <div className="relative mb-5 max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-tertiary" />
         <input
@@ -99,7 +76,6 @@ export default function AdminAdsPage() {
         />
       </div>
 
-      {/* Table */}
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -118,9 +94,7 @@ export default function AdminAdsPage() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
                     {Array.from({ length: 6 }).map((_, j) => (
-                      <td key={j} className="px-5 py-4">
-                        <div className="skeleton h-4 rounded" />
-                      </td>
+                      <td key={j} className="px-5 py-4"><div className="skeleton h-4 rounded" /></td>
                     ))}
                   </tr>
                 ))
@@ -130,7 +104,7 @@ export default function AdminAdsPage() {
                     <p className="font-medium text-ink truncate max-w-[200px]">{ad.title}</p>
                     <p className="text-xs text-ink-tertiary font-mono">#{ad.serial_number}</p>
                   </td>
-                  <td className="px-5 py-4 text-ink-secondary">{ad.owner?.username}</td>
+                  <td className="px-5 py-4 text-ink-secondary">{ad.owner?.username ?? ad.ownerUsername}</td>
                   <td className="px-5 py-4 font-medium text-ink">{formatPrice(ad.price, ad.currency)}</td>
                   <td className="px-5 py-4">
                     <select
@@ -167,7 +141,6 @@ export default function AdminAdsPage() {
           </table>
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-4 border-t border-surface-tertiary">
             <p className="text-sm text-ink-secondary">{total} ads</p>

@@ -1,50 +1,47 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { Search, Shield, User, Loader2, RefreshCw } from 'lucide-react';
+import { Search, Shield, User, RefreshCw } from 'lucide-react';
 import { timeAgo } from '@/lib/helpers';
 
 export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState([]);
-  const [search, setSearch] = useState('');
-  const supabase = createClient();
+  const [users,   setUsers]   = useState([]);
+  const [search,  setSearch]  = useState('');
 
   const fetchUsers = async () => {
     setLoading(true);
-    let query = supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (search) {
-      query = query.ilike('username', `%${search}%`);
+    const params = new URLSearchParams({ limit: '200' });
+    const res = await fetch(`/api/profiles?${params}`);
+    if (res.ok) {
+      const data = await res.json();
+      const all  = Array.isArray(data) ? data : [];
+      const filtered = search
+        ? all.filter(u => u.username?.toLowerCase().includes(search.toLowerCase()))
+        : all;
+      filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      setUsers(filtered);
     }
-
-    const { data } = await query;
-    setUsers(data || []);
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  useEffect(() => { fetchUsers(); }, []);
 
   const toggleRole = async (userId, currentRole) => {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
 
-    // Use RPC to bypass RLS limitations on profile table updates
-    const { error } = await supabase.rpc('toggle_user_role', { 
-      target_user_id: userId, 
-      target_role: newRole 
+    const res = await fetch(`/api/profiles/${userId}`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ role: newRole }),
     });
 
-    if (!error) {
+    if (res.ok) {
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
     } else {
-      alert("Failed to change role: " + error.message);
+      const data = await res.json().catch(() => ({}));
+      alert('Failed to change role: ' + (data.error ?? 'Unknown error'));
     }
   };
 
@@ -93,7 +90,7 @@ export default function AdminUsersPage() {
                 ))
               ) : users.length === 0 ? (
                 <tr>
-                   <td colSpan={4} className="px-6 py-12 text-center text-ink-tertiary">No users found.</td>
+                  <td colSpan={4} className="px-6 py-12 text-center text-ink-tertiary">No users found.</td>
                 </tr>
               ) : users.map((u) => (
                 <tr key={u.id} className="hover:bg-brand-50/10 transition-colors group">
@@ -116,14 +113,9 @@ export default function AdminUsersPage() {
                       {u.role?.toUpperCase()}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-ink-tertiary text-xs">
-                    {timeAgo(u.created_at)}
-                  </td>
+                  <td className="px-6 py-4 text-ink-tertiary text-xs">{timeAgo(u.created_at)}</td>
                   <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => toggleRole(u.id, u.role)}
-                      className="text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline"
-                    >
+                    <button onClick={() => toggleRole(u.id, u.role)} className="text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline">
                       Change Role
                     </button>
                   </td>

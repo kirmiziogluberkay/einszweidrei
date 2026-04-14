@@ -1,220 +1,89 @@
-// 1600
-// mail status toggle: dynamic open/close icons added
 'use client';
 
-import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { timeAgo, truncateText, formatUsername } from '@/lib/helpers';
 import MessageThread from '@/components/messages/MessageThread';
 import { Trash2, MessageSquare, Mail, MailOpen } from 'lucide-react';
 
+const POLL_INTERVAL = 30_000;
+
 export default function InboxPage() {
-  const supabase = createClient();
-  const { user, authLoading } = useAuth();
-  const [threads, setThreads] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
+  const [threads, setThreads]       = useState([]);
+  const [loading, setLoading]       = useState(true);
   const [activeThread, setActiveThread] = useState(null);
 
-  const fetchThreads = async () => {
+  const fetchThreads = useCallback(async () => {
     if (!user) return;
-    setLoading(true);
-
     try {
-      const { data: messages, error } = await supabase
-        .from('messages')
-        .select('*')
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const grouped = {};
-      messages.forEach(msg => {
-        const otherId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
-        const adKey = msg.ad_id ? msg.ad_id : 'no-ad';
-        const key = `${adKey}_${otherId}`;
-
-        if (!grouped[key]) {
-          grouped[key] = {
-            key,
-            ad_id: msg.ad_id,
-            otherId,
-            lastMessage: msg.content,
-            lastTime: msg.created_at,
-            unreadCount: 0,
-            otherName: 'User'
-          };
-        }
-
-        if (msg.receiver_id === user.id && !msg.is_read) {
-          grouped[key].unreadCount++;
-        }
-      });
-
-      const threadsArr = Object.values(grouped);
-      const profileIds = [...new Set(threadsArr.map(t => t.otherId))];
-
-      if (profileIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, username')
-          .in('id', profileIds);
-
-        profiles?.forEach(p => {
-          threadsArr.forEach(t => {
-            if (t.otherId === p.id) t.otherName = p.username;
-          });
-        });
-      }
-
-      setThreads(threadsArr);
+      const res = await fetch('/api/messages?inbox=1');
+      if (!res.ok) throw new Error('Failed to fetch threads');
+      const data = await res.json();
+      setThreads(data.threads ?? []);
     } catch (err) {
       console.error('Fetch threads error:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (!authLoading && user) {
       fetchThreads();
+      const id = setInterval(fetchThreads, POLL_INTERVAL);
+      return () => clearInterval(id);
     }
-  }, [user, authLoading]);
-
-  // Real-time sync
-  useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel(`inbox-sync-${user.id}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'messages',
-        filter: `receiver_id=eq.${user.id}`
-      }, () => {
-        fetchThreads();
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel).catch(() => { }); };
-  }, [user?.id]);
+  }, [user, authLoading, fetchThreads]);
 
   const handleSelectThread = async (thread) => {
     setActiveThread(thread);
     setThreads(prev => prev.map(t => t.key === thread.key ? { ...t, unreadCount: 0 } : t));
 
-    // DATABASE UPDATE — mark messages as read
-    try {
-      let updateQuery = supabase
-        .from('messages')
-        .update({ is_read: true })
-        .eq('receiver_id', user.id)
-        .eq('sender_id', thread.otherId)
-        .eq('is_read', false);
+    const realAdId = (thread.ad_id && thread.ad_id !== 'no-ad' && thread.ad_id !== 'null')
+      ? thread.ad_id : null;
 
-      // Normalise the ad ID
-      const realAdId = (thread.ad_id && thread.ad_id !== 'no-ad' && thread.ad_id !== 'null') ? thread.ad_id : null;
-
-      if (realAdId) {
-        updateQuery = updateQuery.eq('ad_id', realAdId);
-      } else {
-        updateQuery = updateQuery.is('ad_id', null);
-      }
-
-      const { error } = await updateQuery.select();
-
-      if (error) {
-        console.error('Mark as read update error (RLS?):', error.message);
-      }
-    } catch (err) {
-      console.error('Update catch error:', err.message);
-    }
+    await fetch('/api/messages', {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ otherId: thread.otherId, adId: realAdId, is_read: true }),
+    });
   };
 
   const handleMarkUnread = async (thread) => {
-    try {
-      // 1. Find the most recent message ID in this thread
-      let fetchLastQuery = supabase
-        .from('messages')
-        .select('id')
-        .eq('receiver_id', user.id)
-        .eq('sender_id', thread.otherId)
-        .order('created_at', { ascending: false })
-        .limit(1);
+    const realAdId = (thread.ad_id && thread.ad_id !== 'no-ad' && thread.ad_id !== 'null')
+      ? thread.ad_id : null;
 
-      const realAdId = (thread.ad_id && thread.ad_id !== 'no-ad' && thread.ad_id !== 'null') ? thread.ad_id : null;
-      if (realAdId) {
-        fetchLastQuery = fetchLastQuery.eq('ad_id', realAdId);
-      } else {
-        fetchLastQuery = fetchLastQuery.is('ad_id', null);
-      }
+    await fetch('/api/messages', {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ otherId: thread.otherId, adId: realAdId, is_read: false }),
+    });
 
-      const { data: lastMsgs } = await fetchLastQuery;
-      
-      if (!lastMsgs || lastMsgs.length === 0) return;
-
-      // 2. Mark that message as unread
-      const { error } = await supabase
-        .from('messages')
-        .update({ is_read: false })
-        .eq('id', lastMsgs[0].id);
-
-      if (error) throw error;
-
-      fetchThreads(); // Refresh list to show bold unread state
-    } catch (err) {
-      console.error('Mark as unread failed:', err.message);
-    }
+    fetchThreads();
   };
 
   const handleDeleteThread = async (adId, otherId) => {
     if (!confirm('Are you sure you want to delete this conversation? This will clear all messages.')) return;
 
-    try {
-      // 1. Fetch all message IDs in this thread (safest approach)
-      // RLS already limits to our own messages, so filtering by otherId is sufficient
-      let fetchMsgQuery = supabase
-        .from('messages')
-        .select('id')
-        .or(`sender_id.eq.${otherId},receiver_id.eq.${otherId}`);
+    const realAdId = (adId && adId !== 'no-ad' && adId !== 'null') ? adId : null;
 
-      // Filter by ad ID if present, otherwise check for null (e.g., direct messages)
-      if (adId && adId !== 'no-ad' && adId !== 'null') {
-        fetchMsgQuery = fetchMsgQuery.eq('ad_id', adId);
-      } else {
-        fetchMsgQuery = fetchMsgQuery.is('ad_id', null);
-      }
+    const res = await fetch(
+      `/api/messages?adId=${realAdId ?? ''}&otherId=${otherId}`,
+      { method: 'DELETE' }
+    );
 
-      const { data: messagesToDelete, error: fetchError } = await fetchMsgQuery;
-      
-      if (fetchError || !messagesToDelete || messagesToDelete.length === 0) {
-        throw new Error('There is no chat history or already deleted.');
-      }
-
-      const msgIds = messagesToDelete.map(m => m.id);
-
-      // 2. Delete permanently using the ID list
-      const { error: deleteError } = await supabase
-        .from('messages')
-        .delete()
-        .in('id', msgIds);
-
-      if (deleteError) throw deleteError;
-      
-      // Update local state and UI
-      setThreads(prev => prev.filter(t => t.otherId !== otherId || (adId && t.ad_id !== adId)));
-      if (activeThread?.otherId === otherId) {
-         setActiveThread(null);
-      }
-      
-      fetchThreads(); // Final refresh of the thread list
-    } catch (err) {
-      console.error('Delete failed:', err.message);
-      alert('Delete failed. It might be already deleted or you don\'t have permissions.');
+    if (!res.ok) {
+      alert("Delete failed. It might be already deleted or you don't have permissions.");
+      return;
     }
+
+    setThreads(prev => prev.filter(t => !(t.otherId === otherId && t.ad_id === adId)));
+    if (activeThread?.otherId === otherId) setActiveThread(null);
   };
 
-  if (authLoading || loading) return <div className="container-app py-12 text-center text-ink-tertiary">Loading...</div>;
+  if (authLoading || loading)
+    return <div className="container-app py-12 text-center text-ink-tertiary">Loading...</div>;
 
   return (
     <div className="container-app py-8">
@@ -249,37 +118,37 @@ export default function InboxPage() {
                         {thread.otherName.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className={`text-sm truncate ${thread.unreadCount > 0 ? "font-bold text-ink" : "font-normal text-ink-secondary"}`}>
+                        <p className={`text-sm truncate ${thread.unreadCount > 0 ? 'font-bold text-ink' : 'font-normal text-ink-secondary'}`}>
                           {formatUsername(thread.otherName)}
                         </p>
-                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? "text-brand-600 font-bold" : "text-ink-secondary font-normal"}`}>
-                          {truncateText(thread.lastMessage || "", 40)}
+                        <p className={`text-xs truncate ${thread.unreadCount > 0 ? 'text-brand-600 font-bold' : 'text-ink-secondary font-normal'}`}>
+                          {truncateText(thread.lastMessage || '', 40)}
                         </p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       <span className="text-[10px] text-ink-tertiary">{timeAgo(thread.lastTime)}</span>
                       <div className="flex gap-2">
-                         <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (thread.unreadCount > 0) {
-                                handleSelectThread(thread); // Mark as read
-                              } else {
-                                handleMarkUnread(thread);   // Mark as unread
-                              }
-                            }}
-                            title={thread.unreadCount > 0 ? "Mark as read" : "Mark as unread"}
-                            className={`p-1 transition-colors opacity-0 group-hover:opacity-100 ${thread.unreadCount > 0 ? "text-green-600" : "text-ink-tertiary hover:text-green-500"}`}
-                         >
-                            {thread.unreadCount > 0 ? <Mail className="w-3.5 h-3.5" /> : <MailOpen className="w-3.5 h-3.5" />}
-                         </button>
-                         <button 
-                            onClick={(e) => { e.stopPropagation(); handleDeleteThread(thread.ad_id, thread.otherId); }}
-                            className="p-1 text-ink-tertiary hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                         >
-                            <Trash2 className="w-3.5 h-3.5" />
-                         </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (thread.unreadCount > 0) {
+                              handleSelectThread(thread);
+                            } else {
+                              handleMarkUnread(thread);
+                            }
+                          }}
+                          title={thread.unreadCount > 0 ? 'Mark as read' : 'Mark as unread'}
+                          className={`p-1 transition-colors opacity-0 group-hover:opacity-100 ${thread.unreadCount > 0 ? 'text-green-600' : 'text-ink-tertiary hover:text-green-500'}`}
+                        >
+                          {thread.unreadCount > 0 ? <Mail className="w-3.5 h-3.5" /> : <MailOpen className="w-3.5 h-3.5" />}
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDeleteThread(thread.ad_id, thread.otherId); }}
+                          className="p-1 text-ink-tertiary hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -288,10 +157,14 @@ export default function InboxPage() {
             </div>
           </div>
 
-          {/* Chat Field */}
+          {/* Chat Area */}
           <div className="md:col-span-2 card overflow-hidden flex flex-col bg-white">
             {activeThread ? (
-              <MessageThread adId={activeThread.ad_id} receiverId={activeThread.otherId} />
+              <MessageThread
+                adId={activeThread.ad_id}
+                receiverId={activeThread.otherId}
+                receiverName={activeThread.otherName}
+              />
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center p-12 text-ink-tertiary gap-4 text-center">
                 <MessageSquare className="w-12 h-12 opacity-10" />

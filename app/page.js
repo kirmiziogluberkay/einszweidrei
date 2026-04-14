@@ -1,21 +1,15 @@
 /**
- * app/page.js  — Server Component
- * ─────────────────────────────────────────────────────
- * Fetches initial ads + categories on the server, injects
- * them into the React Query cache via HydrationBoundary.
- * The client shell (HomeContent) hydrates instantly with
- * no loading spinner on first visit.
- * ─────────────────────────────────────────────────────
+ * app/page.js — Server Component
+ * Prefetches initial ads + categories via GitHub DB.
  */
 
 import { QueryClient, HydrationBoundary, dehydrate } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/server';
+import { readData }         from '@/lib/github-db';
 import { buildCategoryTree } from '@/lib/helpers';
-import { ADS_PER_PAGE } from '@/constants/config';
-import { Suspense } from 'react';
-import HomeContent from './HomeContent';
+import { ADS_PER_PAGE }     from '@/constants/config';
+import { Suspense }         from 'react';
+import HomeContent          from './HomeContent';
 
-// Cache the rendered page for 60 seconds (ISR) — new ads appear within 1 minute
 export const revalidate = 60;
 
 export const metadata = {
@@ -24,54 +18,35 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const supabase    = await createClient();
   const queryClient = new QueryClient();
 
   // ── Prefetch categories ───────────────────────────────
   await queryClient.prefetchQuery({
     queryKey: ['categories'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('categories')
-        .select('id, name, slug, parent_id, sort_order')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true })
-        .order('name',       { ascending: true });
-      const categories = data ?? [];
+    queryFn:  async () => {
+      const { data } = await readData('categories');
+      const categories = (data ?? []).filter(c => c.is_active !== false);
+      categories.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
       return { categories, categoryTree: buildCategoryTree(categories) };
     },
     staleTime: 10 * 60 * 1000,
   });
 
-  // ── Prefetch first page of ads (default filters) ──────
-  // Query key must match exactly what useAds produces with:
-  //   { categoryId: null, categoryIds: undefined, ownerId: undefined,
-  //     owner_id: undefined, searchQuery: '', minPrice: null,
-  //     maxPrice: null, paymentMethods: ['Cash','PayPal','Free'] }
+  // ── Prefetch first page of ads ────────────────────────
   const defaultAdsKey = ['ads', null, undefined, undefined, '', null, null, 'Cash,PayPal,Free'];
 
   await queryClient.prefetchInfiniteQuery({
-    queryKey:        defaultAdsKey,
+    queryKey:         defaultAdsKey,
     initialPageParam: 1,
-    staleTime:       5 * 60 * 1000,
+    staleTime:        5 * 60 * 1000,
     queryFn: async ({ pageParam = 1 }) => {
-      const from = (pageParam - 1) * ADS_PER_PAGE;
-      const to   = from + ADS_PER_PAGE - 1;
+      const [{ data: ads }, { data: categories }] = await Promise.all([
+        readData('ads'),
+        readData('categories'),
+      ]);
 
-      const { data, count } = await supabase
-        .from('ads')
-        .select(`
-          id, serial_number, title, description, price, original_price,
-          currency, images, status, payment_methods, address,
-          category_id, created_at,
-          category:categories(id, name, slug)
-        `, { count: 'exact' })
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      const resultData = data ?? [];
-      const sorted = [...resultData].sort((a, b) => {
+      const active = ads.filter(a => a.status === 'active');
+      active.sort((a, b) => {
         const aImg = a.images?.length > 0;
         const bImg = b.images?.length > 0;
         if (aImg && !bImg) return -1;
@@ -79,7 +54,15 @@ export default async function HomePage() {
         return new Date(b.created_at) - new Date(a.created_at);
       });
 
-      return { ads: sorted, total: count ?? 0, page: pageParam };
+      const from  = (pageParam - 1) * ADS_PER_PAGE;
+      const slice = active.slice(from, from + ADS_PER_PAGE);
+
+      const withCats = slice.map(ad => {
+        const cat = categories.find(c => c.id === ad.category_id);
+        return cat ? { ...ad, category: { id: cat.id, name: cat.name, slug: cat.slug } } : ad;
+      });
+
+      return { ads: withCats, total: active.length, page: pageParam };
     },
   });
 

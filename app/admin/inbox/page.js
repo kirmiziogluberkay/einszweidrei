@@ -1,66 +1,38 @@
 /**
- * app/admin/inbox/page.js
- * ─────────────────────────────────────────────────────
- * Admin — monitor and delete all message traffic.
- * ─────────────────────────────────────────────────────
+ * app/admin/inbox/page.js — Admin: monitor all message traffic
  */
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Trash2, RefreshCw } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { truncateText, timeAgo } from '@/lib/helpers';
 import { ADMIN_ITEMS_PER_PAGE } from '@/constants/config';
 
 export default function AdminInboxPage() {
-  const supabase = createClient();
-
   const [messages, setMessages] = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [page,     setPage]     = useState(1);
   const [total,    setTotal]    = useState(0);
 
-  /**
-   * Fetches all messages (admin view — all users).
-   */
   const fetchMessages = async () => {
     setLoading(true);
-    const from = (page - 1) * ADMIN_ITEMS_PER_PAGE;
-
-    try {
-      const { data, count, error } = await supabase
-        .from('messages')
-        .select(`
-          id, content, created_at, is_read,
-          sender:profiles!sender_id(id, username),
-          receiver:profiles!receiver_id(id, username),
-          ad:ads!ad_id(id, serial_number, title)
-        `, { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .range(from, from + ADMIN_ITEMS_PER_PAGE - 1);
-
-      if (error) throw error;
-      setMessages(data ?? []);
-      setTotal(count ?? 0);
-    } catch (err) {
-      console.error('Error fetching admin messages:', err);
-    } finally {
-      setLoading(false);
+    const params = new URLSearchParams({ page: String(page), limit: String(ADMIN_ITEMS_PER_PAGE) });
+    const res = await fetch(`/api/admin/messages?${params}`);
+    if (res.ok) {
+      const data = await res.json();
+      setMessages(data.messages ?? []);
+      setTotal(data.total ?? 0);
     }
+    setLoading(false);
   };
 
   useEffect(() => { fetchMessages(); }, [page]);
 
-  /**
-   * Deletes message permanently.
-   * @param {string} messageId
-   */
   const handleDelete = async (messageId) => {
     if (!confirm('Are you sure you want to delete this message?')) return;
-    await supabase.from('messages').delete().eq('id', messageId);
-    setMessages((prev) => prev.filter((m) => m.id !== messageId));
-    setTotal((t) => (t > 0 ? t - 1 : 0));
+    await fetch(`/api/messages/${messageId}`, { method: 'DELETE' });
+    setMessages(prev => prev.filter(m => m.id !== messageId));
+    setTotal(t => (t > 0 ? t - 1 : 0));
   };
 
   const totalPages = Math.ceil(total / ADMIN_ITEMS_PER_PAGE);
@@ -77,7 +49,7 @@ export default function AdminInboxPage() {
             <span className="text-xs text-ink-tertiary font-medium uppercase tracking-wider block">Total Messages</span>
             <span className="text-xl font-bold text-brand-600 leading-none">{total}</span>
           </div>
-          <button onClick={() => fetchMessages()} className="btn-secondary py-3 px-4 h-full">
+          <button onClick={fetchMessages} className="btn-secondary py-3 px-4 h-full">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
@@ -106,30 +78,26 @@ export default function AdminInboxPage() {
                 ))
               ) : messages.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-20 text-center text-ink-tertiary">
-                    No messages found in the database.
-                  </td>
+                  <td colSpan={5} className="px-6 py-20 text-center text-ink-tertiary">No messages found.</td>
                 </tr>
               ) : messages.map((msg) => (
                 <tr key={msg.id} className="hover:bg-brand-50/20 transition-colors group">
                   <td className="px-6 py-5">
                     <div className="flex flex-col">
-                      <span className="font-bold text-ink text-sm">@{msg.sender?.username || 'Unknown'}</span>
-                      <span className="text-[11px] text-ink-tertiary">to @{msg.receiver?.username || 'Unknown'}</span>
+                      <span className="font-bold text-ink text-sm">@{msg.senderUsername || 'Unknown'}</span>
+                      <span className="text-[11px] text-ink-tertiary">to @{msg.receiverUsername || 'Unknown'}</span>
                     </div>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-2">
-                       <span className="bg-brand-50 text-brand-600 text-[10px] font-bold px-1.5 py-0.5 rounded">#{msg.ad?.serial_number || 'DEL'}</span>
-                       <p className="text-xs text-ink-secondary font-medium truncate max-w-[120px]">{msg.ad?.title || 'Deleted Ad'}</p>
+                      <span className="bg-brand-50 text-brand-600 text-[10px] font-bold px-1.5 py-0.5 rounded">#{msg.adSerial || 'DEL'}</span>
+                      <p className="text-xs text-ink-secondary font-medium truncate max-w-[120px]">{msg.adTitle || 'Deleted Ad'}</p>
                     </div>
                   </td>
                   <td className="px-6 py-5">
                     <span className="text-ink-secondary leading-relaxed line-clamp-1">{truncateText(msg.content, 80)}</span>
                   </td>
-                  <td className="px-6 py-5 whitespace-nowrap text-xs text-ink-tertiary">
-                    {timeAgo(msg.created_at)}
-                  </td>
+                  <td className="px-6 py-5 whitespace-nowrap text-xs text-ink-tertiary">{timeAgo(msg.created_at)}</td>
                   <td className="px-6 py-5 text-right">
                     <button
                       onClick={() => handleDelete(msg.id)}
@@ -146,11 +114,11 @@ export default function AdminInboxPage() {
 
         {totalPages > 1 && (
           <div className="px-6 py-4 bg-surface-secondary/20 flex items-center justify-between border-t border-surface-tertiary">
-             <span className="text-xs text-ink-tertiary font-medium">Page {page} of {totalPages}</span>
-             <div className="flex gap-2">
-               <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="btn-secondary py-2 px-4 shadow-sm disabled:opacity-40">Previous</button>
-               <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="btn-secondary py-2 px-4 shadow-sm disabled:opacity-40">Next</button>
-             </div>
+            <span className="text-xs text-ink-tertiary font-medium">Page {page} of {totalPages}</span>
+            <div className="flex gap-2">
+              <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="btn-secondary py-2 px-4 shadow-sm disabled:opacity-40">Previous</button>
+              <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="btn-secondary py-2 px-4 shadow-sm disabled:opacity-40">Next</button>
+            </div>
           </div>
         )}
       </div>

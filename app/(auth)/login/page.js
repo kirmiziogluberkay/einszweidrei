@@ -1,54 +1,34 @@
-/**
- * app/(auth)/login/page.js
- * ─────────────────────────────────────────────────────
- * Login page.
- * Email/password authentication with Supabase Auth.
- * ─────────────────────────────────────────────────────
- */
-
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, Suspense }    from 'react';
+import Link                      from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, AlertCircle } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
-import { SITE_NAME } from '@/constants/config';
+import { Loader2, AlertCircle }  from 'lucide-react';
+import { useAuth }               from '@/providers/AuthProvider';
+import { SITE_NAME }             from '@/constants/config';
 
-
-// Metadata cannot be exported from 'use client' files.
-
-import { Suspense } from 'react';
-
-// Maximum failed attempts before a temporary lockout
-const MAX_ATTEMPTS  = 5;
-const LOCKOUT_MS    = 60_000; // 1 minute
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_MS   = 60_000;
 
 function LoginContent() {
-  const supabase    = createClient();
-  const router      = useRouter();
-  const searchParams = useSearchParams();
+  const router        = useRouter();
+  const searchParams  = useSearchParams();
+  const { refreshProfile } = useAuth();
 
-  /** Redirect URL after successful login — only internal paths are allowed */
   const rawRedirect = searchParams.get('redirect') || '/';
-  const redirectTo = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/';
+  const redirectTo  = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/';
 
   const [email,       setEmail]       = useState('');
   const [password,    setPassword]    = useState('');
   const [loading,     setLoading]     = useState(false);
   const [error,       setError]       = useState(null);
   const [attempts,    setAttempts]    = useState(0);
-  const [lockedUntil, setLockedUntil] = useState(null); // timestamp (ms)
+  const [lockedUntil, setLockedUntil] = useState(null);
 
-  /**
-   * Submits the login form.
-   * @param {React.FormEvent} e
-   */
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);
 
-    // Lockout check
     if (lockedUntil && Date.now() < lockedUntil) {
       const secsLeft = Math.ceil((lockedUntil - Date.now()) / 1000);
       setError(`Too many failed attempts. Please wait ${secsLeft} seconds.`);
@@ -57,41 +37,31 @@ function LoginContent() {
 
     setLoading(true);
 
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email:    email.trim(),
-      password,
+    const res  = await fetch('/api/auth/login', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email: email.trim(), password }),
     });
 
-    if (authError) {
-      const nextAttempts = attempts + 1;
-      setAttempts(nextAttempts);
+    const data = await res.json();
 
-      // Log failed attempt to the console (server logs will capture this via SSR)
-      console.warn('[Auth] Failed login attempt', {
-        email: email.trim(),
-        attempt: nextAttempts,
-        at: new Date().toISOString(),
-      });
-
-      if (nextAttempts >= MAX_ATTEMPTS) {
+    if (!res.ok) {
+      const next = attempts + 1;
+      setAttempts(next);
+      if (next >= MAX_ATTEMPTS) {
         setLockedUntil(Date.now() + LOCKOUT_MS);
         setAttempts(0);
-        setError(`Too many failed attempts. Please wait 60 seconds before trying again.`);
+        setError('Too many failed attempts. Please wait 60 seconds before trying again.');
       } else {
-        setError(
-          authError.message === 'Invalid login credentials'
-            ? `Invalid email or password. (${nextAttempts}/${MAX_ATTEMPTS} attempts)`
-            : authError.message
-        );
+        setError(`${data.error ?? 'Invalid email or password.'} (${next}/${MAX_ATTEMPTS} attempts)`);
       }
-
       setLoading(false);
       return;
     }
 
-    // Successful login — reset counters
     setAttempts(0);
     setLockedUntil(null);
+    await refreshProfile();
     router.push(redirectTo);
     router.refresh();
   };
@@ -99,8 +69,6 @@ function LoginContent() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
-
-        {/* Logo / Title */}
         <div className="text-center mb-8">
           <Link href="/" className="text-2xl font-bold text-ink hover:text-brand-500 transition-colors">
             {SITE_NAME}
@@ -109,71 +77,50 @@ function LoginContent() {
           <p className="text-sm text-ink-secondary mt-1">Log in to your account</p>
         </div>
 
-        {/* Card */}
         <div className="card p-6 sm:p-8">
-          {/* Error message */}
           {error && (
-            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-100
-                            rounded-xl text-red-600 text-sm mb-5">
+            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm mb-5">
               <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleLogin} className="space-y-5">
-            {/* Email */}
             <div>
               <label htmlFor="login-email" className="label">Email</label>
               <input
-                id="login-email"
-                type="email"
-                value={email}
+                id="login-email" type="email" value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="sample@mail.com"
-                required
-                autoComplete="email"
-                className="input"
+                placeholder="sample@mail.com" required autoComplete="email" className="input"
               />
             </div>
-
-            {/* Password */}
             <div>
-              <label htmlFor="login-password" className="label">Password</label>
+              <div className="flex items-center justify-between mb-1">
+                <label htmlFor="login-password" className="label mb-0">Password</label>
+                <Link href="/forgot-password" className="text-xs text-brand-500 hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
               <input
-                id="login-password"
-                type="password"
-                value={password}
+                id="login-password" type="password" value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                autoComplete="current-password"
-                className="input"
+                placeholder="••••••••" required autoComplete="current-password" className="input"
               />
             </div>
-
-            {/* Submit button */}
             <button
               type="submit"
               disabled={loading || (lockedUntil && Date.now() < lockedUntil)}
               id="login-submit-btn"
               className="btn-primary w-full py-3"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Logging in...
-                </>
-              ) : 'Log In'}
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Logging in...</> : 'Log In'}
             </button>
           </form>
         </div>
 
-        {/* Register link */}
         <p className="text-center text-sm text-ink-secondary mt-5">
           Don't have an account?{' '}
-          <Link href="/register" className="text-brand-500 font-medium hover:underline">
-            Sign Up
-          </Link>
+          <Link href="/register" className="text-brand-500 font-medium hover:underline">Sign Up</Link>
         </p>
       </div>
     </div>

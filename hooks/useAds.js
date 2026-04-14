@@ -1,153 +1,76 @@
-// force-rebuild-v3
 'use client';
 
-/**
- * hooks/useAds.js
- * ─────────────────────────────────────────────────────
- * Custom React hook managing ad listing, filtering,
- * and infinite scroll pagination logic.
- * ─────────────────────────────────────────────────────
- */
-
 import { useCallback, useMemo } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/client';
-import { ADS_PER_PAGE } from '@/constants/config';
+import { useInfiniteQuery }     from '@tanstack/react-query';
+import { ADS_PER_PAGE }         from '@/constants/config';
 
-/**
- * Hook that returns the list of ads with infinite scroll support.
- */
 export function useAds(filters = {}) {
-  const supabase = useMemo(() => createClient(), []);
+  const {
+    skip, categoryId, categoryIds, ownerId, owner_id,
+    searchQuery, minPrice, maxPrice, paymentMethods,
+  } = filters;
 
-  const { skip, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods } = filters;
+  const finalOwnerId = ownerId || owner_id;
 
   const queryKey = useMemo(() => [
     'ads',
     categoryId,
     categoryIds?.join(','),
-    ownerId || owner_id,
+    finalOwnerId,
     searchQuery,
     minPrice,
     maxPrice,
     paymentMethods?.join(','),
-  ], [categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods]);
+  ], [categoryId, categoryIds, finalOwnerId, searchQuery, minPrice, maxPrice, paymentMethods]);
 
   const fetchAds = useCallback(async ({ pageParam = 1 }) => {
-    const finalOwnerId = ownerId || owner_id;
+    const params = new URLSearchParams();
+    params.set('page',  String(pageParam));
+    params.set('limit', String(ADS_PER_PAGE));
 
-    let query = supabase
-      .from('ads')
-      .select(`
-        id,
-        serial_number,
-        title,
-        description,
-        price,
-        original_price,
-        currency,
-        images,
-        status,
-        payment_methods,
-        address,
-        category_id,
-        created_at,
-        category:categories(id, name, slug)
-      `, { count: 'exact' });
+    if (finalOwnerId)                          params.set('owner_id',       finalOwnerId);
+    if (categoryIds && categoryIds.length > 0) params.set('categoryIds',    categoryIds.join(','));
+    else if (categoryId)                       params.set('categoryId',     categoryId);
+    if (searchQuery)                           params.set('q',              searchQuery);
+    if (minPrice !== null && minPrice !== undefined) params.set('minPrice', String(minPrice));
+    if (maxPrice !== null && maxPrice !== undefined) params.set('maxPrice', String(maxPrice));
+    if (paymentMethods && paymentMethods.length > 0) params.set('paymentMethods', paymentMethods.join(','));
 
-    if (!finalOwnerId) {
-      query = query.eq('status', 'active');
-    } else {
-      query = query.eq('owner_id', finalOwnerId);
-    }
+    const res  = await fetch(`/api/ads?${params.toString()}`);
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error ?? 'Failed to fetch ads');
 
-    query = query.order('created_at', { ascending: false });
-
-    if (categoryIds && categoryIds.length > 0) {
-      query = query.in('category_id', categoryIds);
-    } else if (categoryId) {
-      query = query.eq('category_id', categoryId);
-    }
-
-    if (searchQuery) {
-      query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
-    }
-
-    if (minPrice || maxPrice) {
-      if (minPrice !== null && minPrice !== undefined) query = query.gte('price', minPrice);
-      if (maxPrice !== null && maxPrice !== undefined) query = query.lte('price', maxPrice);
-    }
-
-    if (paymentMethods && paymentMethods.length > 0 && paymentMethods.length < 3) {
-      const hasFree = paymentMethods.includes('Free');
-      const otherMethods = paymentMethods.filter(m => m !== 'Free');
-
-      if (hasFree && otherMethods.length === 0) {
-        query = query.or('price.is.null,price.eq.0');
-      } else if (!hasFree && otherMethods.length > 0) {
-        query = query.overlaps('payment_methods', otherMethods);
-      } else if (hasFree && otherMethods.length > 0) {
-        const otherMethodsList = otherMethods.join(',');
-        query = query.or(`price.is.null,price.eq.0,payment_methods.ov.{${otherMethodsList}}`);
-      }
-    }
-
-    const from = (pageParam - 1) * ADS_PER_PAGE;
-    const to = from + ADS_PER_PAGE - 1;
-    query = query.range(from, to);
-
-    const { data, error: fetchError, count } = await query;
-
-    if (fetchError) {
-      throw new Error(fetchError.message);
-    }
-
-    const resultData = data || [];
-    const sortedData = [...resultData].sort((a, b) => {
-      const aHasImg = a.images && a.images.length > 0;
-      const bHasImg = b.images && b.images.length > 0;
-      if (aHasImg && !bHasImg) return -1;
-      if (!aHasImg && bHasImg) return 1;
-      return new Date(b.created_at) - new Date(a.created_at);
-    });
-
-    return { ads: sortedData, total: count ?? 0, page: pageParam };
-  }, [supabase, categoryId, categoryIds, ownerId, owner_id, searchQuery, minPrice, maxPrice, paymentMethods]);
+    return { ads: json.ads, total: json.total, page: pageParam };
+  }, [finalOwnerId, categoryId, categoryIds, searchQuery, minPrice, maxPrice, paymentMethods]);
 
   const {
-    data,
-    isPending,
-    error,
-    refetch,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
+    data, isPending, error, refetch,
+    fetchNextPage, hasNextPage, isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey,
-    queryFn: fetchAds,
+    queryFn:          fetchAds,
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) => {
-      const totalLoaded = allPages.reduce((sum, p) => sum + p.ads.length, 0);
-      if (totalLoaded < lastPage.total) return allPages.length + 1;
-      return undefined;
+      const loaded = allPages.reduce((s, p) => s + p.ads.length, 0);
+      return loaded < lastPage.total ? allPages.length + 1 : undefined;
     },
-    enabled: !skip,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    placeholderData: (prev) => prev,
-    refetchOnMount: 'always',
+    enabled:          !skip,
+    staleTime:        5 * 60 * 1000,
+    gcTime:           10 * 60 * 1000,
+    placeholderData:  (prev) => prev,
+    refetchOnMount:   'always',
     refetchOnWindowFocus: false,
   });
 
-  const ads = useMemo(() => data?.pages.flatMap(p => p.ads) ?? [], [data]);
+  const ads   = useMemo(() => data?.pages.flatMap(p => p.ads) ?? [], [data]);
   const total = data?.pages[0]?.total ?? 0;
 
   return {
     ads,
     total,
     totalPages: Math.ceil(total / ADS_PER_PAGE),
-    loading: isPending,
-    error: error?.message || null,
+    loading:    isPending,
+    error:      error?.message || null,
     refetch,
     fetchNextPage,
     hasNextPage,

@@ -2,31 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { Lightbulb, Send, CheckCircle2, X } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { cn } from '@/lib/helpers';
 
 export default function FeedbackBox() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [text, setText] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isOpen,    setIsOpen]    = useState(false);
+  const [text,      setText]      = useState('');
+  const [loading,   setLoading]   = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const { user } = useAuth();
-  const supabase = createClient();
   const [adminId, setAdminId] = useState(null);
 
-  // Fetch a valid admin ID once when the component is ready
   useEffect(() => {
     async function fetchAdmin() {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('role', 'admin')
-        .limit(1)
-        .single();
-      
-      if (data) setAdminId(data.id);
-      if (error) console.error('FeedbackBox: Could not find admin', error);
+      try {
+        const res = await fetch('/api/profiles?role=admin&limit=1');
+        if (!res.ok) return;
+        const data = await res.json();
+        const admin = Array.isArray(data) ? data[0] : data.profiles?.[0];
+        if (admin?.id) setAdminId(admin.id);
+      } catch { /* silent */ }
     }
     fetchAdmin();
   }, []);
@@ -40,25 +34,25 @@ export default function FeedbackBox() {
       return;
     }
 
-    setLoading(true);
-    
-    // Attempt to send the message to the first found admin
-    // Fallback ID if none found (will likely fail but better than hardcoded wrong ID)
-    const targetId = adminId || '00000000-0000-0000-0000-000000000000';
+    if (!adminId) {
+      alert('Could not find an admin to send feedback to.');
+      return;
+    }
 
-    const { error } = await supabase.from('messages').insert({
-      content: `[FEEDBACK]: ${text}`,
-      receiver_id: targetId,
-      sender_id: user.id,
+    setLoading(true);
+
+    const res = await fetch('/api/messages', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ receiver_id: adminId, content: `[FEEDBACK]: ${text}` }),
     });
 
-    setLoading(true);
-    if (error) {
-      console.error('FeedbackBox Error:', error);
-      alert('Failed to send: ' + error.message);
-      setLoading(false);
+    setLoading(false);
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert('Failed to send: ' + (data.error ?? 'Unknown error'));
     } else {
-      setLoading(false);
       setSubmitted(true);
       setText('');
       setTimeout(() => {
@@ -90,7 +84,7 @@ export default function FeedbackBox() {
               <Lightbulb className="w-4 h-4 text-brand-500" />
               New Idea?
             </h3>
-            <button 
+            <button
               onClick={() => setIsOpen(false)}
               className="p-1 hover:bg-white rounded-lg text-brand-400 hover:text-brand-600 transition-colors"
             >

@@ -1,31 +1,46 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { Save, Loader2, Play, Pause, FastForward } from 'lucide-react';
+
+const PRESET_COLORS = [
+  { label: 'Sky Blue',    bg: '#0ea5e9', text: '#ffffff' },
+  { label: 'Brand Dark',  bg: '#0284c7', text: '#ffffff' },
+  { label: 'Emerald',     bg: '#10b981', text: '#ffffff' },
+  { label: 'Amber',       bg: '#f59e0b', text: '#ffffff' },
+  { label: 'Red',         bg: '#ef4444', text: '#ffffff' },
+  { label: 'Violet',      bg: '#7c3aed', text: '#ffffff' },
+  { label: 'Slate',       bg: '#475569', text: '#ffffff' },
+  { label: 'Black',       bg: '#0f172a', text: '#ffffff' },
+  { label: 'White',       bg: '#f8fafc', text: '#0f172a' },
+  { label: 'Gold',        bg: '#fbbf24', text: '#1e293b' },
+];
 
 export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [saving,  setSaving]  = useState(false);
   const [settings, setSettings] = useState({
-    text: '',
-    speed: 15,
-    active: true
+    text:      '',
+    speed:     15,
+    active:    true,
+    bgColor:   '#0ea5e9',
+    textColor: '#ffffff',
   });
   const [savedAt, setSavedAt] = useState(null);
 
-  const supabase = createClient();
-
   useEffect(() => {
     async function fetchSettings() {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('value')
-        .eq('key', 'marquee')
-        .single();
-      
-      if (data) {
-        setSettings(data.value);
+      const res = await fetch('/api/settings?key=marquee');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.value) {
+          setSettings(prev => ({
+            ...prev,
+            ...data.value,
+            bgColor:   data.value.bgColor   || '#0ea5e9',
+            textColor: data.value.textColor || '#ffffff',
+          }));
+        }
       }
       setLoading(false);
     }
@@ -35,20 +50,24 @@ export default function AdminSettingsPage() {
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
-    
-    const { error } = await supabase
-      .from('site_settings')
-      .upsert({ 
-        key: 'marquee', 
-        value: settings 
-      }, { onConflict: 'key' });
+
+    const res = await fetch('/api/settings', {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ marquee: settings }),
+    });
 
     setSaving(false);
-    if (!error) {
+    if (res.ok) {
       setSavedAt(new Date().toLocaleTimeString());
     } else {
-      alert('Error saving settings: ' + error.message);
+      const data = await res.json().catch(() => ({}));
+      alert('Error saving settings: ' + (data.error ?? 'Unknown error'));
     }
+  };
+
+  const applyPreset = (preset) => {
+    setSettings(p => ({ ...p, bgColor: preset.bg, textColor: preset.text }));
   };
 
   if (loading) {
@@ -78,6 +97,7 @@ export default function AdminSettingsPage() {
         </div>
 
         <form onSubmit={handleSave} className="space-y-6">
+
           {/* Active Toggle */}
           <div className="flex items-center justify-between p-4 bg-surface-secondary rounded-2xl">
             <div className="flex items-center gap-3">
@@ -111,7 +131,7 @@ export default function AdminSettingsPage() {
             />
           </div>
 
-          {/* Speed Control */}
+          {/* Speed */}
           <div className="space-y-2">
             <div className="flex justify-between">
               <label className="text-xs font-bold text-ink-secondary uppercase tracking-wider">Scrolling Speed</label>
@@ -132,6 +152,65 @@ export default function AdminSettingsPage() {
             </div>
           </div>
 
+          {/* Colors */}
+          <div className="space-y-4">
+            <label className="text-xs font-bold text-ink-secondary uppercase tracking-wider">Colors</label>
+
+            {/* Presets */}
+            <div>
+              <p className="text-[11px] text-ink-tertiary mb-2 font-medium">Quick Presets</p>
+              <div className="flex flex-wrap gap-2">
+                {PRESET_COLORS.map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    title={preset.label}
+                    onClick={() => applyPreset(preset)}
+                    className={`w-8 h-8 rounded-lg border-2 transition-all hover:scale-110 ${
+                      settings.bgColor === preset.bg ? 'border-brand-500 scale-110 shadow-md' : 'border-surface-tertiary'
+                    }`}
+                    style={{ backgroundColor: preset.bg }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Custom pickers */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-ink-secondary uppercase tracking-wider">Background Color</label>
+                <div className="flex items-center gap-3 p-3 bg-surface-secondary rounded-xl">
+                  <input
+                    type="color"
+                    value={settings.bgColor}
+                    onChange={(e) => setSettings(p => ({ ...p, bgColor: e.target.value }))}
+                    className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent"
+                  />
+                  <div>
+                    <p className="text-xs font-mono font-bold text-ink">{settings.bgColor.toUpperCase()}</p>
+                    <p className="text-[10px] text-ink-tertiary">Background</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-ink-secondary uppercase tracking-wider">Text Color</label>
+                <div className="flex items-center gap-3 p-3 bg-surface-secondary rounded-xl">
+                  <input
+                    type="color"
+                    value={settings.textColor}
+                    onChange={(e) => setSettings(p => ({ ...p, textColor: e.target.value }))}
+                    className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent"
+                  />
+                  <div>
+                    <p className="text-xs font-mono font-bold text-ink">{settings.textColor.toUpperCase()}</p>
+                    <p className="text-[10px] text-ink-tertiary">Text</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Save */}
           <div className="pt-4 border-t border-surface-tertiary flex items-center justify-between">
             <div className="text-[11px] text-ink-tertiary">
               {savedAt && (
@@ -146,43 +225,41 @@ export default function AdminSettingsPage() {
               disabled={saving}
               className="btn-primary py-2.5 px-6 flex items-center gap-2 text-sm shadow-md"
             >
-              {saving ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4" />
-              )}
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               Save Settings
             </button>
           </div>
         </form>
       </div>
 
-      {/* Preview Section */}
+      {/* Live Preview */}
       {settings.active && (
         <div className="mt-8">
           <p className="text-xs font-bold text-ink-tertiary uppercase tracking-widest mb-3">Live Preview</p>
           <div className="rounded-2xl overflow-hidden border border-surface-tertiary shadow-sm">
-             {/* Small preview of the marquee */}
-             <div className="bg-brand-600 text-white py-2 overflow-hidden whitespace-nowrap">
-                <div 
-                  className="inline-block animate-preview-marquee"
-                  style={{ 
-                    animationDuration: `${settings.speed}s`,
-                    paddingLeft: '100%'
-                  }}
+            <div
+              className="py-1 overflow-hidden whitespace-nowrap"
+              style={{ backgroundColor: settings.bgColor }}
+            >
+              <div
+                className="inline-block animate-preview-marquee"
+                style={{ animationDuration: `${settings.speed}s`, paddingLeft: '100%' }}
+              >
+                <span
+                  className="text-sm font-bold uppercase px-4 tracking-wide"
+                  style={{ color: settings.textColor }}
                 >
-                  <span className="text-sm font-bold uppercase transition-all duration-300">
-                    {settings.text || 'TYPE SOMETHING ABOVE'}
-                  </span>
-                </div>
-             </div>
+                  {settings.text || 'TYPE SOMETHING ABOVE'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       <style jsx>{`
         @keyframes preview-marquee {
-          0% { transform: translate3d(0, 0, 0); }
+          0%   { transform: translate3d(0, 0, 0); }
           100% { transform: translate3d(-100%, 0, 0); }
         }
         .animate-preview-marquee {

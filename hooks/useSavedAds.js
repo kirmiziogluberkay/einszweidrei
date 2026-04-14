@@ -1,86 +1,48 @@
 'use client';
 
-/**
- * hooks/useSavedAds.js
- * ─────────────────────────────────────────────────────
- * Kullanıcının kaydettiği ilanları yöneten hook.
- * ─────────────────────────────────────────────────────
- */
-
-import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/client';
 
-/**
- * Kullanıcının kaydettiği ilan ID'lerini ve tam verilerini döner.
- * toggleSave ile ilan kaydedilir / kayıt kaldırılır (optimistik güncelleme).
- *
- * @param {string | null | undefined} userId
- */
 export function useSavedAds(userId) {
-  const supabase = useMemo(() => createClient(), []);
   const queryClient = useQueryClient();
-
   const idsKey  = ['saved_ads_ids',  userId];
   const listKey = ['saved_ads_list', userId];
 
-  // ── Kaydedilen ilan ID'leri (SaveButton için hafif sorgu) ──
+  // Saved IDs (lightweight)
   const { data: savedIds = [], isLoading: idsLoading } = useQuery({
     queryKey: idsKey,
-    queryFn: async () => {
-      if (!userId) return [];
-      const { data, error } = await supabase
-        .from('saved_ads')
-        .select('ad_id')
-        .eq('user_id', userId);
-      if (error) throw new Error(error.message);
-      return data.map(r => r.ad_id);
+    queryFn:  async () => {
+      const res  = await fetch('/api/saved-ads');
+      const json = await res.json();
+      return json.savedIds ?? [];
     },
-    enabled: !!userId,
+    enabled:   !!userId,
     staleTime: 2 * 60 * 1000,
   });
 
-  // ── Kaydedilen ilanların tam verisi (My Profile sayfası için) ──
+  // Full saved ads list
   const { data: savedAds = [], isLoading: listLoading } = useQuery({
     queryKey: listKey,
-    queryFn: async () => {
-      if (!userId) return [];
-      const { data, error } = await supabase
-        .from('saved_ads')
-        .select(`
-          ad_id,
-          created_at,
-          ad:ads(
-            id, serial_number, title, description, price, currency,
-            images, status, payment_methods, tags, address, created_at,
-            category:categories(id, name, slug)
-          )
-        `)
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-      if (error) throw new Error(error.message);
-      return data.map(r => r.ad).filter(Boolean);
+    queryFn:  async () => {
+      const res  = await fetch('/api/saved-ads?full=1');
+      const json = await res.json();
+      return json.savedAds ?? [];
     },
-    enabled: !!userId,
+    enabled:   !!userId,
     staleTime: 2 * 60 * 1000,
   });
 
-  // ── Toggle: kaydet / kaydı kaldır ──
+  // Toggle save / unsave with optimistic update
   const { mutate: toggleSave, isPending, error: toggleError } = useMutation({
     mutationFn: async (adId) => {
       const isSaved = savedIds.includes(adId);
       if (isSaved) {
-        const { error } = await supabase
-          .from('saved_ads')
-          .delete()
-          .eq('user_id', userId)
-          .eq('ad_id', adId);
-        if (error) throw new Error(error.message);
+        await fetch(`/api/saved-ads?adId=${adId}`, { method: 'DELETE' });
       } else {
-        const { error } = await supabase
-          .from('saved_ads')
-          .insert({ user_id: userId, ad_id: adId });
-        if (error) throw new Error(error.message);
+        await fetch('/api/saved-ads', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ adId }),
+        });
       }
     },
     onMutate: async (adId) => {
@@ -103,9 +65,9 @@ export function useSavedAds(userId) {
   return {
     savedIds,
     savedAds,
-    loading: idsLoading,
+    loading:     idsLoading,
     listLoading,
-    isSaved: (adId) => savedIds.includes(adId),
+    isSaved:     (adId) => savedIds.includes(adId),
     toggleSave,
     isPending,
     toggleError,

@@ -1,76 +1,52 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 export default function Marquee() {
   const [settings, setSettings] = useState(null);
-  const supabase = createClient();
 
   useEffect(() => {
-    let channel;
     let isMounted = true;
-
     async function fetchSettings() {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('value')
-        .eq('key', 'marquee')
-        .single();
-
-      if (isMounted && data) {
-        setSettings(data.value);
-      }
-
-      // Only subscribe to realtime after the initial fetch, and only if the
-      // component is still mounted. This prevents the "WebSocket closed before
-      // connection established" warning caused by early unmounts (StrictMode).
-      if (!isMounted) return;
-
-      channel = supabase
-        .channel('site_settings_marquee')
-        .on('postgres_changes', {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'site_settings',
-          filter: 'key=eq.marquee'
-        }, (payload) => {
-          if (isMounted) setSettings(payload.new.value);
-        })
-        .subscribe((status) => {
-          if (status === 'CHANNEL_ERROR') {
-            console.warn('[Marquee] Realtime channel error — will use polling fallback.');
-          }
-        });
+      try {
+        const res = await fetch('/api/settings?key=marquee');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (isMounted && data.value) setSettings(data.value);
+      } catch { /* silent */ }
     }
-
     fetchSettings();
-
-    return () => {
-      isMounted = false;
-      if (channel) supabase.removeChannel(channel).catch(() => {});
-    };
+    return () => { isMounted = false; };
   }, []);
 
   if (!settings || !settings.active || !settings.text) return null;
 
+  const bg      = settings.bgColor   || '#0ea5e9';
+  const textCol = settings.textColor || '#ffffff';
+
   return (
-    <div className="bg-brand-600 text-white py-0.5 overflow-hidden whitespace-nowrap relative z-[60]">
-      <div 
+    <div
+      className="overflow-hidden whitespace-nowrap relative z-[60] py-0.5"
+      style={{ backgroundColor: bg }}
+    >
+      <div
         className="inline-block animate-marquee"
-        style={{ 
+        style={{
           animationDuration: `${settings.speed || 15}s`,
-          paddingLeft: '100%'
+          paddingLeft: '100%',
         }}
       >
-        <span className="text-sm font-bold tracking-wide uppercase px-4">
+        <span
+          className="text-sm font-bold tracking-wide uppercase px-4"
+          style={{ color: textCol }}
+        >
           {settings.text}
         </span>
       </div>
 
       <style jsx>{`
         @keyframes marquee {
-          0% { transform: translate3d(0, 0, 0); }
+          0%   { transform: translate3d(0, 0, 0); }
           100% { transform: translate3d(-100%, 0, 0); }
         }
         .animate-marquee {

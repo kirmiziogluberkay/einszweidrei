@@ -1,60 +1,38 @@
 /**
- * app/admin/messages/page.js
- * ─────────────────────────────────────────────────────
- * Admin — monitor and delete all message traffic.
- * ─────────────────────────────────────────────────────
+ * app/admin/messages/page.js — Admin: monitor all messages
  */
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Trash2, RefreshCw } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { truncateText, timeAgo } from '@/lib/helpers';
 import { ADMIN_ITEMS_PER_PAGE } from '@/constants/config';
 
 export default function AdminMessagesPage() {
-  const supabase = createClient();
-
   const [messages, setMessages] = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [page,     setPage]     = useState(1);
   const [total,    setTotal]    = useState(0);
 
-  /**
-   * Fetches all messages (admin view — all users).
-   */
   const fetchMessages = async () => {
     setLoading(true);
-    const from = (page - 1) * ADMIN_ITEMS_PER_PAGE;
-
-    const { data, count } = await supabase
-      .from('messages')
-      .select(`
-        id, content, created_at, is_read,
-        sender:profiles!sender_id(id, username),
-        receiver:profiles!receiver_id(id, username),
-        ad:ads!ad_id(id, serial_number, title)
-      `, { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(from, from + ADMIN_ITEMS_PER_PAGE - 1);
-
-    setMessages(data ?? []);
-    setTotal(count ?? 0);
+    const params = new URLSearchParams({ page: String(page), limit: String(ADMIN_ITEMS_PER_PAGE) });
+    const res = await fetch(`/api/admin/messages?${params}`);
+    if (res.ok) {
+      const data = await res.json();
+      setMessages(data.messages ?? []);
+      setTotal(data.total ?? 0);
+    }
     setLoading(false);
   };
 
   useEffect(() => { fetchMessages(); }, [page]);
 
-  /**
-   * Deletes message permanently.
-   * @param {string} messageId
-   */
   const handleDelete = async (messageId) => {
     if (!confirm('Are you sure you want to delete this message?')) return;
-    await supabase.from('messages').delete().eq('id', messageId);
-    setMessages((prev) => prev.filter((m) => m.id !== messageId));
-    setTotal((t) => t - 1);
+    await fetch(`/api/messages/${messageId}`, { method: 'DELETE' });
+    setMessages(prev => prev.filter(m => m.id !== messageId));
+    setTotal(t => t - 1);
   };
 
   const totalPages = Math.ceil(total / ADMIN_ITEMS_PER_PAGE);
@@ -65,7 +43,7 @@ export default function AdminMessagesPage() {
         <h1 className="text-2xl font-bold text-ink">
           Message Monitoring <span className="text-ink-tertiary font-normal text-lg">({total})</span>
         </h1>
-        <button onClick={() => fetchMessages()} className="btn-secondary py-2">
+        <button onClick={fetchMessages} className="btn-secondary py-2">
           <RefreshCw className="w-4 h-4" /> Refresh
         </button>
       </div>
@@ -94,11 +72,11 @@ export default function AdminMessagesPage() {
                 ))
               ) : messages.map((msg) => (
                 <tr key={msg.id} className="hover:bg-surface-secondary transition-colors">
-                  <td className="px-5 py-4 font-medium text-ink">{msg.sender?.username}</td>
-                  <td className="px-5 py-4 text-ink-secondary">{msg.receiver?.username}</td>
+                  <td className="px-5 py-4 font-medium text-ink">{msg.senderUsername}</td>
+                  <td className="px-5 py-4 text-ink-secondary">{msg.receiverUsername}</td>
                   <td className="px-5 py-4">
-                    <span className="text-xs font-mono text-ink-tertiary">#{msg.ad?.serial_number}</span>
-                    <p className="text-xs text-ink-secondary truncate max-w-[120px]">{msg.ad?.title}</p>
+                    <span className="text-xs font-mono text-ink-tertiary">#{msg.adSerial}</span>
+                    <p className="text-xs text-ink-secondary truncate max-w-[120px]">{msg.adTitle}</p>
                   </td>
                   <td className="px-5 py-4 text-ink-secondary max-w-[200px]">
                     <span className="block truncate">{truncateText(msg.content, 60)}</span>

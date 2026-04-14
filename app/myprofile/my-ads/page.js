@@ -15,7 +15,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Loader2, Edit3, Trash2, Eye, Plus, AlertCircle, Lock, Unlock, CheckCircle, Circle } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useAds } from '@/hooks/useAds';
@@ -24,7 +23,6 @@ import { formatPrice, timeAgo } from '@/lib/helpers';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES, AD_STATUSES, AD_URL_PREFIX } from '@/constants/config';
 
 export default function MyAdsPage() {
-  const supabase = createClient();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user, loading: authLoading } = useAuth();
@@ -60,13 +58,9 @@ export default function MyAdsPage() {
   const handleDeleteAd = async (adId) => {
     if (!confirm('Are you sure you want to delete this ad?')) return;
 
-    const { error } = await supabase
-      .from('ads')
-      .delete()
-      .eq('id', adId)
-      .eq('owner_id', user.id);
+    const res = await fetch(`/api/ads/${adId}`, { method: 'DELETE' });
 
-    if (!error) {
+    if (res.ok) {
       setMsg(SUCCESS_MESSAGES.adDeleted);
       setMsgType('success');
       queryClient.invalidateQueries({ queryKey: ['ads'] });
@@ -91,29 +85,28 @@ export default function MyAdsPage() {
 
     const newStatus = currentStatus === 'active' ? targetStatus : 'active';
 
-    const { error } = await supabase
-      .from('ads')
-      .update({ status: newStatus })
-      .eq('id', adId)
-      .eq('owner_id', user.id);
+    const res = await fetch(`/api/ads/${adId}`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ status: newStatus }),
+    });
 
-    if (!error) {
+    if (res.ok) {
       queryClient.invalidateQueries({ queryKey: ['ads'] });
     } else {
-      setMsg('Update failed: ' + error.message);
+      setMsg('Update failed.');
       setMsgType('error');
     }
   };
 
   const handleMarkSold = async (adId, currentStatus) => {
     const newStatus = currentStatus === 'sold' ? 'active' : 'sold';
-    const { error } = await supabase
-      .from('ads')
-      .update({ status: newStatus })
-      .eq('id', adId)
-      .eq('owner_id', user.id);
-
-    if (!error) queryClient.invalidateQueries({ queryKey: ['ads'] });
+    const res = await fetch(`/api/ads/${adId}`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ status: newStatus }),
+    });
+    if (res.ok) queryClient.invalidateQueries({ queryKey: ['ads'] });
   };
 
   if (authLoading) {

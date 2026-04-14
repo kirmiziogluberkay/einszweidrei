@@ -1,43 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { Lightbulb, Trash2, User, Clock, RefreshCw } from 'lucide-react';
 import { timeAgo } from '@/lib/helpers';
 
 export default function AdminFeedbackPage() {
-  const [loading, setLoading] = useState(true);
+  const [loading,   setLoading]   = useState(true);
   const [feedbacks, setFeedbacks] = useState([]);
-  const supabase = createClient();
 
   const fetchFeedbacks = async () => {
     setLoading(true);
-    // Messages starting with [FEEDBACK]
-    const { data, error } = await supabase
-      .from('messages')
-      .select(`
-        id, content, created_at,
-        sender:profiles!sender_id(username)
-      `)
-      .like('content', '[FEEDBACK]%')
-      .order('created_at', { ascending: false });
-
-    if (!error) {
-      setFeedbacks(data || []);
+    try {
+      const res = await fetch('/api/admin/messages?feedback=1');
+      if (res.ok) {
+        const data = await res.json();
+        setFeedbacks(data.messages ?? []);
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  useEffect(() => {
-    fetchFeedbacks();
-  }, []);
+  useEffect(() => { fetchFeedbacks(); }, []);
 
   const deleteFeedback = async (id) => {
     if (!confirm('Are you sure you want to delete this suggestion?')) return;
-    const { error } = await supabase.from('messages').delete().eq('id', id);
-    if (!error) {
-      setFeedbacks(prev => prev.filter(f => f.id !== id));
-    }
+    await fetch(`/api/messages/${id}`, { method: 'DELETE' });
+    setFeedbacks(prev => prev.filter(f => f.id !== id));
   };
 
   return (
@@ -68,13 +57,12 @@ export default function AdminFeedbackPage() {
           </div>
         ) : feedbacks.map((f) => (
           <div key={f.id} className="card p-6 flex flex-col justify-between hover:shadow-md transition-shadow group relative">
-            <button 
+            <button
               onClick={() => deleteFeedback(f.id)}
               className="absolute top-4 right-4 p-2 text-ink-tertiary hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
             >
               <Trash2 className="w-4 h-4" />
             </button>
-
             <div>
               <div className="flex items-center gap-2 mb-4 text-xs font-bold text-brand-600 uppercase tracking-widest">
                 <div className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-pulse" />
@@ -84,11 +72,10 @@ export default function AdminFeedbackPage() {
                 {f.content.replace('[FEEDBACK]: ', '')}
               </p>
             </div>
-
             <div className="mt-6 flex items-center justify-between border-t border-surface-tertiary/50 pt-4">
               <div className="flex items-center gap-2 text-xs text-ink-secondary font-medium">
                 <User className="w-3.5 h-3.5 text-ink-tertiary" />
-                {f.sender?.username || 'Anonymous'}
+                {f.senderUsername || 'Anonymous'}
               </div>
               <div className="flex items-center gap-2 text-[10px] text-ink-tertiary font-bold uppercase">
                 <Clock className="w-3 h-3" />

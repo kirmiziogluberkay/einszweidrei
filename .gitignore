@@ -33,5 +33,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# vercel
 .vercel
 .env*.local
+
+# claude (contains secrets — never commit)
+.claude/

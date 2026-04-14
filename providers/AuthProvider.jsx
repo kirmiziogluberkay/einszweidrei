@@ -2,112 +2,65 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/client';
 import { USER_ROLES } from '@/constants/config';
 
 const AuthContext = createContext({
-  user: null,
-  profile: null,
-  isAdmin: false,
-  loading: true,
-  signOut: async () => {},
-  refreshProfile: async () => {},
+  user:            null,
+  profile:         null,
+  isAdmin:         false,
+  loading:         true,
+  signOut:         async () => {},
+  refreshProfile:  async () => {},
 });
 
 export const AuthProvider = ({ children }) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
-  const [user, setUser] = useState(null);
+  const [user,    setUser]    = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async (userId) => {
+  const fetchMe = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, username, role, avatar_url, phone')
-        .eq('id', userId)
-        .single();
-
-      if (!error && data) {
-        setProfile(data);
-        return;
-      }
-
-      // Profile missing — recover username from Auth metadata and create it now.
-      // This handles the edge case where the DB trigger or RPC failed at signup.
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      const fallbackUsername =
-        authUser?.user_metadata?.username ||
-        authUser?.email?.split('@')[0] ||
-        `user_${userId.slice(0, 8)}`;
-
-      await supabase.rpc('create_user_profile', {
-        user_id:  userId,
-        username: fallbackUsername,
-      });
-
-      // Fetch again after creating
-      const { data: created } = await supabase
-        .from('profiles')
-        .select('id, username, role, avatar_url, phone')
-        .eq('id', userId)
-        .single();
-
-      setProfile(created ?? null);
-    } catch (err) {
-      console.error('Unexpected error fetching profile:', err);
-      setProfile(null);
-    }
-  }, [supabase]);
-
-  useEffect(() => {
-    // onAuthStateChange fires INITIAL_SESSION immediately on mount with the
-    // persisted session (read from cookies/localStorage — no network call).
-    // Subsequent events (TOKEN_REFRESHED, SIGNED_IN, SIGNED_OUT) keep state
-    // in sync. This single listener replaces the old initAuth + getUser()
-    // pattern that caused a race: getUser() triggered a server round-trip
-    // that could time out and sign the user out while INITIAL_SESSION had
-    // already resolved the session successfully.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const u = session?.user ?? null;
-      setUser(u);
-
-      if (u) {
-        await fetchProfile(u.id);
+      const res  = await fetch('/api/auth/me');
+      const data = await res.json();
+      if (data.user) {
+        setUser(data.user);
+        setProfile(data.user);  // profile === user object in the new system
       } else {
+        setUser(null);
         setProfile(null);
       }
-
+    } catch {
+      setUser(null);
+      setProfile(null);
+    } finally {
       setLoading(false);
-    });
+    }
+  }, []);
 
-    return () => subscription.unsubscribe();
-  }, [supabase, fetchProfile]);
+  useEffect(() => { fetchMe(); }, [fetchMe]);
 
   const signOut = async () => {
-    // Clear all cached query data before signing out so stale authenticated
-    // data (saved ads, messages, etc.) is never served to the next session.
     queryClient.clear();
-    await supabase.auth.signOut();
+    await fetch('/api/auth/logout', { method: 'POST' });
+    setUser(null);
+    setProfile(null);
   };
 
-  const refreshProfile = async () => {
-    if (user) {
-      await fetchProfile(user.id);
-    }
-  };
+  const refreshProfile = async () => { await fetchMe(); };
 
-  const value = {
-    user,
-    profile,
-    isAdmin: profile?.role === USER_ROLES.ADMIN,
-    loading,
-    signOut,
-    refreshProfile,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{
+      user,
+      profile,
+      isAdmin: profile?.role === USER_ROLES.ADMIN,
+      loading,
+      signOut,
+      refreshProfile,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => useContext(AuthContext);

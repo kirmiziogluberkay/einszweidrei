@@ -1,26 +1,17 @@
 /**
  * app/category/[slug]/page.js
- * ─────────────────────────────────────────────────────
  * Category page — listings based on slug.
- * URL: /category/[slug]
- * ─────────────────────────────────────────────────────
  */
 
-import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { notFound }  from 'next/navigation';
+import { readData }  from '@/lib/github-db';
 import CategoryClient from './CategoryClient';
 
-export const revalidate = 0; // Force dynamic rendering for newest categories
+export const revalidate = 0;
 
-/** Dynamic SEO metadata */
 export async function generateMetadata({ params }) {
-  const supabase = await createClient();
-  const { data: category } = await supabase
-    .from('categories')
-    .select('name')
-    .eq('slug', params.slug)
-    .single();
-
+  const { data: categories } = await readData('categories');
+  const category = (categories ?? []).find(c => c.slug === params.slug);
   if (!category) return { title: 'Category Not Found' };
   return {
     title:       `${category.name} Ads`,
@@ -29,67 +20,40 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function CategoryPage({ params }) {
-  const supabase = await createClient();
+  const { data: allCats } = await readData('categories');
 
-  // Fetch the requested category (only if active)
-  const { data: category } = await supabase
-    .from('categories')
-    .select('id, name, slug, parent_id, is_active')
-    .eq('slug', params.slug)
-    .single();
+  const activeCats = (allCats ?? []).filter(c => c.is_active !== false);
+  const category   = activeCats.find(c => c.slug === params.slug);
 
-  if (!category || category.is_active === false) notFound();
+  if (!category) notFound();
 
-  // Fetch ALL active categories to:
-  // 1. Resolve the parent category (for breadcrumb)
-  // 2. Find all children (for showing subcategory ads)
-  const { data: allCats } = await supabase
-    .from('categories')
-    .select('id, name, slug, parent_id, sort_order')
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true })
-    .order('name', { ascending: true });
+  const sortBySortOrder = (a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999);
+  const sorted = [...activeCats].sort(sortBySortOrder);
 
-  // Resolve parent via DB
-  let parent = allCats?.find(c => c.id === category.parent_id) ?? null;
+  let parent = sorted.find(c => c.id === category.parent_id) ?? null;
 
-  // EMERGENCY OVERRIDE: If no parent in DB, resolve via keyword matching
-  if (!parent) {
+  // Fallback: keyword-based parent resolution
+  if (!parent && category.parent_id) {
     const catName = category.name.toLowerCase();
     const secondHandKeywords = ['furniture', 'electronics', 'clothing', 'baby', 'sports', 'home', 'books'];
-    const rentalKeywords = ['rental', 'apartments', 'car', 'tools'];
-
-    if (secondHandKeywords.some(key => catName.includes(key))) {
-      parent = allCats?.find(c => c.name.toLowerCase().includes('second hand')) ?? null;
-    } else if (rentalKeywords.some(key => catName.includes(key))) {
-      parent = allCats?.find(c => c.name.toLowerCase().includes('rental')) ?? null;
+    const rentalKeywords     = ['rental', 'apartments', 'car', 'tools'];
+    if (secondHandKeywords.some(k => catName.includes(k))) {
+      parent = sorted.find(c => c.name.toLowerCase().includes('second hand')) ?? null;
+    } else if (rentalKeywords.some(k => catName.includes(k))) {
+      parent = sorted.find(c => c.name.toLowerCase().includes('rental')) ?? null;
     }
   }
 
-  // Find direct children of this category (subcategories)
-  // Used so that parent categories show ads from ALL their subcategories
-  const children = allCats?.filter(c => c.parent_id === category.id) ?? [];
+  const children = sorted.filter(c => c.parent_id === category.id);
 
-  // Build the enriched category object
-  const enrichedCategory = {
-    ...category,
-    parent: parent ?? null,
-    children,
-  };
+  const enrichedCategory = { ...category, parent: parent ?? null, children };
 
-  // Build the full category tree for sidebar navigation
-  // roots = top-level categories; each has children attached
-  const sortBySortOrder = (a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999);
-
-  const roots = allCats
-    ?.filter(c => !c.parent_id)
-    .sort(sortBySortOrder)
+  const roots = sorted
+    .filter(c => !c.parent_id)
     .map(root => ({
       ...root,
-      children: allCats
-        .filter(c => c.parent_id === root.id)
-        .sort(sortBySortOrder),
-    })) ?? [];
+      children: sorted.filter(c => c.parent_id === root.id).sort(sortBySortOrder),
+    }));
 
   return <CategoryClient category={enrichedCategory} categoryTree={roots} />;
 }

@@ -19,7 +19,7 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { Upload, X, Loader2, AlertCircle, Star } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+// Supabase removed — using API routes
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import {
@@ -39,7 +39,6 @@ import { buildAdUrl, cn } from '@/lib/helpers';
  * }} props
  */
 export default function AdForm({ initialData = null }) {
-  const supabase = createClient();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -60,9 +59,11 @@ export default function AdForm({ initialData = null }) {
     address: initialData?.address ?? '',
   });
 
-  /** URLs of uploaded photos (Supabase Storage) */
+  /** URLs of uploaded photos */
   const [uploadedImages, setUploadedImages] = useState(initialData?.images ?? []);
 
+  // { [tempId]: { name, progress (0-100), error } }
+  const [uploadQueue, setUploadQueue] = useState({});
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -158,6 +159,45 @@ export default function AdForm({ initialData = null }) {
    *
    * @param {React.ChangeEvent<HTMLInputElement>} e
    */
+  /** XHR-based upload with per-file progress tracking */
+  const uploadFileWithProgress = (file, tempId) =>
+    new Promise((resolve) => {
+      const form = new FormData();
+      form.append('file', file);
+
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener('progress', (ev) => {
+        if (!ev.lengthComputable) return;
+        const pct = Math.round((ev.loaded / ev.total) * 100);
+        setUploadQueue(prev => ({ ...prev, [tempId]: { ...prev[tempId], progress: pct } }));
+      });
+
+      xhr.addEventListener('load', () => {
+        try {
+          const json = JSON.parse(xhr.responseText);
+          if (xhr.status >= 200 && xhr.status < 300 && json.url) {
+            setUploadQueue(prev => ({ ...prev, [tempId]: { ...prev[tempId], progress: 100 } }));
+            resolve(json.url);
+          } else {
+            setUploadQueue(prev => ({ ...prev, [tempId]: { ...prev[tempId], error: json.error ?? ERROR_MESSAGES.uploadFailed } }));
+            resolve(null);
+          }
+        } catch {
+          setUploadQueue(prev => ({ ...prev, [tempId]: { ...prev[tempId], error: ERROR_MESSAGES.uploadFailed } }));
+          resolve(null);
+        }
+      });
+
+      xhr.addEventListener('error', () => {
+        setUploadQueue(prev => ({ ...prev, [tempId]: { ...prev[tempId], error: ERROR_MESSAGES.uploadFailed } }));
+        resolve(null);
+      });
+
+      xhr.open('POST', '/api/upload');
+      xhr.send(form);
+    });
+
   const handleImageUpload = async (e) => {
     if (!user) return;
     const files = Array.from(e.target.files ?? []);
@@ -170,11 +210,10 @@ export default function AdForm({ initialData = null }) {
     }
 
     const filesToUpload = files.slice(0, remaining);
-    setUploading(true);
     setError(null);
 
-    // Validate files first
-    const validFiles = [];
+    // Validate & register in queue
+    const validEntries = [];
     for (const file of filesToUpload) {
       if (file.size > MAX_IMAGE_SIZE_BYTES) {
         setError(`The file "${file.name}" cannot be larger than 5 MB.`);
@@ -184,46 +223,41 @@ export default function AdForm({ initialData = null }) {
         setError('Only JPEG, PNG and WebP formats are accepted.');
         continue;
       }
-      validFiles.push(file);
+      const tempId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      validEntries.push({ file, tempId });
     }
 
-    // Upload all valid files in parallel
-    const uploadResults = await Promise.all(
-      validFiles.map(async (file) => {
-        const form = new FormData();
-        form.append('file', file);
-        const res = await fetch('/api/upload', { method: 'POST', body: form });
-        const json = await res.json();
-        if (!res.ok || !json.url) {
-          setError(json.error ?? ERROR_MESSAGES.uploadFailed);
-          return null;
-        }
-        return json.url;
-      })
+    if (!validEntries.length) return;
+
+    // Add all to queue at once (progress = 0)
+    setUploadQueue(prev => {
+      const next = { ...prev };
+      validEntries.forEach(({ tempId, file }) => {
+        next[tempId] = { name: file.name, progress: 0, error: null };
+      });
+      return next;
+    });
+    setUploading(true);
+
+    // Upload in parallel
+    const results = await Promise.all(
+      validEntries.map(({ file, tempId }) => uploadFileWithProgress(file, tempId))
     );
 
-    const newUrls = uploadResults.filter(Boolean);
+    const newUrls = results.filter(Boolean);
+    setUploadedImages(prev => [...prev, ...newUrls]);
 
-    /* — Supabase Storage (eski yöntem) —————————————————————————
-    for (const file of filesToUpload) {
-      const ext = file.name.split('.').pop();
-      const filePath = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    // Remove completed (non-error) entries from queue after a short delay
+    setTimeout(() => {
+      setUploadQueue(prev => {
+        const next = { ...prev };
+        validEntries.forEach(({ tempId }) => {
+          if (!next[tempId]?.error) delete next[tempId];
+        });
+        return next;
+      });
+    }, 800);
 
-      const { error: uploadError } = await supabase.storage
-        .from(STORAGE_BUCKET)
-        .upload(filePath, file, { cacheControl: '3600', upsert: false });
-
-      if (uploadError) { setError(ERROR_MESSAGES.uploadFailed); continue; }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from(STORAGE_BUCKET)
-        .getPublicUrl(filePath);
-
-      newUrls.push(publicUrl);
-    }
-    ——————————————————————————————————————————————————————————— */
-
-    setUploadedImages((prev) => [...prev, ...newUrls]);
     setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -364,49 +398,47 @@ export default function AdForm({ initialData = null }) {
       // For inserts it is set below from the authenticated session only.
     };
 
-    let result;
+    let res, data;
 
     if (initialData?.id) {
       // ── Update mode ──
-      // Always filter by owner_id for the authenticated user.
-      // Supabase RLS admin policy bypasses this filter for admins server-side,
-      // so we never rely on the client-side isAdmin flag for authorization.
-      result = await supabase
-        .from('ads')
-        .update({ ...payload, updated_at: new Date().toISOString() })
-        .eq('id', initialData.id)
-        .eq('owner_id', user.id)
-        .select('serial_number')
-        .single();
+      res = await fetch(`/api/ads/${initialData.id}`, {
+        method:  'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ ...payload, updated_at: new Date().toISOString() }),
+      });
     } else {
-      // ── Creation mode — original_price is always null for new listings ──
-      result = await supabase
-        .from('ads')
-        .insert({ ...payload, original_price: null, owner_id: user.id })
-        .select('serial_number')
-        .single();
+      // ── Creation mode ──
+      res = await fetch('/api/ads', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ ...payload, original_price: null }),
+      });
     }
 
-    const { data, error: dbError } = result;
+    data = await res.json().catch(() => ({}));
 
-    if (dbError) {
-      console.error('Ad save error:', dbError);
-      setError(dbError.message || ERROR_MESSAGES.generic);
+    if (!res.ok) {
+      console.error('Ad save error:', data);
+      setError(data.error || ERROR_MESSAGES.generic);
       setSubmitting(false);
       return;
     }
 
-    if (!data?.serial_number) {
-      console.error('Ad save error: no serial_number returned', data);
+    const serial = data.ad?.serial_number ?? data.serial_number;
+    if (!serial) {
       setError('Ad was saved but could not be redirected. Please check your ads.');
       setSubmitting(false);
       return;
     }
 
+    // reassign for redirect below
+    data = { serial_number: serial };
+
     setSubmitting(false);
 
     // Redirect immediately, invalidate cache in background
-    router.push(buildAdUrl(data.serial_number));
+    router.push(buildAdUrl(serial));
     queryClient.invalidateQueries({ queryKey: ['ads'] });
   };
 
@@ -818,6 +850,30 @@ export default function AdForm({ initialData = null }) {
                   <X className="w-4 h-4" />
                 </button>
               </div>
+            </div>
+          ))}
+
+          {/* In-progress uploads */}
+          {Object.entries(uploadQueue).map(([tempId, item]) => (
+            <div key={tempId} className="relative aspect-square rounded-2xl overflow-hidden border-2 border-brand-200 bg-surface-secondary flex flex-col items-center justify-center gap-1 p-2">
+              {item.error ? (
+                <>
+                  <X className="w-5 h-5 text-red-500" />
+                  <span className="text-[9px] text-red-500 font-bold text-center leading-tight">{item.error}</span>
+                </>
+              ) : (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin text-brand-500" />
+                  <span className="text-[10px] font-bold text-brand-600">{item.progress}%</span>
+                  <div className="w-full bg-surface-tertiary rounded-full h-1.5 mt-1">
+                    <div
+                      className="bg-brand-500 h-1.5 rounded-full transition-all duration-200"
+                      style={{ width: `${item.progress}%` }}
+                    />
+                  </div>
+                  <span className="text-[9px] text-ink-tertiary truncate w-full text-center leading-tight">{item.name}</span>
+                </>
+              )}
             </div>
           ))}
 
