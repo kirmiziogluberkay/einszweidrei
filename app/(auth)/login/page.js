@@ -3,7 +3,7 @@
 import { useState, Suspense }    from 'react';
 import Link                      from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, AlertCircle }  from 'lucide-react';
+import { Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth }               from '@/providers/AuthProvider';
 import { SITE_NAME }             from '@/constants/config';
 
@@ -24,6 +24,7 @@ function LoginContent() {
   const [error,       setError]       = useState(null);
   const [attempts,    setAttempts]    = useState(0);
   const [lockedUntil, setLockedUntil] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -101,11 +102,22 @@ function LoginContent() {
                   Forgot password?
                 </Link>
               </div>
-              <input
-                id="login-password" type="password" value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••" required autoComplete="current-password" className="input"
-              />
+              <div className="relative">
+                <input
+                  id="login-password" type={showPassword ? 'text' : 'password'} value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••" required autoComplete="current-password" className="input pr-11"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-tertiary hover:text-ink-secondary transition-colors"
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
             <button
               type="submit"

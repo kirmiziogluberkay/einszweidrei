@@ -39,10 +39,15 @@ export default function RegisterPage() {
       }),
     });
 
-    const data = await res.json();
+    let data = {};
+    try {
+      data = await res.json();
+    } catch {
+      // Response body was empty (e.g. a 500 with no body)
+    }
 
     if (!res.ok) {
-      setError(data.error ?? 'Registration failed.');
+      setError(data.error ?? `Registration failed (${res.status}). Please try again later.`);
       setLoading(false);
       return;
     }
