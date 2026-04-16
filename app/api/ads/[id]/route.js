@@ -72,24 +72,42 @@ export async function PUT(request, { params }) {
 }
 
 export async function DELETE(_req, { params }) {
-  const session = await getSession();
-  if (!session.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    const session = await getSession();
+    if (!session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { data: ads, sha } = await readData('ads');
+    const ad = ads.find(a => a.id === params.id);
+
+    if (!ad) {
+      console.error(`[DELETE] Ad not found: ${params.id}`);
+      return NextResponse.json({ error: 'Ad not found in database.' }, { status: 404 });
+    }
+
+    const isOwner = ad.owner_id === session.user.id;
+    const isAdmin = session.user.role === 'admin';
+    
+    console.log(`[DELETE] User ID: ${session.user.id}, Role: ${session.user.role}`);
+    console.log(`[DELETE] Ad ID: ${ad.id}, Owner ID: ${ad.owner_id}`);
+    console.log(`[DELETE] isOwner: ${isOwner}, isAdmin: ${isAdmin}`);
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: 'Forbidden: You do not have permission to delete this ad.' }, { status: 403 });
+    }
+
+    const next = ads.filter(a => a.id !== params.id);
+    await writeData('ads', next, sha);
+
+    console.log(`[DELETE] Successfully deleted ad: ${params.id}`);
+    return NextResponse.json({ ok: true });
+
+  } catch (err) {
+    console.error('[DELETE] Unexpected error:', err);
+    return NextResponse.json(
+      { error: err.message ?? 'An unexpected server error occurred during deletion.' },
+      { status: 500 }
+    );
   }
-
-  const { data: ads, sha } = await readData('ads');
-  const ad = ads.find(a => a.id === params.id);
-
-  if (!ad) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-
-  const isOwner = ad.owner_id === session.user.id;
-  const isAdmin = session.user.role === 'admin';
-  if (!isOwner && !isAdmin) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
-  const next = ads.filter(a => a.id !== params.id);
-  await writeData('ads', next, sha);
-
-  return NextResponse.json({ ok: true });
 }
