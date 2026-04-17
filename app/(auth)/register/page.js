@@ -14,7 +14,7 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({ username: '', email: '', password: '', confirm: '' });
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState(null);
-  const [success,  setSuccess]  = useState(false);
+  const [success,  setSuccess]  = useState(null);
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -52,9 +52,16 @@ export default function RegisterPage() {
       return;
     }
 
+    if (data.status === 'pending') {
+      setSuccess('pending');
+      setLoading(false);
+      setTimeout(() => router.push('/login'), 3500);
+      return;
+    }
+
     // Auto-logged-in — refresh auth state and redirect
     await refreshProfile();
-    setSuccess(true);
+    setSuccess('active');
     setLoading(false);
     setTimeout(() => router.push('/'), 1500);
   };
@@ -64,11 +71,23 @@ export default function RegisterPage() {
       <div className="min-h-[80vh] flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
           <div className="card p-8 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-9 h-9 text-green-500" />
-            </div>
-            <h2 className="text-xl font-bold text-ink">Welcome!</h2>
-            <p className="text-ink-secondary text-sm">Your account has been created. Redirecting…</p>
+            {success === 'pending' ? (
+              <>
+                <div className="w-16 h-16 rounded-full bg-yellow-50 flex items-center justify-center mx-auto">
+                  <AlertCircle className="w-9 h-9 text-yellow-500" />
+                </div>
+                <h2 className="text-xl font-bold text-ink">Hold up!</h2>
+                <p className="text-ink-secondary text-sm">Your account has been created but is pending admin approval.<br/><br/>You cannot log in until an admin confirms you. Redirecting to login...</p>
+              </>
+            ) : (
+              <>
+                <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="w-9 h-9 text-green-500" />
+                </div>
+                <h2 className="text-xl font-bold text-ink">Welcome!</h2>
+                <p className="text-ink-secondary text-sm">Your account has been created. Redirecting…</p>
+              </>
+            )}
           </div>
         </div>
       </div>

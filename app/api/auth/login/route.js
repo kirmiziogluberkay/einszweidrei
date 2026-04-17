@@ -22,6 +22,10 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
   }
 
+  if (profile.status === 'pending') {
+    return NextResponse.json({ error: 'Your account is pending admin approval. You cannot log in yet.' }, { status: 403 });
+  }
+
   const session = await getSession();
   session.user  = {
     id:       profile.id,

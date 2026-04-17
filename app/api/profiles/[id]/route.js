@@ -49,7 +49,7 @@ export async function PUT(request, { params }) {
 
   // Only allow safe fields to be updated
   const allowed = ['username', 'phone', 'avatar_url'];
-  if (isAdmin) allowed.push('role');
+  if (isAdmin) allowed.push('role', 'status');
 
   for (const key of allowed) {
     if (key in body) profiles[idx][key] = body[key];

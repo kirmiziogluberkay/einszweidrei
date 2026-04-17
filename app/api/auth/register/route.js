@@ -58,6 +58,7 @@ export async function POST(request) {
       email:         email.trim().toLowerCase(),
       password_hash,
       role:          profiles.length === 0 ? 'admin' : 'user', // first user becomes admin
+      status:        profiles.length === 0 ? 'active' : 'pending',
       phone:         null,
       avatar_url:    null,
       created_at:    new Date().toISOString(),
@@ -67,16 +68,18 @@ export async function POST(request) {
     await writeData('profiles', profiles, sha);
 
     // ── Auto-login after register ───────────────────────
-    const session  = await getSession();
-    session.user   = {
-      id:       newProfile.id,
-      username: newProfile.username,
-      email:    newProfile.email,
-      role:     newProfile.role,
-    };
-    await session.save();
+    if (newProfile.status === 'active') {
+      const session  = await getSession();
+      session.user   = {
+        id:       newProfile.id,
+        username: newProfile.username,
+        email:    newProfile.email,
+        role:     newProfile.role,
+      };
+      await session.save();
+    }
 
-    return NextResponse.json({ ok: true, user: session.user }, { status: 201 });
+    return NextResponse.json({ ok: true, user: newProfile.status === 'active' ? newProfile : null, status: newProfile.status }, { status: 201 });
 
   } catch (err) {
     console.error('[register] unexpected error:', err);

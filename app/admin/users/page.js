@@ -45,6 +45,25 @@ export default function AdminUsersPage() {
     }
   };
 
+  const toggleStatus = async (userId, currentStatus) => {
+    // If undefined in older records, defaults to active
+    const newStatus = (!currentStatus || currentStatus === 'active') ? 'pending' : 'active';
+    if (!confirm(`Are you sure you want to change this user's status to ${newStatus.toUpperCase()}?`)) return;
+
+    const res = await fetch(`/api/profiles/${userId}`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ status: newStatus }),
+    });
+
+    if (res.ok) {
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: newStatus } : u));
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert('Failed to change status: ' + (data.error ?? 'Unknown error'));
+    }
+  };
+
   return (
     <div className="animate-in fade-in transition-all duration-500">
       <div className="flex items-center justify-between mb-8">
@@ -77,6 +96,7 @@ export default function AdminUsersPage() {
               <tr className="bg-surface-secondary/50 text-ink-secondary border-b border-surface-tertiary">
                 <th className="px-6 py-4 font-bold uppercase tracking-wider text-[11px]">User</th>
                 <th className="px-6 py-4 font-bold uppercase tracking-wider text-[11px]">Role</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-wider text-[11px]">Status</th>
                 <th className="px-6 py-4 font-bold uppercase tracking-wider text-[11px]">Joined</th>
                 <th className="px-6 py-4 font-bold uppercase tracking-wider text-[11px] text-right">Actions</th>
               </tr>
@@ -85,12 +105,12 @@ export default function AdminUsersPage() {
               {loading && users.length === 0 ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
-                    <td colSpan={4} className="px-6 py-4"><div className="skeleton h-5 w-full rounded" /></td>
+                    <td colSpan={5} className="px-6 py-4"><div className="skeleton h-5 w-full rounded" /></td>
                   </tr>
                 ))
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-ink-tertiary">No users found.</td>
+                  <td colSpan={5} className="px-6 py-12 text-center text-ink-tertiary">No users found.</td>
                 </tr>
               ) : users.map((u) => (
                 <tr key={u.id} className="hover:bg-brand-50/10 transition-colors group">
@@ -113,8 +133,18 @@ export default function AdminUsersPage() {
                       {u.role?.toUpperCase()}
                     </span>
                   </td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                      u.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                    }`}>
+                      {u.status === 'pending' ? 'PENDING' : 'ACTIVE'}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 text-ink-tertiary text-xs">{timeAgo(u.created_at)}</td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-right flex items-center justify-end gap-3 h-full pt-6">
+                    <button onClick={() => toggleStatus(u.id, u.status)} className="text-xs font-bold text-orange-600 hover:text-orange-700 hover:underline">
+                      Toggle Status
+                    </button>
                     <button onClick={() => toggleRole(u.id, u.role)} className="text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline">
                       Change Role
                     </button>
