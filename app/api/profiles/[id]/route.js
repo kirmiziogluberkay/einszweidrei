@@ -69,3 +69,44 @@ export async function PUT(request, { params }) {
   const { password_hash, ...safe } = profiles[idx];
   return NextResponse.json({ profile: safe });
 }
+
+export async function DELETE(request, { params }) {
+  try {
+    const session = await getSession();
+    if (!session.user || session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized: Admin only' }, { status: 403 });
+    }
+
+    if (session.user.id === params.id) {
+      return NextResponse.json({ error: 'You cannot delete your own admin account.' }, { status: 400 });
+    }
+
+    const { data: profiles, sha: pSha } = await readData('profiles');
+    const nextProfiles = profiles.filter(p => p.id !== params.id);
+
+    if (nextProfiles.length === profiles.length) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Cascade: delete user's ads
+    try {
+      const { data: ads, sha: aSha } = await readData('ads');
+      const nextAds = ads.filter(a => a.owner_id !== params.id);
+      if (nextAds.length !== ads.length) await writeData('ads', nextAds, aSha);
+    } catch (e) { console.error('Failed to cascade delete ads', e); }
+
+    // Cascade: delete user's messages
+    try {
+      const { data: messages, sha: mSha } = await readData('messages');
+      const nextMessages = messages.filter(m => m.sender_id !== params.id && m.receiver_id !== params.id);
+      if (nextMessages.length !== messages.length) await writeData('messages', nextMessages, mSha);
+    } catch (e) { console.error('Failed to cascade delete messages', e); }
+
+    // Finally delete profile
+    await writeData('profiles', nextProfiles, pSha);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    return NextResponse.json({ error: 'An error occurred during deletion.' }, { status: 500 });
+  }
+}
+

@@ -64,6 +64,18 @@ export default function AdminUsersPage() {
     }
   };
 
+  const deleteUser = async (userId) => {
+    if (!confirm('Are you SURE you want to permanently delete this user? All their ads and messages will also be deleted!')) return;
+
+    const res = await fetch(`/api/profiles/${userId}`, { method: 'DELETE' });
+    if (res.ok) {
+      setUsers(prev => prev.filter(u => u.id !== userId));
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert('Failed to delete user: ' + (data.error ?? 'Unknown error'));
+    }
+  };
+
   return (
     <div className="animate-in fade-in transition-all duration-500">
       <div className="flex items-center justify-between mb-8">
@@ -147,6 +159,9 @@ export default function AdminUsersPage() {
                     </button>
                     <button onClick={() => toggleRole(u.id, u.role)} className="text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline">
                       Change Role
+                    </button>
+                    <button onClick={() => deleteUser(u.id)} className="text-xs font-bold text-red-600 hover:text-red-700 hover:underline">
+                      Delete
                     </button>
                   </td>
                 </tr>
